@@ -131,8 +131,14 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     const poll = setInterval(async () => {
       if (jobIds.length === 0) return;
       try {
-        const updated: Record<string, any> = {};
-        for (const id of jobIds) { updated[id] = await api.getJob(id); }
+        const updated: Record<string, any> = { ...jobStates };
+        for (const id of jobIds) { 
+          try {
+            updated[id] = await api.getJob(id); 
+          } catch (err) {
+            updated[id] = { status: 'FAILED', progress: 100, log_msg: 'Job not found or server error.' };
+          }
+        }
         setJobStates(updated);
       } catch { /* silent */ }
     }, 500);

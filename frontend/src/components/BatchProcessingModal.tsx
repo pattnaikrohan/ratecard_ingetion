@@ -26,9 +26,14 @@ export const BatchProcessingModal: React.FC<BatchProcessingModalProps> = ({ isOp
         let totalProg = 0;
 
         for (const id of jobIds) {
-          const data = await api.getJob(id);
-          updated[id] = data;
-          totalProg += data.progress || 0;
+          try {
+            const data = await api.getJob(id);
+            updated[id] = data;
+            totalProg += data.progress || 0;
+          } catch (err) {
+            updated[id] = { status: 'FAILED', progress: 100, log_msg: 'Job not found or server error.' };
+            totalProg += 100;
+          }
         }
 
         setJobStates(updated);

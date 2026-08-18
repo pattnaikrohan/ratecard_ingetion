@@ -47,7 +47,10 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
         }
       } catch (err) {
         console.error('Error fetching job details:', err);
-        if (isSubscribed) setIsLoading(false);
+        if (isSubscribed) {
+          setIsLoading(false);
+          setJobData({ status: 'FAILED', logs: ['Job not found or server error.'] });
+        }
       }
     };
 
