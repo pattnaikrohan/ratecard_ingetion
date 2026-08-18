@@ -257,14 +257,24 @@ class GenericExcelPlugin(BaseParser):
 
             # ── Phase 1: Scan metadata from top rows ──
             for r in range(1, min(max_row + 1, 15)):
-                row_text = " ".join(str(ws.cell(r, c).value or "") for c in range(1, max_col + 1)).lower()
-                # Extract validity from text like "Validity: 15-Jul-2026 to 31-Jul 2026"
-                val_match = re.search(r'validity[:\s]*([\d][\w\s\-/,]+?)(?:\s+to\s+|\s*-\s*)([\d][\w\s\-/,]+?)(?:\s|$)', row_text)
-                if val_match and not detected_validity_start:
-                    detected_validity_start = _clean_date(val_match.group(1).strip())
-                    detected_validity_end = _clean_date(val_match.group(2).strip())
+                row_text = " ".join(str(ws.cell(r, c).value or "") for c in range(1, max_col + 1))
+                if not detected_validity_start and re.search(r'validity|effective', row_text, re.IGNORECASE):
+                    text_clean = re.sub(r'\s+', ' ', row_text).strip()
+                    m = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', text_clean, re.IGNORECASE)
+                    if m:
+                        s_raw = m.group(1).strip()
+                        e_raw = m.group(2).strip()
+                        year_match = re.search(r'\b(20\d{2})\b', text_clean)
+                        year = year_match.group(1) if year_match else str(datetime.datetime.now().year)
+                        if not re.search(r'\b20\d{2}\b', s_raw):
+                            s_raw = f"{s_raw} {year}"
+                        if not re.search(r'\b20\d{2}\b', e_raw):
+                            e_raw = f"{e_raw} {year}"
+                        detected_validity_start = _clean_date(s_raw)
+                        detected_validity_end = _clean_date(e_raw)
+
                 # Contract number
-                contract_match = re.search(r'(?:contract|sc)\s*(?:no|number|#)?[:\s]*(\S+)', row_text)
+                contract_match = re.search(r'(?:contract|sc)\s*(?:no|number|#)?[:\s]*(\S+)', row_text, re.IGNORECASE)
                 if contract_match and not detected_contract:
                     detected_contract = contract_match.group(1).strip()
 
