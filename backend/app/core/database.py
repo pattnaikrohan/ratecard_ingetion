@@ -24,6 +24,12 @@ class DatabaseManager:
         return conn
 
     def _init_db(self):
+        # Ensure we try to pull the latest DB from cloud before initializing
+        try:
+            self.restore_from_blob()
+        except Exception:
+            pass
+
         with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -70,6 +76,28 @@ class DatabaseManager:
             logs=logs
         )
 
+    def backup_to_blob(self):
+        from app.services.storage import StorageService
+        blob_client = StorageService._get_blob_client("rate_agent.db")
+        if blob_client:
+            try:
+                with open(self.db_path, "rb") as data:
+                    blob_client.upload_blob(data, overwrite=True)
+                print(f"Backed up SQLite DB to Azure Blob Storage")
+            except Exception as e:
+                print(f"Failed to backup SQLite DB to Blob Storage: {e}")
+
+    def restore_from_blob(self):
+        from app.services.storage import StorageService
+        blob_client = StorageService._get_blob_client("rate_agent.db")
+        if blob_client and blob_client.exists():
+            try:
+                with open(self.db_path, "wb") as f:
+                    f.write(blob_client.download_blob().readall())
+                print(f"Restored SQLite DB from Azure Blob Storage")
+            except Exception as e:
+                print(f"Failed to restore SQLite DB from Blob Storage: {e}")
+
     def update_job_status(self, job_id: str, status: str, progress: int = None, log_msg: str = None, canonical_sheet: CanonicalRateSheet = None, output_file: str = None):
         now = datetime_now_iso()
         with self._get_conn() as conn:
@@ -102,6 +130,12 @@ class DatabaseManager:
             cursor.execute(sql, params)
             conn.commit()
 
+        # If job is finished, backup the DB
+        if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW"] and progress == 100:
+             # run in background so it doesn't block
+             import threading
+             threading.Thread(target=self.backup_to_blob).start()
+
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
         with self._get_conn() as conn:
             cursor = conn.cursor()
@@ -133,6 +167,8 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM jobs;")
             conn.commit()
+        # Backup after clearing
+        self.backup_to_blob()
 
 def datetime_now_iso():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

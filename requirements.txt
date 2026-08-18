@@ -6,3 +6,4 @@ xlrd
 python-multipart
 python-dotenv
 gunicorn
+azure-storage-blob
