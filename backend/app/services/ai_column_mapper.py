@@ -249,6 +249,158 @@ Omit keys from col_map if they are not present in the headers. Do not include co
             print(f"[AI Mapper] API Error: {e}")
             return None
 
+    def resolve_ports_with_ai(self, rates: List[RateRow], carrier: str) -> List[RateRow]:
+        """Use GPT-4o to resolve unmatched port names to UNLOCODEs.
+        
+        Collects unique unresolved origin/destination port names, sends them to AI
+        in batches, and writes the resolved UNLOCODEs back into each row.
+        Successfully resolved mappings are auto-learned for future files.
+        """
+        if not self.client:
+            print("[AI Mapper] No OpenAI client configured — skipping AI port resolution")
+            return rates
+
+        from app.core.master_data import MasterDataEngine
+        md = MasterDataEngine.get_instance()
+
+        # Collect unique unresolved port names
+        unresolved_origins: set = set()
+        unresolved_dests: set = set()
+
+        for r in rates:
+            if r.validation_status != "WARNING":
+                continue
+            for item in r.validation_items:
+                if item.reason_code == "unresolved_origin_port" and r.origin_raw:
+                    unresolved_origins.add(r.origin_raw.strip())
+                elif item.reason_code == "unresolved_dest_port" and r.destination_raw:
+                    unresolved_dests.add(r.destination_raw.strip())
+
+        all_unresolved = list(unresolved_origins | unresolved_dests)
+        if not all_unresolved:
+            print("[AI Mapper] No unresolved ports to resolve")
+            return rates
+
+        print(f"[AI Mapper] Resolving {len(all_unresolved)} unique unresolved port names via GPT-4o...")
+
+        # Build a quick reference of known LOCODEs for the AI prompt
+        sample_ports = list(md.ports.keys())[:200]
+
+        # Process in batches of 50 to avoid token limits
+        BATCH_SIZE = 50
+        resolved_map: Dict[str, str] = {}
+
+        for batch_start in range(0, len(all_unresolved), BATCH_SIZE):
+            batch = all_unresolved[batch_start:batch_start + BATCH_SIZE]
+
+            system_prompt = """You are an expert in ocean freight logistics and UN/LOCODEs.
+You will be given a list of port names, city names, or location strings extracted from carrier rate cards.
+For each one, return the correct 5-character UN/LOCODE (e.g., CNSHA for Shanghai, AUMEL for Melbourne, KRPUS for Busan).
+
+Rules:
+- Use standard UN/LOCODE format: 2-letter country code + 3-letter location code (e.g., CNSHA, SGSIN, USNYC)
+- If a name contains a country code prefix already (e.g., "AU MELBOURNE"), extract the port from that country
+- If the name is ambiguous (e.g., "PORT KLANG" could be MYPKG), pick the most common shipping port
+- If you truly cannot determine the LOCODE, return "UNKNOWN" for that entry
+- Do NOT guess wildly — only return codes you are confident about
+
+Return a JSON object:
+{
+  "resolutions": {
+    "Original Port Name": "LOCODE",
+    "Another Port": "LOCODE"
+  }
+}"""
+
+            user_prompt = f"Carrier: {carrier or 'Unknown'}\n\nPort names to resolve:\n"
+            for name in batch:
+                user_prompt += f"- {name}\n"
+            user_prompt += f"\nReference LOCODEs from our master data (sample): {', '.join(sample_ports[:100])}"
+
+            try:
+                response = self.client.chat.completions.create(
+                    model=self.deployment,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0.0
+                )
+
+                result_json = json.loads(response.choices[0].message.content)
+                batch_resolutions = result_json.get("resolutions", {})
+
+                for raw_name, locode in batch_resolutions.items():
+                    if locode and locode != "UNKNOWN" and len(locode) == 5:
+                        resolved_map[raw_name.strip()] = locode.strip().upper()
+
+                print(f"[AI Mapper] Batch {batch_start // BATCH_SIZE + 1}: Resolved {len(batch_resolutions)} ports, {sum(1 for v in batch_resolutions.values() if v != 'UNKNOWN')} valid")
+
+            except Exception as e:
+                print(f"[AI Mapper] GPT-4o port resolution batch error: {e}")
+                continue
+
+        if not resolved_map:
+            print("[AI Mapper] AI could not resolve any ports")
+            return rates
+
+        print(f"[AI Mapper] Successfully resolved {len(resolved_map)} port names via AI")
+
+        # Apply resolutions back to rate rows
+        ai_fixed_count = 0
+        for r in rates:
+            changed = False
+
+            # Fix origin
+            if r.origin_raw and r.origin_raw.strip() in resolved_map:
+                new_locode = resolved_map[r.origin_raw.strip()]
+                # Verify the LOCODE exists in master data, or accept it if it looks valid
+                port_info = md.ports.get(new_locode, {})
+                r.origin_locode = new_locode
+                r.origin_name = port_info.get("name", r.origin_raw)
+                md.learn_port(r.origin_raw, new_locode)
+                changed = True
+
+            # Fix destination
+            if r.destination_raw and r.destination_raw.strip() in resolved_map:
+                new_locode = resolved_map[r.destination_raw.strip()]
+                port_info = md.ports.get(new_locode, {})
+                r.destination_locode = new_locode
+                r.destination_name = port_info.get("name", r.destination_raw)
+                md.learn_port(r.destination_raw, new_locode)
+                changed = True
+
+            # If we fixed the port issues, clear old validation items and re-evaluate severity
+            if changed:
+                # Remove the unresolved port warnings
+                r.validation_items = [
+                    item for item in r.validation_items
+                    if item.reason_code not in ("unresolved_origin_port", "unresolved_dest_port")
+                ]
+                # Add an INFO item noting the AI resolution
+                from app.models.canonical import ValidationItem
+                r.validation_items.append(ValidationItem(
+                    field="ai_resolution",
+                    severity="INFO",
+                    reason_code="ai_resolved_port",
+                    message=f"AI resolved ports: origin={r.origin_locode}, dest={r.destination_locode}"
+                ))
+                # Re-evaluate max severity
+                max_sev = "VALID"
+                severity_levels = {"VALID": 0, "INFO": 0, "WARNING": 1, "ERROR": 2, "CRITICAL": 3}
+                for item in r.validation_items:
+                    if severity_levels.get(item.severity, 0) > severity_levels.get(max_sev, 0):
+                        max_sev = item.severity
+                r.validation_status = max_sev
+                ai_fixed_count += 1
+
+        # Persist learned synonyms
+        md.save_if_dirty()
+
+        print(f"[AI Mapper] AI port resolution complete: {ai_fixed_count} rows upgraded from WARNING to VALID/INFO")
+        return rates
+
     def validate_with_reasoning(self, rates: List[RateRow], carrier: str) -> List[RateRow]:
         if not self.client:
             return rates
@@ -313,3 +465,4 @@ Return a JSON object:
             print(f"[AI Mapper] Validation Reasoning API Error: {e}")
             
         return rates
+

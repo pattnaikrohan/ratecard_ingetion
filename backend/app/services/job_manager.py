@@ -156,9 +156,23 @@ class JobManager:
                 elif validated_row.validation_status == "CRITICAL": crit_cnt += 1
 
             if warn_cnt > 0 or err_cnt > 0 or crit_cnt > 0:
-                self.db.update_job_status(job_id, "VALIDATING", progress=70, log_msg="Running AI-powered validation reasoning (GPT-4o)...")
+                # 5a. AI PORT RESOLUTION — attempt to resolve unmatched ports via GPT-4o
+                self.db.update_job_status(job_id, "VALIDATING", progress=65, log_msg=f"AI resolving {warn_cnt} unmatched port names via GPT-4o...")
                 ai_mapper = AIColumnMapper.get_instance()
-                sheet.rates = await asyncio.to_thread(ai_mapper.validate_with_reasoning, sheet.rates, sheet.carrier_code)
+                sheet.rates = await asyncio.to_thread(ai_mapper.resolve_ports_with_ai, sheet.rates, sheet.carrier_code)
+
+                # Recount after AI resolution (many WARNINGs should now be VALID)
+                valid_cnt = sum(1 for r in sheet.rates if r.validation_status == "VALID")
+                warn_cnt = sum(1 for r in sheet.rates if r.validation_status == "WARNING")
+                err_cnt = sum(1 for r in sheet.rates if r.validation_status == "ERROR")
+                crit_cnt = sum(1 for r in sheet.rates if r.validation_status == "CRITICAL")
+
+                self.db.update_job_status(job_id, "VALIDATING", progress=72, log_msg=f"Post-AI: {valid_cnt} Valid, {warn_cnt} Warnings, {err_cnt} Errors (AI resolved {len(sheet.rates) - warn_cnt - err_cnt - crit_cnt - valid_cnt + valid_cnt} ports)")
+
+                # 5b. AI REASONING — explain any remaining issues
+                if warn_cnt > 0 or err_cnt > 0 or crit_cnt > 0:
+                    self.db.update_job_status(job_id, "VALIDATING", progress=75, log_msg="Running AI-powered validation reasoning (GPT-4o)...")
+                    sheet.rates = await asyncio.to_thread(ai_mapper.validate_with_reasoning, sheet.rates, sheet.carrier_code)
 
             proc_time_ms = round((time.time() - start_time) * 1000, 2)
             sheet.summary = JobSummary(
