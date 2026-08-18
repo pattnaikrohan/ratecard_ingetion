@@ -18,6 +18,8 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
 
 
 
+  const fetchingRef = React.useRef(false);
+
   useEffect(() => {
     if (!jobId) {
       setIsLoading(false);
@@ -28,6 +30,8 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     let isSubscribed = true;
 
     const fetchJob = async () => {
+      if (fetchingRef.current) return;
+      fetchingRef.current = true;
       try {
         const data = await api.getJob(jobId);
         if (!isSubscribed) return;
@@ -51,6 +55,8 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
           setIsLoading(false);
           setJobData({ status: 'FAILED', logs: ['Job not found or server error.'] });
         }
+      } finally {
+        fetchingRef.current = false;
       }
     };
 
@@ -58,10 +64,10 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
 
     // Poll ONLY while worker is actively processing
     const interval = setInterval(() => {
-      if (!jobData || ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData?.status)) {
+      if (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) {
         fetchJob();
       }
-    }, 1000);
+    }, 2500);
 
     return () => {
       isSubscribed = false;
