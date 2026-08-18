@@ -418,6 +418,17 @@ class MasterDataEngine:
             "NHAVASHEVA": "INNSA",
             "NHAVA SHEVA / MUMBAI": "INNSA",
             "SGSIN / MYPKG": "SGSIN",
+
+            # Carrier Region & Pearl River Delta Synonyms
+            "PRDA": "CNFOS",
+            "PRDA*": "CNFOS",
+            "PRDB": "CNZUH",
+            "PRDB*": "CNZUH",
+            "THL": "THLCH",
+            "DOC": "CNGZG",
+            "SPRC": "CNSHA",
+            "NPRC": "CNXMN",
+            "AUBNE_AUMEL": "AUBNE",
         })
 
         # ── Load Type Map ──
@@ -523,6 +534,17 @@ class MasterDataEngine:
             "US WEST COAST": ["USLAX", "USLGB", "USSEA", "USOAK"],
             "USGC": ["USHOU"],
             "US GULF COAST": ["USHOU"],
+
+            # Pearl River Delta & Carrier Region Aliases
+            "PRDA": ["CNFOS", "CNJMN", "CNSDE", "CNNHA"],
+            "PRDA*": ["CNFOS", "CNJMN", "CNSDE", "CNNHA"],
+            "PRDB": ["CNZUH", "CNHUI", "CNDGG"],
+            "PRDB*": ["CNZUH", "CNHUI", "CNDGG"],
+            "THL": ["THLCH", "THBKK"],
+            "DOC": ["CNGZG"],
+            "SPRC": ["CNSHA", "CNNGB"],
+            "NPRC": ["CNXMN", "CNTAO"],
+            "AUBNE_AUMEL": ["AUBNE", "AUMEL"],
         }
         # Merge any learned groups
         self.destination_groups.update(self._learned_groups)

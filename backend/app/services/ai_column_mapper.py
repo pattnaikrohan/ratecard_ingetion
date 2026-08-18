@@ -294,15 +294,20 @@ Omit keys from col_map if they are not present in the headers. Do not include co
             batch = all_unresolved[batch_start:batch_start + BATCH_SIZE]
 
             system_prompt = """You are an expert in ocean freight logistics and UN/LOCODEs.
-You will be given a list of port names, city names, or location strings extracted from carrier rate cards.
+You will be given a list of port names, city names, or region location codes extracted from carrier rate cards.
 For each one, return the correct 5-character UN/LOCODE (e.g., CNSHA for Shanghai, AUMEL for Melbourne, KRPUS for Busan).
 
 Rules:
-- Use standard UN/LOCODE format: 2-letter country code + 3-letter location code (e.g., CNSHA, SGSIN, USNYC)
-- If a name contains a country code prefix already (e.g., "AU MELBOURNE"), extract the port from that country
-- If the name is ambiguous (e.g., "PORT KLANG" could be MYPKG), pick the most common shipping port
-- If you truly cannot determine the LOCODE, return "UNKNOWN" for that entry
-- Do NOT guess wildly — only return codes you are confident about
+- Standard UN/LOCODE format: 2-letter country code + 3-letter location code (e.g., CNSHA, SGSIN, USNYC)
+- If a string has trailing asterisks or symbols (e.g., "PRDA*", "PRDB*"), strip the symbols and resolve the base code!
+- If a code is a carrier region or port group alias (e.g. "PRDA", "PRDB", "THL", "DOC"), map it to the primary representative UN/LOCODE:
+  * PRDA / PRDA* -> CNFOS (Pearl River Delta - Foshan)
+  * PRDB / PRDB* -> CNZUH (Pearl River Delta - Zhuhai)
+  * THL -> THLCH (Thailand - Laem Chabang)
+  * DOC -> CNGZG (Guangzhou / China origin)
+  * SPRC -> CNSHA (South Pearl River / Shanghai)
+  * NPRC -> CNXMN (North Pearl River / Xiamen)
+- ALWAYS provide the best representative 5-character UN/LOCODE for shipping locations!
 
 Return a JSON object:
 {
