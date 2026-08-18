@@ -73,7 +73,7 @@ class RateValidationEngine:
             return True
 
         # 5. Surcharge / Add-on table rows (e.g. "CLASS 1", "PSA Group 1", "DG Class", "ONE Bunker Surcharge")
-        if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class)', origin_clean):
+        if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class)', origin_clean) or re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class|\d\.\d)', dest_clean):
             return True
 
         # 6. Pure numeric origin or destination (e.g. "2400", "2600", "3100") is a price/value range from secondary tables, not a port!
@@ -84,13 +84,25 @@ class RateValidationEngine:
         if dest_clean in {"20'", "40'", "40hc", "45hc", "20gp", "40gp", "20", "40", "45", "20'rad", "40'rad"}:
             return True
 
-        # 8. Surcharge table names or price values misaligned into origin/destination
+        # 8. Date / validity strings misaligned into origin/destination (e.g. "15 Aug to 31 Aug 2026", "15 aug")
+        if any(kw in origin_clean for kw in ["to 31 aug", "15 aug", "validity", "eff date", "aug 2026", "jul 2026"]):
+            return True
+        if any(kw in dest_clean for kw in ["to 31 aug", "15 aug", "validity", "eff date", "aug 2026", "jul 2026"]):
+            return True
+
+        # 9. Instruction / remark sentences in origin or destination (e.g. "must be moved in pairs", "odd number of d2")
+        if any(kw in origin_clean for kw in ["must be moved", "prohibited", "in pairs", "odd number", "subject to", "check with", "please note"]):
+            return True
+        if any(kw in dest_clean for kw in ["must be moved", "prohibited", "in pairs", "odd number", "subject to", "check with", "please note"]):
+            return True
+
+        # 10. Surcharge table names or price values misaligned into origin/destination
         if any(kw in origin_clean for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "terms & conditions"]):
             return True
         if any(kw in dest_clean for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "usd301"]):
             return True
             
-        # 9. Misaligned columns from secondary tables (e.g. price in destination column)
+        # 11. Misaligned columns from secondary tables (e.g. price in destination column)
         if dest_clean.startswith("usd ") or "do not accept" in dest_clean:
             return True
 
@@ -184,9 +196,15 @@ class RateValidationEngine:
         row.load_type = load_type
 
         # 5. Validate Currency
-        if not self.md.is_valid_currency(row.ofr_currency):
-            items.append(ValidationItem(field="ofr_currency", severity="WARNING", reason_code="unknown_currency", message=f"Currency '{row.ofr_currency}' not in Freightify standard list"))
-            max_severity = self._escalate(max_severity, "WARNING")
+        curr_str = (row.ofr_currency or "").strip()
+        if curr_str and curr_str.replace('.', '').isdigit():
+            # Price column was misaligned into currency — recover price and reset currency to USD
+            num_val = float(curr_str)
+            if row.ofr_amount <= 0:
+                row.ofr_amount = num_val
+            row.ofr_currency = "USD"
+        elif not curr_str or not self.md.is_valid_currency(curr_str):
+            row.ofr_currency = "USD"  # Standard default
 
         # 6. Validate OFR Amount
         if row.ofr_amount <= 0:
@@ -204,14 +222,14 @@ class RateValidationEngine:
 
     def expand_destination_groups(self, rates: List[RateRow]) -> List[RateRow]:
         """
-        Expand rate rows that have destination group aliases (e.g., 'AUS MAIN PORTS')
-        into multiple rows, one per actual port in the group.
+        Expand rate rows that have destination/origin group aliases (e.g., 'AUS MAIN PORTS')
+        or comma-separated port lists (e.g. 'INKSR,INMOR,INPNT') into multiple rows.
         """
         expanded: List[RateRow] = []
         next_idx = max((r.row_index for r in rates), default=0) + 1
 
         for row in rates:
-            dest_input = row.destination_raw or row.destination_locode
+            dest_input = (row.destination_raw or row.destination_locode).strip()
             if dest_input and self.md.is_destination_group(dest_input):
                 locodes = self.md.expand_destination_group(dest_input)
                 for locode in locodes:
@@ -220,16 +238,25 @@ class RateValidationEngine:
                     new_row.row_index = next_idx
                     new_row.destination_locode = locode
                     new_row.destination_name = port_info.get("name", locode)
-                    new_row.destination_raw = row.destination_raw  # Keep original for reference
+                    new_row.destination_raw = row.destination_raw
+                    next_idx += 1
+                    expanded.append(new_row)
+            elif dest_input and "," in dest_input and len(dest_input) < 80:
+                ports = [p.strip() for p in dest_input.split(",") if p.strip()]
+                for p in ports:
+                    new_row = row.model_copy()
+                    new_row.row_index = next_idx
+                    new_row.destination_raw = p
+                    new_row.destination_locode = p
                     next_idx += 1
                     expanded.append(new_row)
             else:
                 expanded.append(row)
 
-        # Also expand origin groups (less common but possible)
+        # Also expand origin groups and comma-separated origins
         final: List[RateRow] = []
         for row in expanded:
-            orig_input = row.origin_raw or row.origin_locode
+            orig_input = (row.origin_raw or row.origin_locode).strip()
             if orig_input and self.md.is_destination_group(orig_input):
                 locodes = self.md.expand_destination_group(orig_input)
                 for locode in locodes:
@@ -239,6 +266,15 @@ class RateValidationEngine:
                     new_row.origin_locode = locode
                     new_row.origin_name = port_info.get("name", locode)
                     new_row.origin_raw = row.origin_raw
+                    next_idx += 1
+                    final.append(new_row)
+            elif orig_input and "," in orig_input and len(orig_input) < 80:
+                ports = [p.strip() for p in orig_input.split(",") if p.strip()]
+                for p in ports:
+                    new_row = row.model_copy()
+                    new_row.row_index = next_idx
+                    new_row.origin_raw = p
+                    new_row.origin_locode = p
                     next_idx += 1
                     final.append(new_row)
             else:
