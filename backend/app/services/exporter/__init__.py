@@ -27,9 +27,7 @@ class FreightifyExporter:
             else:  # WARNING_PERMISSIVE
                 rows_to_export.append(r)
 
-        # Clear existing sample data (from row 2 onwards)
-        if ws.max_row >= 2:
-            ws.delete_rows(2, amount=ws.max_row)
+        orig_max_row = ws.max_row
 
         for idx, rate in enumerate(rows_to_export, start=2):
             ws.cell(row=idx, column=1, value=rate.carrier_scac)
@@ -62,6 +60,13 @@ class FreightifyExporter:
                     ws.cell(row=idx, column=42, value=chg.amount)
                     ws.cell(row=idx, column=43, value=chg.basis)
                     ws.cell(row=idx, column=44, value=chg.currency)
+
+        # Clear leftover rows from template if template originally had more rows
+        last_written_row = 1 + len(rows_to_export)
+        if orig_max_row > last_written_row:
+            for r in range(last_written_row + 1, orig_max_row + 1):
+                for c in range(1, 50):
+                    ws.cell(row=r, column=c).value = None
 
         output_path = PROCESSED_DIR / output_filename
         wb.save(output_path)
