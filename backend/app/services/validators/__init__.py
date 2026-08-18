@@ -72,11 +72,25 @@ class RateValidationEngine:
         if len(dest) > 100 and not self._looks_like_port(dest):
             return True
 
-        # 5. Surcharge / Add-on table rows (e.g. "CLASS 1", "PSA Group 1", "DG Class")
+        # 5. Surcharge / Add-on table rows (e.g. "CLASS 1", "PSA Group 1", "DG Class", "ONE Bunker Surcharge")
         if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class)', origin_clean):
             return True
+
+        # 6. Pure numeric origin or destination (e.g. "2400", "2600", "3100") is a price/value range from secondary tables, not a port!
+        if re.match(r'^\d+$', origin_clean) or re.match(r'^\d+$', dest_clean):
+            return True
+
+        # 7. Container type/size in destination (e.g. "20'", "40'", "40hc", "20") is a column header, not a port!
+        if dest_clean in {"20'", "40'", "40hc", "45hc", "20gp", "40gp", "20", "40", "45", "20'rad", "40'rad"}:
+            return True
+
+        # 8. Surcharge table names or price values misaligned into origin/destination
+        if any(kw in origin_clean for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "terms & conditions"]):
+            return True
+        if any(kw in dest_clean for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "usd301"]):
+            return True
             
-        # 6. Misaligned columns from secondary tables (e.g. price in destination column)
+        # 9. Misaligned columns from secondary tables (e.g. price in destination column)
         if dest_clean.startswith("usd ") or "do not accept" in dest_clean:
             return True
 

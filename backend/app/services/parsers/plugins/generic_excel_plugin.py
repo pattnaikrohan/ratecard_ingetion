@@ -529,8 +529,17 @@ class GenericExcelPlugin(BaseParser):
                 _o_chk = origin_val.strip().lower()
                 if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class|haz\s*surcharge|haz\s*add|psa\s*add|via\s+sin\s+shipment)', _o_chk):
                     continue
+                if any(kw in _o_chk for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "terms & conditions"]):
+                    continue
+                if re.match(r'^\d+$', _o_chk):
+                    continue
+
                 _d_chk = dest_val.strip().lower()
-                if _d_chk.startswith("usd ") or "do not accept" in _d_chk:
+                if _d_chk.startswith("usd ") or "do not accept" in _d_chk or _d_chk in {"20'", "40'", "40hc", "45hc", "20gp", "40gp", "20", "40", "45", "20'rad", "40'rad"}:
+                    continue
+                if re.match(r'^\d+$', _d_chk):
+                    continue
+                if any(kw in _d_chk for kw in ["bunker surcharge", "cargo value", "add-on", "addon", "tariff", "value range", "usd301"]):
                     continue
 
                 # Handle destinations with "/" separator
