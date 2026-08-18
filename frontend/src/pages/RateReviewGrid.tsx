@@ -126,8 +126,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     );
   }
 
-  const isWorkerProcessing = (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) || (isLoading && !jobData);
-  const isFailed = jobData?.status === 'FAILED';
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 150;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const filteredRates = rates.filter((r) => {
     const matchesSearch =
@@ -138,6 +142,10 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     const matchesStatus = statusFilter === 'ALL' || r.validation_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRates.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedRates = filteredRates.slice(startIndex, startIndex + pageSize);
 
   const summary = jobData?.summary || {};
 
@@ -313,7 +321,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                   </td>
                 </tr>
               ) : (
-                filteredRates.map((row, filterIdx) => {
+                paginatedRates.map((row, filterIdx) => {
                   const actualIdx = rates.indexOf(row);
                   const targetIdx = actualIdx !== -1 ? actualIdx : filterIdx;
                   const errorItems = (row.validation_items || []).filter((v: any) => v.severity === 'ERROR' || v.severity === 'CRITICAL');
@@ -455,6 +463,34 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Bar */}
+        {filteredRates.length > 0 && (
+          <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+            <p className="text-xs text-slate-500 font-semibold">
+              Showing <span className="font-extrabold text-slate-900">{startIndex + 1}</span>–<span className="font-extrabold text-slate-900">{Math.min(startIndex + pageSize, filteredRates.length)}</span> of <span className="font-extrabold text-slate-900">{filteredRates.length}</span> rows
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs"
+              >
+                Previous
+              </button>
+              <span className="text-xs text-slate-600 font-extrabold px-2">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
