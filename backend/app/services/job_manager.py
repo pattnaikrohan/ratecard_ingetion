@@ -219,7 +219,7 @@ class JobManager:
         sheet = CanonicalRateSheet(**canonical_data)
         output_filename = f"Freightify_Upload_{job_id}.xlsm"
 
-        self.exporter.export(sheet, output_filename, export_policy)
+        await asyncio.to_thread(self.exporter.export, sheet, output_filename, export_policy)
 
         self.db.update_job_status(
             job_id, 
