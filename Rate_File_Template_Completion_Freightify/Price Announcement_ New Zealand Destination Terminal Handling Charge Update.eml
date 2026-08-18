@@ -1,0 +1,1439 @@
+Received: from SI2P104MB0236.NAMP104.PROD.OUTLOOK.COM (2603:1096:4:18c::12) by
+ SI2P104MB0249.NAMP104.PROD.OUTLOOK.COM with HTTPS; Sun, 1 Dec 2024 06:08:32
+ +0000
+Received: from AM6PR10CA0104.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:209:8c::45)
+ by SI2P104MB0236.NAMP104.PROD.OUTLOOK.COM (2603:1096:4:18c::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8182.25; Sun, 1 Dec
+ 2024 06:08:26 +0000
+Received: from AM2PEPF0001C70D.eurprd05.prod.outlook.com
+ (2603:10a6:209:8c:cafe::b6) by AM6PR10CA0104.outlook.office365.com
+ (2603:10a6:209:8c::45) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.8207.15 via Frontend Transport; Sun,
+ 1 Dec 2024 06:08:25 +0000
+Received: from mx28.a.outbound.createsend.com (203.55.21.28) by
+ AM2PEPF0001C70D.mail.protection.outlook.com (10.167.16.201) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.20.8230.7
+ via Frontend Transport; Sun, 1 Dec 2024 06:08:24 +0000
+From: <donotreply@msc.com>
+To: <AU006-ANZ.LocalCharges@msc.com>
+Subject: Price Announcement: New Zealand Destination Terminal Handling Charge
+ Update
+Thread-Topic: Price Announcement: New Zealand Destination Terminal Handling
+ Charge Update
+Thread-Index: AQHbQ7dzEwfOYBqfOESVuEBYj/pWjA==
+Date: Sun, 1 Dec 2024 06:08:19 +0000
+Message-ID: <cm.1708197292217.sqlhkd.dtilqdddi.d@cmail19.com>
+List-Unsubscribe: <https://eur01.safelinks.protection.outlook.com/?url=https%3A%2F%2Funsub.cmail19.com%2Ft%2Fcompleteheader%2Fd%2Fsqlhkd%2Fdtilqdddi%2Fc%2F&data=05%7C02%7Cdaniel.fielder%40msc.com%7Ca372323e3e76423349fe08dd11ce90f8%7C088e9b00ffd0458ebfa1acf4c596d3cb%7C0%7C0%7C638686301130482982%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=57edFb3QMa9ZDnRyjH7VoW94xWyHdBKNTPoVCUcjkiU%3D&reserved=0>,
+ <mailto:unsubscribe-sqlhkd2dtilqdddi2d-33F1B22F@cmail19.com?subject=Unsubscribe>
+Reply-To: <donotreply@msc.com>
+Content-Language: en-US
+X-MS-Exchange-Organization-AuthSource: AM2PEPF0001C70D.eurprd05.prod.outlook.com
+X-MS-Has-Attach:
+X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
+X-MS-Exchange-Organization-Network-Message-Id: a372323e-3e76-4233-49fe-08dd11ce90f8
+X-MS-TNEF-Correlator:
+X-MS-Exchange-Organization-RecordReviewCfmType: 0
+x-ms-publictraffictype: Email
+received-spf: Pass (protection.outlook.com: domain of cmail19.com designates
+ 203.55.21.28 as permitted sender) receiver=protection.outlook.com;
+ client-ip=203.55.21.28; helo=mx28.a.outbound.createsend.com; pr=C
+x-ms-exchange-organization-originalclientipaddress: 203.55.21.28
+x-ms-exchange-organization-originalserveripaddress: 10.167.16.201
+x-forefront-antispam-report: CIP:203.55.21.28;CTRY:AU;LANG:en;SCL:-1;SRV:;IPV:NLI;SFV:SKN;H:mx28.a.outbound.createsend.com;PTR:mx28.a.outbound.createsend.com;CAT:NONE;SFS:(13230040)(4022899009)(69100299015)(1032899013)(29132699027)(8096899003)(2066899003);DIR:INB;
+x-ms-traffictypediagnostic: AM2PEPF0001C70D:EE_|SI2P104MB0236:EE_|SI2P104MB0249:EE_
+x-ms-exchange-crosstenant-originalarrivaltime: 01 Dec 2024 06:08:24.4292 (UTC)
+x-ms-exchange-crosstenant-fromentityheader: Internet
+x-ms-exchange-crosstenant-id: 088e9b00-ffd0-458e-bfa1-acf4c596d3cb
+x-ms-exchange-crosstenant-network-message-id: a372323e-3e76-4233-49fe-08dd11ce90f8
+x-ms-exchange-transport-crosstenantheadersstamped: SI2P104MB0236
+x-ms-exchange-transport-endtoendlatency: 00:00:08.5073469
+authentication-results: spf=pass (sender IP is 203.55.21.28)
+ smtp.mailfrom=cmail19.com; dkim=pass (signature was verified)
+ header.d=msc.com;dmarc=pass action=none header.from=msc.com;compauth=pass
+ reason=100
+x-ms-office365-filtering-correlation-id: a372323e-3e76-4233-49fe-08dd11ce90f8
+x-microsoft-antispam: BCL:0;ARA:13230040|4022899009|69100299015|1032899013|29132699027|8096899003|2066899003;
+x-ms-exchange-processed-by-bccfoldering: 15.20.8182.018
+x-ms-exchange-atpmessageproperties: SA|SL
+x-ms-exchange-crosstenant-authsource: AM2PEPF0001C70D.eurprd05.prod.outlook.com
+x-ms-exchange-crosstenant-authas: Anonymous
+dkim-signature: v=1; a=rsa-sha256; c=relaxed/relaxed; s=cs2013; d=cmail2.com;
+ h=Subject:From:To:Reply-To:Date:MIME-Version:Content-Type:List-Unsubscribe:
+ List-Unsubscribe-Post:Message-ID;
+ bh=0p6Fi5QqqtrTOabGRo3QFOTYd/oqn3WgZ2vPyN+mzjE=;
+ b=aA+3k/9JFxA2PVXjtZofMHRBGbcCa/YW6fzd/i7hKa1W/OwAM9jeep/nBW4Qsw1Rj4qezOeATCiR
+   AMmF0AAg1W7q46f7QEVo5hkf3WEl33vm8MHuCH7fVC4XjjtCM7N/wJtfZWS/4gk2HogsZLZbDrXj
+   0gH5MQ8acZr74No6KM4=
+x-eopattributedmessage: 0
+x-eoptenantattributedmessage: 088e9b00-ffd0-458e-bfa1-acf4c596d3cb:0
+x-mailer: Create Send
+X-Microsoft-Antispam-Mailbox-Delivery: ucf:0;jmr:0;auth:0;dest:I;ENG:(910001)(944506478)(944626604)(920097)(930097)(140003)(1420198);
+X-Microsoft-Antispam-Message-Info: =?Windows-1252?Q?AdBMa2T2c07/xLobf9Hy1d5Apls4WZutukdR4mdVh9qf8PLtypUMqQRk?=
+ =?Windows-1252?Q?MHJ9Tk/071JZR2nXMpK7ZRFTyVTveywt7yjeuVnmlIf0lfn2Njk9VjRc?=
+ =?Windows-1252?Q?GYjBobBSXwePOOx5p+xaAj8LlGYvR+vimmY5DgXWtvUjMwKvERSAsjkY?=
+ =?Windows-1252?Q?WfRAz5f0TN+DTRV8WAOnbj/PUCno+CNVkuFJz9cI+HYAfaZHEy+FrBIY?=
+ =?Windows-1252?Q?mz2AX5H8h46FbsHwFvlbL10EYxduYLHbbwWjDGqzK45KSiZi58n7Nkvp?=
+ =?Windows-1252?Q?Op6xqPZzoRHG2yGffmTIlV8XAHlxdNVAtLpIgGuBshtNWfrltKf3nrMY?=
+ =?Windows-1252?Q?uOv8WNOQTYTNnD3ng+LkqboDsCBbCSxJLfAcoMWxios0ddVK9lW08pb/?=
+ =?Windows-1252?Q?Iwp4oxtnYz2bOgfHBr/nDIBjx85G94zdh9nRnI91OxGmASQp0NeALvBi?=
+ =?Windows-1252?Q?JtFPJ7L3NhfF1jHW44fCTUQJkwEU3H+/yKIeGPkTIozqODzBVW9NmQqa?=
+ =?Windows-1252?Q?lr0Kp4hH5ILwMJlWd++YIzlblzpke6WYPK6EkBAOfWgjPjpHZMpSHR6j?=
+ =?Windows-1252?Q?BqDyT7KP1/sltKu8rlt0nlXceHA44ljZ47eAwHsVkG+JISOYZVZdWzPo?=
+ =?Windows-1252?Q?hwSSYjZiuTH3t5i1H71ZDZhCvBlnaD9hqFZWm0Z7smnwWsfYpnSu4Wal?=
+ =?Windows-1252?Q?3gMcp/oZAhx0/gvlit/upZ8XLJySOac5cfAUxmpXHPQ52N/bUmvMywZL?=
+ =?Windows-1252?Q?68JGaoX8rMqhCbqoMzXGeqDHYoJvelceHxAelHyfQyeENeKEBs76tWIQ?=
+ =?Windows-1252?Q?+49pXCprXd4K+VFmzRdKu4p945Kb/4lPMt0zQzNqdVH+/jZ29HRqO3or?=
+ =?Windows-1252?Q?aDuYSVQ/hMfFlgVeai8vDbhtf0MRWgURLPBuGDqlk4PJGZDwy0SMi+uv?=
+ =?Windows-1252?Q?0BaoHSSW3mRO2kGqHLEIm+Lo1E+QJabWC2UpyOH1QtCZ1pYd4VzOMiYm?=
+ =?Windows-1252?Q?DiaZEc3otb1sWt830TGu7FtEGPSIEbkRWM4TIiw/G9n0m+zWWpWtykRH?=
+ =?Windows-1252?Q?uzdIRHih3ygP+WaLwNNGqYh3PEng79F6t5QHKfOkevQ9QwQh/ki+ScWI?=
+ =?Windows-1252?Q?po8kqjkts9a1yzKtMZ2uWM7cRZWTW60owAtdQEjXEqTGIcCJz1JcJ0ZS?=
+ =?Windows-1252?Q?GGNhBmpm1jcjEw1bSq1WrniNXKcU6fq8lUmUawCFqOV03yS3PrSvmy1E?=
+ =?Windows-1252?Q?vr5y8Ft1TQChslVYb1B71yHsf6ciKoXtoyQaskgIkNrO7uJkvami+vBK?=
+ =?Windows-1252?Q?WSlaKa2XzWIXJNQfUniFspQ/CyRtJfssIacSw51WCGvzTMd38NqdyJUn?=
+ =?Windows-1252?Q?ad0MljZ/MfJoqEy20NMw5hnq5d0cJUu3TZgt7LLepGIdppoYpjrgLB8p?=
+ =?Windows-1252?Q?PEYWf2DaIXvonDy6y9J3Ld4gFfxwQaLOsGq9CbFj3AQhZulUzBtUrpob?=
+ =?Windows-1252?Q?2+Kpe8z2+jf6orydxvhNJ5gWaVBVP3hELoFlC1UcFPLoGkpMlRPWqztw?=
+ =?Windows-1252?Q?6wK6O1HGVcd4HEv4NaS8AmcaRzZ/PVNh8lQCj3lQDoUa3nrneUHhn1S4?=
+ =?Windows-1252?Q?xsw=3D?=
+Content-Type: multipart/alternative;
+	boundary="_000_cm1708197292217sqlhkddtilqdddidcmail19com_"
+MIME-Version: 1.0
+
+--_000_cm1708197292217sqlhkddtilqdddidcmail19com_
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Content-length: 11225
+
+CAUTION: External email. Do not click links or open attachments unless you =
+recognize the sender and know the content is safe.
+
+
+
+No images? Click here<https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A=
+__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscne=
+wzealand.cmail19.com-252Ft-252Fd-2De-2Dsqlhkd-2Ddtilqdddi-2Du-252F-26data-3=
+D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce9=
+0f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130310366=
+-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIl=
+AiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26s=
+data-3DCiLc-252BnT1SwHjAFQCbybX8R75LblEGHbaY41JoSJvD8s-253D-26reserved-3D0&=
+d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsX=
+qG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZ=
+pPvsTrFIYT7L3aAU9Z2p8oqUR&s=3DKYxooYtHoTyjLntbJE1oFwNXfPYMFtrErbyR1SSX1Cs&e=
+=3D>
+
+ <https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__i1.cmail19.com_ei_=
+d_B6_EBE_AB6_142342_csfinal_Logo-5FMSC-5FCargo-5Frgb-5Fyellow.jpg&d=3DDwIF-=
+g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC=
+14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIY=
+T7L3aAU9Z2p8oqUR&s=3DC6XvMiyLraL-Xg8i56Rkmood3qL0a_JVXkYEDDo-OE0&e=3D>
+
+PRICE ANNOUNCEMENT
+
+
+NEW ZEALAND DESTINATION TERMINAL HANDLING CHARGE UPDATE
+
+
+ <https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__i1.cmail19.com_ei_=
+d_B6_EBE_AB6_142343_csfinal_separatormscyellow2024fixed1-2D990451000001453c=
+.png&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65=
+GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0c=
+BZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3DomkpbsZQ51XxEnUss1xNsNih0TxEuj_VQezYyyWL=
+J0w&e=3D>
+
+
+1/12/2024
+
+Dear Customer,
+
+Please take note of the below update.
+
+
+
+
+New Zealand Destination Terminal Handling Charge
+
+Effective date: January 1st, 2025
+(Bill of Lading date or last container gate in date for the USA/Costa Rica)
+
+
+
+ <https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__i2.cmail19.com_ei_=
+d_B6_EBE_AB6_142343_csfinal_NZDTHCJAN20252-2D9900000000079e3c.png&d=3DDwIF-=
+g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC=
+14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIY=
+T7L3aAU9Z2p8oqUR&s=3DGAC__GFZVNPeYNTmBC5T14ahpF9D9aycP04xDXW__CQ&e=3D>
+
+FIND OUT MORE ABOUT OUR RATES<https://urldefense.proofpoint.com/v2/url?u=3D=
+https-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-2=
+52Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dr-252F-=
+26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe0=
+8dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C6386863011=
+30327736-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMD=
+AwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-=
+257C-26sdata-3DHEPlIOyXC35RY-252FVf0E5j662W0MGjap1Fe-252F1Ik1MKacY-253D-26r=
+eserved-3D0&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D=
+OYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq=
+4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3D-QI9dZhiVh9uhZWt9ay5tyadcaiGxF7Sf=
+8VwI_ID6ZQ&e=3D>
+
+
+
+We thank you for your continued support.
+
+MSC Mediterranean Shipping Company
+
+<https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur01.safelinks.pro=
+tection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzealand.cmail19.com-=
+252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dy-252F-26data-3D05-257C02-257Cdaniel=
+.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-257C088e9b00ffd04=
+58ebfa1acf4c596d3cb-257C0-257C0-257C638686301130350802-257CUnknown-257CTWFp=
+bGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjo=
+iTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3Da92yfSyYoBx95B=
+sIbAjpH1YgKPTmhjh3C6k1ooz5qpM-253D-26reserved-3D0&d=3DDwIF-g&c=3DeuGZstcaTD=
+llvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4=
+cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR=
+&s=3D3oLiMOGH91oWG8jx-8mUabt5zTlOPmhRlK7vV95JXDM&e=3D><https://urldefense.p=
+roofpoint.com/v2/url?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-=
+3Furl-3Dhttps-253A-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsql=
+hkd-2Ddtilqdddi-2Dj-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-=
+257Ca372323e3e76423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-2=
+57C0-257C0-257C638686301130362048-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hc=
+GkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-2=
+53D-253D-257C0-257C-257C-257C-26sdata-3DlcaCCrShhJ-252FHhqPk65XQTZX-252FvW5=
+v4HTo-252FhsXBUTRGX4-253D-26reserved-3D0&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b=
+7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=
+=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3D2O1=
+PIj5ZH9Hrha8ZizZojodbYFZxwDACdBOirSJo1Tk&e=3D><https://urldefense.proofpoin=
+t.com/v2/url?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3D=
+https-253A-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddt=
+ilqdddi-2Dt-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372=
+323e3e76423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257=
+C0-257C638686301130373038-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRyd=
+WUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D=
+-257C0-257C-257C-257C-26sdata-3D3bLCcddnWStAoyPsE5-252B9FGybeCt-252BVLKgcUN=
+RqB-252FJy-252F4-253D-26reserved-3D0&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXr=
+wqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFR=
+DavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3D8dOSnm7r=
+Hv4n1MRyyWtiaaxq3IF-oWylrMelweIW_v4&e=3D><https://urldefense.proofpoint.com=
+/v2/url?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps=
+-253A-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdd=
+di-2Di-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3=
+e76423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-25=
+7C638686301130384205-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIl=
+YiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C=
+0-257C-257C-257C-26sdata-3DJu6xnK7jsgoA6Fez-252BE8QPGMmIs9-252B1qMXFO7voJGP=
+Bm4-253D-26reserved-3D0&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_Cdpg=
+nVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwht=
+P-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3DaREQHynP-DKrjIMQZNgfc=
+ujipoNCNHKX_m-HOdlelK8&e=3D><https://urldefense.proofpoint.com/v2/url?u=3Dh=
+ttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-25=
+2Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dd-252F-2=
+6data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08=
+dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C63868630113=
+0395230-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDA=
+wMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-2=
+57C-26sdata-3D52ArD7qNVDJ3WD2cRO9K1obhxqL3jActIIshidCi6sU-253D-26reserved-3=
+D0&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65Gg=
+nsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZ=
+PZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3DN-i3lI_2qPiQdaLk1qNKdStXlif1Xn3fQFokNLud5y=
+Q&e=3D>
+
+
+
+
+MSC Mediterranean Shipping Company
+
+Lvl 4, 70 - 72 Gloucester Street, Christchurch 8013 New Zealand
+
+T: +643 977 6999  W: https://urldefense.proofpoint.com/v2/url?u=3Dhttp-3A__=
+www.msc.com&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3D=
+OYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq=
+4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3D5hBkXravwoVwiUkdf3nhalbvJLmfTdyQV=
+TskR-9Kzf8&e=3D<https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur0=
+1.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzeala=
+nd.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dh-252F-26data-3D05-25=
+7C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-25=
+7C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130406147-257CU=
+nknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJX=
+aW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3=
+Do0e41HHtiAh9OAt5m53JSHLIMQQoJRebZhQgGew9iIA-253D-26reserved-3D0&d=3DDwIF-g=
+&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC1=
+4CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT=
+7L3aAU9Z2p8oqUR&s=3Dr_g7UegzHjhsR_lSVdyXAUqt1ksc6cjr23aXv2UuAAk&e=3D>
+
+In order to comply with the General Data Protection Regulation, you may exe=
+rcise your rights of access, rectification, cancellation, limitation, oppos=
+ition and portability free of charge by sending an e-mail to:
+data.protection@msc.com<mailto:ch001-data.protection@msc.com>, please visit=
+ Privacy Policy | MSC<https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A=
+__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscne=
+wzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dk-252F-26data-3=
+D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce9=
+0f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130417132=
+-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIl=
+AiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26s=
+data-3DgnAe1kk9ZhG-252Bkx5wFIIMSiimTV83cBrXJ4PvASGwFhc-253D-26reserved-3D0&=
+d=3DDwIF-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsX=
+qG8er1zeC14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZ=
+pPvsTrFIYT7L3aAU9Z2p8oqUR&s=3Dv0___J1oX7xj6UBv9bgMzUIY1rW9Ks0oX_LjrHC1nQk&e=
+=3D> for more information.
+
+=A9 Copyright 2024 =96 All Rights Reserved
+
+Unsubscribe<https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur01.sa=
+felinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzealand.c=
+mail19.com-252Ft-252Fd-2Du-2Dsqlhkd-2Ddtilqdddi-2Do-252F-26data-3D05-257C02=
+-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-257C08=
+8e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130427945-257CUnkno=
+wn-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4z=
+MiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3D-25=
+2FIEv5hvVlIdIS4twLwxM6HMcWooIutV8V0vqann0ZJM-253D-26reserved-3D0&d=3DDwIF-g=
+&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC1=
+4CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT=
+7L3aAU9Z2p8oqUR&s=3DIoE7FWnU3qZ2NLC9uQGvsn8M0Yo86fYPC8No6Ukhlok&e=3D>
+
+ <https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__mscnewzealand.cmai=
+l19.com_t_d-2Do-2Dsqlhkd-2Ddtilqdddi_o.gif&d=3DDwIF-g&c=3DeuGZstcaTDllvimEN=
+8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&=
+m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&s=3DzM=
+prkhZtAujahK31PBuO2P42YESZr3UVj9DkMeuYbAE&e=3D>
+
+--_000_cm1708197292217sqlhkddtilqdddidcmail19com_
+Content-Type: text/html; charset="Windows-1252"
+Content-ID: <B508FE34DB243844B2A3880A27A9BE00@NAMP104.PROD.OUTLOOK.COM>
+Content-Transfer-Encoding: quoted-printable
+Content-length: 60737
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www=
+.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html style=3D"margin: 0;pad=
+ding: 0;" xmlns=3D"http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DWindows-1=
+252">
+<title></title>
+<!--[if !mso]><!-->
+<meta http-equiv=3D"X-UA-Compatible" content=3D"IE=3Dedge">
+<!--<![endif]-->
+<meta name=3D"viewport" content=3D"width=3Ddevice-width">
+<style type=3D"text/css">
+@media only screen and (min-width: 620px){.column{}.wrapper{min-width:600px=
+ !important}.wrapper h1{}.wrapper h1{font-size:40px !important;line-height:=
+47px !important}.wrapper h2{}.wrapper h2{font-size:30px !important;line-hei=
+ght:38px !important}.wrapper h3{}.wrapper h3{font-size:20px !important;line=
+-height:28px !important}.wrapper .size-8,.wrapper .size-8-m,.wrapper .size-=
+8-l{font-size:8px !important;line-height:14px !important}.wrapper .size-8-m=
+{line-height:16px !important}.wrapper .size-8-l{line-height:24px !important=
+}.wrapper .size-9,.wrapper .size-9-m,.wrapper .size-9-l{font-size:9px !impo=
+rtant;line-height:16px !important}.wrapper .size-9-m{line-height:18px !impo=
+rtant}.wrapper .size-9-l{line-height:27px !important}.wrapper .size-10,.wra=
+pper .size-10-m,.wrapper .size-10-l{font-size:10px !important;line-height:1=
+8px !important}.wrapper .size-10-m{line-height:20px !important}.wrapper=20
+.size-10-l{line-height:30px !important}.wrapper .size-11,.wrapper .size-11-=
+m,.wrapper .size-11-l{font-size:11px !important;line-height:19px !important=
+}.wrapper .size-11-m{line-height:22px !important}.wrapper .size-11-l{line-h=
+eight:33px !important}.wrapper .size-12,.wrapper .size-12-m,.wrapper .size-=
+12-l{font-size:12px !important;line-height:19px !important}.wrapper .size-1=
+2-m{line-height:24px !important}.wrapper .size-12-l{line-height:36px !impor=
+tant}.wrapper .size-13,.wrapper .size-13-m,.wrapper .size-13-l{font-size:13=
+px !important;line-height:21px !important}.wrapper .size-13-m{line-height:2=
+6px !important}.wrapper .size-13-l{line-height:39px !important}.wrapper .si=
+ze-14,.wrapper .size-14-m,.wrapper .size-14-l{font-size:14px !important;lin=
+e-height:21px !important}.wrapper .size-14-m{line-height:28px !important}.w=
+rapper .size-14-l{line-height:42px !important}.wrapper .size-15,.wrapper=20
+.size-15-m,.wrapper .size-15-l{font-size:15px !important;line-height:23px !=
+important}.wrapper .size-15-m{line-height:30px !important}.wrapper .size-15=
+-l{line-height:45px !important}.wrapper .size-16,.wrapper .size-16-m,.wrapp=
+er .size-16-l{font-size:16px !important;line-height:24px !important}.wrappe=
+r .size-16-m{line-height:32px !important}.wrapper .size-16-l{line-height:48=
+px !important}.wrapper .size-17,.wrapper .size-17-m,.wrapper .size-17-l{fon=
+t-size:17px !important;line-height:26px !important}.wrapper .size-17-m{line=
+-height:34px !important}.wrapper .size-17-l{line-height:51px !important}.wr=
+apper .size-18,.wrapper .size-18-m,.wrapper .size-18-l{font-size:18px !impo=
+rtant;line-height:26px !important}.wrapper .size-18-m{line-height:36px !imp=
+ortant}.wrapper .size-18-l{line-height:54px !important}.wrapper .size-20,.w=
+rapper .size-20-m,.wrapper .size-20-l{font-size:20px=20
+!important;line-height:28px !important}.wrapper .size-20-m{line-height:40px=
+ !important}.wrapper .size-20-l{line-height:60px !important}.wrapper .size-=
+22,.wrapper .size-22-m,.wrapper .size-22-l{font-size:22px !important;line-h=
+eight:31px !important}.wrapper .size-22-m{line-height:44px !important}.wrap=
+per .size-22-l{line-height:66px !important}.wrapper .size-24,.wrapper .size=
+-24-m,.wrapper .size-24-l{font-size:24px !important;line-height:32px !impor=
+tant}.wrapper .size-24-m{line-height:48px !important}.wrapper .size-24-l{li=
+ne-height:72px !important}.wrapper .size-26,.wrapper .size-26-m,.wrapper .s=
+ize-26-l{font-size:26px !important;line-height:34px !important}.wrapper .si=
+ze-26-m{line-height:52px !important}.wrapper .size-26-l{line-height:78px !i=
+mportant}.wrapper .size-28,.wrapper .size-28-m,.wrapper .size-28-l{font-siz=
+e:28px !important;line-height:36px !important}.wrapper=20
+.size-28-m{line-height:56px !important}.wrapper .size-28-l{line-height:84px=
+ !important}.wrapper .size-30,.wrapper .size-30-m,.wrapper .size-30-l{font-=
+size:30px !important;line-height:38px !important}.wrapper .size-30-m{line-h=
+eight:60px !important}.wrapper .size-30-l{line-height:90px !important}.wrap=
+per .size-32,.wrapper .size-32-m,.wrapper .size-32-l{font-size:32px !import=
+ant;line-height:40px !important}.wrapper .size-32-m{line-height:64px !impor=
+tant}.wrapper .size-32-l{line-height:96px !important}.wrapper .size-34,.wra=
+pper .size-34-m,.wrapper .size-34-l{font-size:34px !important;line-height:4=
+3px !important}.wrapper .size-34-m{line-height:68px !important}.wrapper .si=
+ze-34-l{line-height:102px !important}.wrapper .size-36,.wrapper .size-36-m,=
+.wrapper .size-36-l{font-size:36px !important;line-height:43px !important}.=
+wrapper .size-36-m{line-height:72px !important}.wrapper=20
+.size-36-l{line-height:108px !important}.wrapper .size-40,.wrapper .size-40=
+-m,.wrapper .size-40-l{font-size:40px !important;line-height:47px !importan=
+t}.wrapper .size-40-m{line-height:80px !important}.wrapper .size-40-l{line-=
+height:120px !important}.wrapper .size-44,.wrapper .size-44-m,.wrapper .siz=
+e-44-l{font-size:44px !important;line-height:50px !important}.wrapper .size=
+-44-m{line-height:88px !important}.wrapper .size-44-l{line-height:132px !im=
+portant}.wrapper .size-48,.wrapper .size-48-m,.wrapper .size-48-l{font-size=
+:48px !important;line-height:54px !important}.wrapper .size-48-m{line-heigh=
+t:96px !important}.wrapper .size-48-l{line-height:144px !important}.wrapper=
+ .size-56,.wrapper .size-56-m,.wrapper .size-56-l{font-size:56px !important=
+;line-height:60px !important}.wrapper .size-56-m{line-height:112px !importa=
+nt}.wrapper .size-56-l{line-height:168px !important}.wrapper=20
+.size-64,.wrapper .size-64-m,.wrapper .size-64-l{font-size:64px !important;=
+line-height:68px !important}.wrapper .size-64-m{line-height:128px !importan=
+t}.wrapper .size-64-l{line-height:192px !important}.wrapper .size-72,.wrapp=
+er .size-72-m,.wrapper .size-72-l{font-size:72px !important;line-height:76p=
+x !important}.wrapper .size-72-m{line-height:144px !important}.wrapper .siz=
+e-72-l{line-height:216px !important}.wrapper .size-80,.wrapper .size-80-m,.=
+wrapper .size-80-l{font-size:80px !important;line-height:84px !important}.w=
+rapper .size-80-m{line-height:160px !important}.wrapper .size-80-l{line-hei=
+ght:240px !important}.wrapper .size-96,.wrapper .size-96-m,.wrapper .size-9=
+6-l{font-size:96px !important;line-height:100px !important}.wrapper .size-9=
+6-m{line-height:192px !important}.wrapper .size-96-l{line-height:288px !imp=
+ortant}.wrapper .size-112,.wrapper .size-112-m,.wrapper=20
+.size-112-l{font-size:112px !important;line-height:116px !important}.wrappe=
+r .size-112-m{line-height:224px !important}.wrapper .size-112-l{line-height=
+:336px !important}.wrapper .size-128,.wrapper .size-128-m,.wrapper .size-12=
+8-l{font-size:128px !important;line-height:132px !important}.wrapper .size-=
+128-m{line-height:256px !important}.wrapper .size-128-l{line-height:384px !=
+important}.wrapper .size-144,.wrapper .size-144-m,.wrapper .size-144-l{font=
+-size:144px !important;line-height:148px !important}.wrapper .size-144-m{li=
+ne-height:288px !important}.wrapper .size-144-l{line-height:432px !importan=
+t}}
+</style>
+<meta name=3D"x-apple-disable-message-reformatting">
+<style type=3D"text/css">
+.main, .mso {
+  margin: 0;
+  padding: 0;
+}
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+* {
+  line-height: inherit;
+}
+[x-apple-data-detectors] {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+.wrapper .footer__share-button a:hover,
+.wrapper .footer__share-button a:focus {
+  color: #ffffff !important;
+}
+.wrapper .footer__share-button a.icon-white:hover,
+.wrapper .footer__share-button a.icon-white:focus {
+  color: #ffffff !important;
+}
+.wrapper .footer__share-button a.icon-black:hover,
+.wrapper .footer__share-button a.icon-black:focus {
+  color: #000000 !important;
+}
+.btn a:hover,
+.btn a:focus,
+.footer__share-button a:hover,
+.footer__share-button a:focus,
+.email-footer__links a:hover,
+.email-footer__links a:focus {
+  opacity: 0.8;
+}
+.preheader,
+.header,
+.layout,
+.column {
+  transition: width 0.25s ease-in-out, max-width 0.25s ease-in-out;
+}
+.preheader td {
+  padding-bottom: 8px;
+}
+.layout,
+div.header {
+  max-width: 400px !important;
+  -fallback-width: 95% !important;
+  width: calc(100% - 20px) !important;
+}
+div.preheader {
+  max-width: 360px !important;
+  -fallback-width: 90% !important;
+  width: calc(100% - 60px) !important;
+}
+.snippet,
+.webversion {
+  Float: none !important;
+}
+.stack .column {
+  max-width: 400px !important;
+  width: 100% !important;
+}
+.fixed-width.has-border {
+  max-width: 402px !important;
+}
+.fixed-width.has-border .layout__inner {
+  box-sizing: border-box;
+}
+.snippet,
+.webversion {
+  width: 50% !important;
+}
+.mso .layout__edges {
+  font-size: 0;
+}
+.layout-fixed-width,
+.mso .layout-full-width {
+  background-color: #ffffff;
+}
+@media only screen and (min-width: 620px) {
+  .column,
+  .gutter {
+    display: table-cell;
+    Float: none !important;
+    vertical-align: top;
+  }
+  div.preheader,
+  .email-footer {
+    max-width: 560px !important;
+    width: 560px !important;
+  }
+  .snippet,
+  .webversion {
+    width: 280px !important;
+  }
+  div.header,
+  .layout,
+  .one-col .column {
+    max-width: 600px !important;
+    width: 600px !important;
+  }
+  .fixed-width.has-border,
+  .fixed-width.x_has-border,
+  .has-gutter.has-border,
+  .has-gutter.x_has-border {
+    max-width: 602px !important;
+    width: 602px !important;
+  }
+  .two-col .column {
+    max-width: 300px !important;
+    width: 300px !important;
+  }
+  .three-col .column,
+  .column.narrow,
+  .column.x_narrow {
+    max-width: 200px !important;
+    width: 200px !important;
+  }
+  .column.wide,
+  .column.x_wide {
+    width: 400px !important;
+  }
+  .two-col.has-gutter .column,
+  .two-col.x_has-gutter .column {
+    max-width: 290px !important;
+    width: 290px !important;
+  }
+  .three-col.has-gutter .column,
+  .three-col.x_has-gutter .column,
+  .has-gutter .narrow {
+    max-width: 188px !important;
+    width: 188px !important;
+  }
+  .has-gutter .wide {
+    max-width: 394px !important;
+    width: 394px !important;
+  }
+  .two-col.has-gutter.has-border .column,
+  .two-col.x_has-gutter.x_has-border .column {
+    max-width: 292px !important;
+    width: 292px !important;
+  }
+  .three-col.has-gutter.has-border .column,
+  .three-col.x_has-gutter.x_has-border .column,
+  .has-gutter.has-border .narrow,
+  .has-gutter.x_has-border .narrow {
+    max-width: 190px !important;
+    width: 190px !important;
+  }
+  .has-gutter.has-border .wide,
+  .has-gutter.x_has-border .wide {
+    max-width: 396px !important;
+    width: 396px !important;
+  }
+}
+@supports (display: flex) {
+  @media only screen and (min-width: 620px) {
+    .fixed-width.has-border .layout__inner {
+      display: flex !important;
+    }
+  }
+}
+/***
+* Mobile Styles
+*
+* 1. Overriding inline styles
+*/
+@media(max-width: 619px) {
+  .email-flexible-footer .left-aligned-footer .column,
+  .email-flexible-footer .center-aligned-footer,
+  .email-flexible-footer .right-aligned-footer .column {
+    max-width: 100% !important; /* [1] */
+    text-align: center !important; /* [1] */
+    width: 100% !important; /* [1] */
+  }
+  .flexible-footer-logo {
+    margin-left: 0px !important; /* [1] */
+    margin-right: 0px !important; /* [1] */
+  }
+  .email-flexible-footer .left-aligned-footer .flexible-footer__share-butto=
+n__container,
+  .email-flexible-footer .center-aligned-footer .flexible-footer__share-but=
+ton__container,
+  .email-flexible-footer .right-aligned-footer .flexible-footer__share-butt=
+on__container {
+    display: inline-block;
+    margin-left: 5px !important; /* [1] */
+    margin-right: 5px !important; /* [1] */
+  }
+  .email-flexible-footer__additionalinfo--center {
+    text-align: center !important; /* [1] */
+  }
+ =20
+  .email-flexible-footer .left-aligned-footer table,
+  .email-flexible-footer .center-aligned-footer table,
+  .email-flexible-footer .right-aligned-footer table {
+    display: table !important; /* [1] */
+    width: 100% !important; /* [1] */
+  }
+  .email-flexible-footer .footer__share-button,
+  .email-flexible-footer .email-footer__additional-info {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+}
+@media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and=
+ (min--moz-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-rat=
+io: 2/1), only screen and (min-device-pixel-ratio: 2), only screen and (min=
+-resolution: 192dpi), only screen and (min-resolution: 2dppx) {
+  .fblike {
+    background-image: url(https://i7.cmail19.com/static/eb/master/13-the-bl=
+ueprint-3/images/fblike@2x.png) !important;
+  }
+  .tweet {
+    background-image: url(https://i8.cmail19.com/static/eb/master/13-the-bl=
+ueprint-3/images/tweet@2x.png) !important;
+  }
+  .linkedinshare {
+    background-image: url(https://i9.cmail19.com/static/eb/master/13-the-bl=
+ueprint-3/images/lishare@2x.png) !important;
+  }
+  .forwardtoafriend {
+    background-image: url(https://i10.cmail19.com/static/eb/master/13-the-b=
+lueprint-3/images/forward@2x.png) !important;
+  }
+}
+@media (max-width: 321px) {
+  .fixed-width.has-border .layout__inner {
+    border-width: 1px 0 !important;
+  }
+  .layout,
+  .stack .column {
+    min-width: 320px !important;
+    width: 320px !important;
+  }
+  .border {
+    display: none;
+  }
+  .has-gutter .border {
+    display: table-cell;
+  }
+}
+.cmctbl--inline table {
+  border-collapse: collapse;
+}
+</style><style type=3D"text/css">
+.main,.mso{background-color:#fff}.logo a:hover,.logo a:focus{color:#859bb1 =
+!important}.footer-logo a:hover,.footer-logo a:focus{color:#372d1b !importa=
+nt}.mso .layout-has-border{border-top:1px solid #ccc;border-bottom:1px soli=
+d #ccc}.mso .layout-has-bottom-border{border-bottom:1px solid #ccc}.mso .bo=
+rder{background-color:#ccc}.mso h1{}.mso h1{font-size:40px !important;line-=
+height:47px !important}.mso h2{}.mso h2{font-size:30px !important;line-heig=
+ht:38px !important}.mso h3{}.mso h3{font-size:20px !important;line-height:2=
+8px !important}.mso .layout__inner{}.mso .footer__share-button p{}.mso .foo=
+ter__share-button p{font-family:sans-serif}
+</style><!--[if mso]><style type=3D"text/css" emb-not-inline>
+.mso div{border:0 none white !important}.mso .w560 .divider{}.mso .w560 .di=
+vider{Margin-left:260px !important;Margin-right:260px !important}.mso .w360=
+ .divider{}.mso .w360 .divider{Margin-left:160px !important;Margin-right:16=
+0px !important}.mso .w260 .divider{}.mso .w260 .divider{Margin-left:110px !=
+important;Margin-right:110px !important}.mso .w160 .divider{}.mso .w160 .di=
+vider{Margin-left:60px !important;Margin-right:60px !important}.mso .w60 .d=
+ivider{}.mso .w60 .divider{Margin-left:10px !important;Margin-right:10px !i=
+mportant}.mso .w354 .divider{}.mso .w354 .divider{Margin-left:157px !import=
+ant;Margin-right:157px !important}.mso .w250 .divider{}.mso .w250 .divider{=
+Margin-left:105px !important;Margin-right:105px !important}.mso .w148 .divi=
+der{}.mso .w148 .divider{Margin-left:54px !important;Margin-right:54px !imp=
+ortant}.mso .size-8,.mso .size-8-m,.mso .size-8-l{font-size:8px=20
+!important;line-height:14px !important}.mso .size-8-m{line-height:16px !imp=
+ortant}.mso .size-8-l{line-height:24px !important}.mso .size-9,.mso .size-9=
+-m,.mso .size-9-l{font-size:9px !important;line-height:16px !important}.mso=
+ .size-9-m{line-height:18px !important}.mso .size-9-l{line-height:27px !imp=
+ortant}.mso .size-10,.mso .size-10-m,.mso .size-10-l{font-size:10px !import=
+ant;line-height:18px !important}.mso .size-10-m{line-height:20px !important=
+}.mso .size-10-l{line-height:30px !important}.mso .size-11,.mso .size-11-m,=
+.mso .size-11-l{font-size:11px !important;line-height:19px !important}.mso =
+.size-11-m{line-height:22px !important}.mso .size-11-l{line-height:33px !im=
+portant}.mso .size-12,.mso .size-12-m,.mso .size-12-l{font-size:12px !impor=
+tant;line-height:19px !important}.mso .size-12-m{line-height:24px !importan=
+t}.mso .size-12-l{line-height:36px !important}.mso .size-13,.mso=20
+.size-13-m,.mso .size-13-l{font-size:13px !important;line-height:21px !impo=
+rtant}.mso .size-13-m{line-height:26px !important}.mso .size-13-l{line-heig=
+ht:39px !important}.mso .size-14,.mso .size-14-m,.mso .size-14-l{font-size:=
+14px !important;line-height:21px !important}.mso .size-14-m{line-height:28p=
+x !important}.mso .size-14-l{line-height:42px !important}.mso .size-15,.mso=
+ .size-15-m,.mso .size-15-l{font-size:15px !important;line-height:23px !imp=
+ortant}.mso .size-15-m{line-height:30px !important}.mso .size-15-l{line-hei=
+ght:45px !important}.mso .size-16,.mso .size-16-m,.mso .size-16-l{font-size=
+:16px !important;line-height:24px !important}.mso .size-16-m{line-height:32=
+px !important}.mso .size-16-l{line-height:48px !important}.mso .size-17,.ms=
+o .size-17-m,.mso .size-17-l{font-size:17px !important;line-height:26px !im=
+portant}.mso .size-17-m{line-height:34px !important}.mso=20
+.size-17-l{line-height:51px !important}.mso .size-18,.mso .size-18-m,.mso .=
+size-18-l{font-size:18px !important;line-height:26px !important}.mso .size-=
+18-m{line-height:36px !important}.mso .size-18-l{line-height:54px !importan=
+t}.mso .size-20,.mso .size-20-m,.mso .size-20-l{font-size:20px !important;l=
+ine-height:28px !important}.mso .size-20-m{line-height:40px !important}.mso=
+ .size-20-l{line-height:60px !important}.mso .size-22,.mso .size-22-m,.mso =
+.size-22-l{font-size:22px !important;line-height:31px !important}.mso .size=
+-22-m{line-height:44px !important}.mso .size-22-l{line-height:66px !importa=
+nt}.mso .size-24,.mso .size-24-m,.mso .size-24-l{font-size:24px !important;=
+line-height:32px !important}.mso .size-24-m{line-height:48px !important}.ms=
+o .size-24-l{line-height:72px !important}.mso .size-26,.mso .size-26-m,.mso=
+ .size-26-l{font-size:26px !important;line-height:34px !important}.mso=20
+.size-26-m{line-height:52px !important}.mso .size-26-l{line-height:78px !im=
+portant}.mso .size-28,.mso .size-28-m,.mso .size-28-l{font-size:28px !impor=
+tant;line-height:36px !important}.mso .size-28-m{line-height:56px !importan=
+t}.mso .size-28-l{line-height:84px !important}.mso .size-30,.mso .size-30-m=
+,.mso .size-30-l{font-size:30px !important;line-height:38px !important}.mso=
+ .size-30-m{line-height:60px !important}.mso .size-30-l{line-height:90px !i=
+mportant}.mso .size-32,.mso .size-32-m,.mso .size-32-l{font-size:32px !impo=
+rtant;line-height:40px !important}.mso .size-32-m{line-height:64px !importa=
+nt}.mso .size-32-l{line-height:96px !important}.mso .size-34,.mso .size-34-=
+m,.mso .size-34-l{font-size:34px !important;line-height:43px !important}.ms=
+o .size-34-m{line-height:68px !important}.mso .size-34-l{line-height:102px =
+!important}.mso .size-36,.mso .size-36-m,.mso .size-36-l{font-size:36px=20
+!important;line-height:43px !important}.mso .size-36-m{line-height:72px !im=
+portant}.mso .size-36-l{line-height:108px !important}.mso .size-40,.mso .si=
+ze-40-m,.mso .size-40-l{font-size:40px !important;line-height:47px !importa=
+nt}.mso .size-40-m{line-height:80px !important}.mso .size-40-l{line-height:=
+120px !important}.mso .size-44,.mso .size-44-m,.mso .size-44-l{font-size:44=
+px !important;line-height:50px !important}.mso .size-44-m{line-height:88px =
+!important}.mso .size-44-l{line-height:132px !important}.mso .size-48,.mso =
+.size-48-m,.mso .size-48-l{font-size:48px !important;line-height:54px !impo=
+rtant}.mso .size-48-m{line-height:96px !important}.mso .size-48-l{line-heig=
+ht:144px !important}.mso .size-56,.mso .size-56-m,.mso .size-56-l{font-size=
+:56px !important;line-height:60px !important}.mso .size-56-m{line-height:11=
+2px !important}.mso .size-56-l{line-height:168px !important}.mso=20
+.size-64,.mso .size-64-m,.mso .size-64-l{font-size:64px !important;line-hei=
+ght:68px !important}.mso .size-64-m{line-height:128px !important}.mso .size=
+-64-l{line-height:192px !important}.mso .size-72,.mso .size-72-m,.mso .size=
+-72-l{font-size:72px !important;line-height:76px !important}.mso .size-72-m=
+{line-height:144px !important}.mso .size-72-l{line-height:216px !important}=
+.mso .size-80,.mso .size-80-m,.mso .size-80-l{font-size:80px !important;lin=
+e-height:84px !important}.mso .size-80-m{line-height:160px !important}.mso =
+.size-80-l{line-height:240px !important}.mso .size-96,.mso .size-96-m,.mso =
+.size-96-l{font-size:96px !important;line-height:100px !important}.mso .siz=
+e-96-m{line-height:192px !important}.mso .size-96-l{line-height:288px !impo=
+rtant}.mso .size-112,.mso .size-112-m,.mso .size-112-l{font-size:112px !imp=
+ortant;line-height:116px !important}.mso .size-112-m{line-height:224px=20
+!important}.mso .size-112-l{line-height:336px !important}.mso .size-128,.ms=
+o .size-128-m,.mso .size-128-l{font-size:128px !important;line-height:132px=
+ !important}.mso .size-128-m{line-height:256px !important}.mso .size-128-l{=
+line-height:384px !important}.mso .size-144,.mso .size-144-m,.mso .size-144=
+-l{font-size:144px !important;line-height:148px !important}.mso .size-144-m=
+{line-height:288px !important}.mso .size-144-l{line-height:432px !important=
+}.mso .cmctbl table td,.mso .cmctbl table th{Margin-left:20px !important;Ma=
+rgin-right:20px !important}.mso .cmctbl- -inline,.mso .cmctbl{padding-left:=
+20px !important;padding-right:20px !important}.mso .cmctbl- -inline table,.=
+mso .cmctbl=20
+table{mso-table-lspace:0pt;mso-table-rspace:0pt;mso-line-height-rule:exactl=
+y}.size-8,.size-9{mso-text-raise:9px}.size-34,h1{mso-text-raise:13px}.size-=
+36{mso-text-raise:14px}.size-40{mso-text-raise:16px}.size-44{mso-text-raise=
+:17px}.size-48{mso-text-raise:18px}.size-56{mso-text-raise:22px}.size-64{ms=
+o-text-raise:25px}.size-72{mso-text-raise:28px}.size-80{mso-text-raise:32px=
+}.size-96{mso-text-raise:40px}.size-112{mso-text-raise:46px}.size-128{mso-t=
+ext-raise:54px}.size-144{mso-text-raise:58px}.size-11-m,.size-12-m{mso-text=
+-raise:6px}.size-13-m,.size-14-m{mso-text-raise:7px}.size-15-m,.size-16-m,.=
+size-8-l{mso-text-raise:8px}.size-17-m,.size-18-m{mso-text-raise:9px}.size-=
+20-m,.size-10-l{mso-text-raise:10px}.size-22-m,.size-11-l{mso-text-raise:11=
+px}.size-24-m,.size-12-l{mso-text-raise:12px}.size-26-m,.size-13-l{mso-text=
+-raise:13px}.size-28-m,.size-14-l{mso-text-raise:14px}.size-30-m,.size-15-l=
+{mso-text-raise:15px}.size-32-m,.size-16-l{mso-text-raise:16px}.size-34-m,.=
+size-17-l{mso-text-raise:17px}.size-36-m,.size-18-l{mso-text-raise:18px}.si=
+ze-40-m,.size-20-l{mso-text-raise:20px}.size-44-m,.size-22-l{mso-text-raise=
+:22px}.size-48-m,.size-24-l{mso-text-raise:24px}.size-26-l{mso-text-raise:2=
+6px}.size-56-m,.size-28-l{mso-text-raise:28px}.size-30-l{mso-text-raise:30p=
+x}.size-64-m,.size-32-l{mso-text-raise:32px}.size-34-l{mso-text-raise:34px}=
+.size-72-m,.size-36-l{mso-text-raise:36px}.size-80-m,.size-40-l{mso-text-ra=
+ise:40px}.size-44-l{mso-text-raise:44px}.size-96-m,.size-48-l{mso-text-rais=
+e:48px}.size-112-m,.size-56-l{mso-text-raise:56px}.size-128-m,.size-64-l{ms=
+o-text-raise:64px}.size-144-m,.size-72-l{mso-text-raise:72px}.size-80-l{mso=
+-text-raise:80px}.size-96-l{mso-text-raise:96px}.size-112-l{mso-text-raise:=
+112px}.size-128-l{mso-text-raise:128px}.size-144-l{mso-text-raise:144px}
+</style><![endif]--><!--[if mso]>
+  <body class=3D"mso">
+<![endif]--><!--[if !mso]><!-->
+</head>
+<body class=3D"main no-padding" style=3D"margin: 0;padding: 0;-webkit-text-=
+size-adjust: 100%;">
+<p class=3D"MsoNormal" style=3D"line-height:12.0pt;background:#FFEB9C"><spa=
+n style=3D"font-size:12.0pt;color:#9C6500;background:#FFEB9C">CAUTION:</spa=
+n><span style=3D"font-size:12.0pt;color:black;background:#FFEB9C"> External=
+ email. Do not click links or open attachments
+ unless you recognize the sender and know the content is safe.</span></p>
+<br>
+<br>
+<div><!--<![endif]-->
+<table class=3D"wrapper" style=3D"border-collapse: collapse;table-layout: f=
+ixed;min-width: 320px;width: 100%;background-color: #fff;" cellpadding=3D"0=
+" cellspacing=3D"0" role=3D"presentation">
+<tbody>
+<tr>
+<td>
+<div role=3D"banner">
+<div class=3D"preheader" style=3D"Margin: 0 auto;max-width: 560px;min-width=
+: 280px; width: 280px;width: calc(28000% - 167440px);">
+<div style=3D"border-collapse: collapse;display: table;width: 100%;"><!--[i=
+f mso]><table align=3D"center" class=3D"preheader" cellpadding=3D"0" cellsp=
+acing=3D"0" role=3D"presentation"><tr><td style=3D"width: 280px" valign=3D"=
+top"><![endif]-->
+<div class=3D"snippet" style=3D"display: table-cell;Float: left;font-size: =
+12px;line-height: 19px;max-width: 280px;min-width: 140px; width: 140px;widt=
+h: calc(14000% - 78120px);padding: 10px 0 5px 0;color: #030303;font-family:=
+ sans-serif;">
+</div>
+<!--[if mso]></td><td style=3D"width: 280px" valign=3D"top"><![endif]-->
+<div class=3D"webversion" style=3D"display: table-cell;Float: left;font-siz=
+e: 12px;line-height: 19px;max-width: 280px;min-width: 139px; width: 139px;w=
+idth: calc(14100% - 78680px);padding: 10px 0 5px 0;text-align: right;color:=
+ #030303;font-family: sans-serif;">
+<p style=3D"Margin-top: 0;Margin-bottom: 0;" emb-social=3D"webversion">No i=
+mages? <a style=3D"text-decoration: underline;transition: opacity 0.1s ease=
+-in;color: #030303;" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dh=
+ttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-25=
+2Fmscnewzealand.cmail19.com-252Ft-252Fd-2De-2Dsqlhkd-2Ddtilqdddi-2Du-252F-2=
+6data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08=
+dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C63868630113=
+0310366-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDA=
+wMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-2=
+57C-26sdata-3DCiLc-252BnT1SwHjAFQCbybX8R75LblEGHbaY41JoSJvD8s-253D-26reserv=
+ed-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&a=
+mp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP=
+-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3DKYxooYtHoTyjLntbJE=
+1oFwNXfPYMFtrErbyR1SSX1Cs&amp;e=3D" originalsrc=3D"https://mscnewzealand.cm=
+ail19.com/t/d-e-sqlhkd-dtilqdddi-u/" shash=3D"XbPZMpQKVifcrh2mGcrMuOMvIUUtL=
+ed0+vr8n1kmg8RZmGAYJGKUZfZ6LkF2/cCJ8ozWXfCa5otcd9cQbjkHeXPXWvU1s7IuMgtUtCfs=
+4QVEx4tcJ8DfqvX/1tHYf4n3ltfG3PVzHjznZfFPVUeMeKXsDI0jp9DJH6tRCzaeSyY=3D">
+Click here</a></p>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div class=3D"header" style=3D"Margin: 0 auto;max-width: 600px;min-width: 3=
+20px; width: 320px;width: calc(28000% - 167400px);" id=3D"emb-email-header-=
+container">
+<!--[if mso]><table align=3D"center" class=3D"header" cellpadding=3D"0" cel=
+lspacing=3D"0" role=3D"presentation"><tr><td style=3D"width: 600px"><![endi=
+f]-->
+<div class=3D"logo emb-logo-margin-box" style=3D"font-size: 26px;line-heigh=
+t: 32px;Margin-top: 6px;Margin-bottom: 0px;color: #c3ced9;font-family: Robo=
+to,Tahoma,sans-serif;" align=3D"center">
+<div class=3D"logo-right" align=3D"right" id=3D"emb-email-header"><img styl=
+e=3D"display: block;height: auto;width: 100%;border: 0;max-width: 101px;" s=
+rc=3D"https://i1.cmail19.com/ei/d/B6/EBE/AB6/142342/csfinal/Logo_MSC_Cargo_=
+rgb_yellow.jpg" alt=3D"" width=3D"101"></div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<h1 class=3D"size-36" style=3D"Margin-top: 0;Margin-bottom: 0;font-style: n=
+ormal;font-weight: normal;color: #333;font-size: 30px;line-height: 38px;fon=
+t-family: sans-serif;text-align: left;" lang=3D"x-size-36">
+PRICE ANNOUNCEMENT</h1>
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<h3 style=3D"Margin-top: 0;Margin-bottom: 0;font-style: normal;font-weight:=
+ normal;color: #333;font-size: 17px;line-height: 26px;font-family: Calibri,=
+Carlito,&quot;PT Sans&quot;,&quot;Trebuchet MS&quot;,sans-serif;text-align:=
+ left;">
+<span class=3D"font-calibri" style=3D"text-decoration: inherit;">NEW ZEALAN=
+D DESTINATION TERMINAL HANDLING CHARGE UPDATE</span></h3>
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"font-size: 12px;font-style: normal;font-weight: normal;line-h=
+eight: 19px;" align=3D"left">
+<img style=3D"border: 0;display: block;height: auto;width: 100%;max-width: =
+105px;" alt=3D"" width=3D"105" src=3D"https://i1.cmail19.com/ei/d/B6/EBE/AB=
+6/142343/csfinal/separatormscyellow2024fixed1-990451000001453c.png">
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<p class=3D"size-14" style=3D"Margin-top: 0;Margin-bottom: 0;font-size: 14p=
+x;line-height: 21px;text-align: left;" lang=3D"x-size-14">
+1/12/2024</currentmonth></currentday></p>
+<p class=3D"size-16" style=3D"Margin-top: 20px;Margin-bottom: 0;font-size: =
+16px;line-height: 24px;text-align: left;" lang=3D"x-size-16">
+Dear Customer,</p>
+<p class=3D"size-16" style=3D"Margin-top: 20px;Margin-bottom: 0;font-size: =
+16px;line-height: 24px;text-align: left;" lang=3D"x-size-16">
+Please take note of the below update.</p>
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #dedede;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #dedede;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;line-height: 28px;font-size: 1p=
+x;">&nbsp;</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<p class=3D"size-16" style=3D"Margin-top: 0;Margin-bottom: 0;font-size: 16p=
+x;line-height: 24px;text-align: center;" lang=3D"x-size-16">
+<strong>New Zealand Destination Terminal Handling Charge</strong></p>
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #dedede;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #dedede;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<p class=3D"size-16" style=3D"Margin-top: 0;Margin-bottom: 20px;font-size: =
+16px;line-height: 24px;text-align: center;" lang=3D"x-size-16">
+<strong>Effective date: January 1<sup>st</sup>, 2025</strong><br>
+<strong><strong>(Bill of Lading date or last container gate in date for the=
+ USA/Costa Rica)</strong></strong></p>
+</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;line-height: 6px;font-size: 1px=
+;">&nbsp;</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"font-size: 12px;font-style: normal;font-weight: normal;line-h=
+eight: 19px;" align=3D"center">
+<img class=3D"gnd-corner-image gnd-corner-image-center gnd-corner-image-top=
+ gnd-corner-image-bottom" style=3D"border: 0;display: block;height: auto;wi=
+dth: 100%;max-width: 639px;" alt=3D"" width=3D"600" src=3D"https://i2.cmail=
+19.com/ei/d/B6/EBE/AB6/142343/csfinal/NZDTHCJAN20252-9900000000079e3c.png">
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 34px;font-size: 34=
+px;">&nbsp;</div>
+<div class=3D"layout one-col fixed-width stack" style=3D"Margin: 0 auto;max=
+-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - 167400px)=
+;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;background-color: #ffffff;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-fixed-width" style=3D"background-co=
+lor: #ffffff;"><td style=3D"width: 600px" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div class=3D"btn btn--ghost btn--medium" style=3D"text-align:left;"><!--[i=
+f !mso]><!--><a style=3D"border-radius: 4px;display: inline-block;font-size=
+: 12px;font-weight: bold;line-height: 22px;padding: 10px 20px;text-align: c=
+enter;text-decoration: none !important;transition: opacity 0.1s ease-in;col=
+or: #030303 !important;border: 1px solid #eed484;font-family: Arial, sans-s=
+erif;border-color: #333333;" href=3D"https://urldefense.proofpoint.com/v2/u=
+rl?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A=
+-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2D=
+r-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e7642=
+3349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638=
+686301130327736-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiI=
+wLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257=
+C-257C-257C-26sdata-3DHEPlIOyXC35RY-252FVf0E5j662W0MGjap1Fe-252F1Ik1MKacY-2=
+53D-26reserved-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_C=
+dpgnVfiiMM&amp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDa=
+vqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3D-QI9dZ=
+hiVh9uhZWt9ay5tyadcaiGxF7Sf8VwI_ID6ZQ&amp;e=3D" originalsrc=3D"https://mscn=
+ewzealand.cmail19.com/t/d-l-sqlhkd-dtilqdddi-r/" shash=3D"hc8L73UAc2NrSnuGt=
+Nsqqay598Z6fM4sivDzio+Osdp0tA9SVACNpLvsRVwoOeUxHHb3B2X3DlPqfaH/EJnWurrpmVy5=
+UHwzWDufTZh3iKA9ow8OsDo34ZO0pzlEwX1kK9TUrhPXtVxS5zYnUlmGv7B2mKj2tmWcUZsomKP=
+Uxko=3D">FIND
+ OUT MORE ABOUT OUR RATES</a><!--<![endif]--><!--[if mso]><p style=3D"line-=
+height:0;margin:0;">&nbsp;</p><v:roundrect xmlns:v=3D"urn:schemas-microsoft=
+-com:vml" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eu=
+r01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzea=
+land.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dr-252F-26data-3D05-=
+257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-=
+257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130339424-257=
+CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOi=
+JXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata=
+-3DahdbCFDW0nIgtm6p2De53zxbPrv3kd7RKiOr5CurFd0-253D-26reserved-3D0&d=3DDwMF=
+-g&c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&r=3DOYQaI65GgnsXqG8er1ze=
+C14CBa6rYVZnQeTX4cgtgnM&m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFI=
+YT7L3aAU9Z2p8oqUR&s=3Dh_Z3XitTXh6_gNDB4gSykd6nKU3MEZgY7Jz9kbRWeO8&e=3D" ori=
+ginalsrc=3D"https://mscnewzealand.cmail19.com/t/d-l-sqlhkd-dtilqdddi-r/" sh=
+ash=3D"mrv5bWfO1oN4Iz90b0Oo7Ns4ZLIBj2BwqIeDLiGLdz0lnXQVjGMxBAVYu/GKaKURIaZj=
+bcfGHPMSoRtcxFc6aadNhPa00Nt49iHvB3hEcYlfSsM+3jbNpI+VWZBPdX2Qv90n4MqDgCwziUW=
++bg6YS0OQuUSUZbcpQGanrjvlnw4=3D" style=3D"width:191.25pt" arcsize=3D"9%" fi=
+lled=3D"f" strokecolor=3D"#EED484" strokeweight=3D"1px"><v:textbox style=3D=
+"mso-fit-shape-to-text:t" inset=3D"0pt,6.75pt,0pt,6.75pt"><center style=3D"=
+font-size:12px;line-height:22px;color:#030303;font-family:Arial,sans-serif;=
+font-weight:bold;mso-line-height-rule:exactly;mso-text-raise:2px">FIND OUT =
+MORE ABOUT OUR RATES</center></v:textbox></v:roundrect><![endif]-->
+</div>
+</div>
+</div>
+<!--[if mso]></td></tr></table><![endif]--></div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+<div style=3D"background-color: #ffffff;">
+<div class=3D"layout one-col stack" style=3D"Margin: 0 auto;max-width: 600p=
+x;min-width: 320px; width: 320px;width: calc(28000% - 167400px);overflow-wr=
+ap: break-word;word-wrap: break-word;word-break: break-word;">
+<div class=3D"layout__inner" style=3D"border-collapse: collapse;display: ta=
+ble;width: 100%;">
+<!--[if mso]><table width=3D"100%" cellpadding=3D"0" cellspacing=3D"0" role=
+=3D"presentation"><tr class=3D"layout-full-width" style=3D"background-color=
+: #ffffff;"><td class=3D"layout__edges">&nbsp;</td><td style=3D"width: 600p=
+x" class=3D"w560"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;color: #050505;font-size: 1=
+4px;line-height: 21px;font-family: Calibri,Carlito,PT Sans,Trebuchet MS,san=
+s-serif;">
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;line-height: 13px;font-size: 1p=
+x;">&nbsp;</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<p class=3D"size-16" style=3D"Margin-top: 0;Margin-bottom: 20px;font-size: =
+16px;line-height: 24px;text-align: left;" lang=3D"x-size-16">
+We thank you for your continued support.</p>
+</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;mso-text-raise: 11px;vertical-a=
+lign: middle;">
+<p class=3D"size-14" style=3D"Margin-top: 0;Margin-bottom: 20px;font-size: =
+14px;line-height: 21px;text-align: left;" lang=3D"x-size-14">
+<strong>MSC Mediterranean Shipping Company</strong></p>
+</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div>
+<div style=3D"padding-top: 8px; text-align: left"><span style=3D"padding-ri=
+ght: 4px;"><a style=3D"text-decoration: underline;transition: opacity 0.1s =
+ease-in;color: #000003;display: inline-block;border-radius: 50%;width: 32px=
+;height: 32px;max-height: 32px;background-color: #050505;" href=3D"https://=
+urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur01.safelinks.protection.o=
+utlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzealand.cmail19.com-252Ft-252=
+Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dy-252F-26data-3D05-257C02-257Cdaniel.fielder-=
+2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1ac=
+f4c596d3cb-257C0-257C0-257C638686301130350802-257CUnknown-257CTWFpbGZsb3d8e=
+yJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIs=
+IldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3Da92yfSyYoBx95BsIbAjpH1Y=
+gKPTmhjh3C6k1ooz5qpM-253D-26reserved-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDl=
+lvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQe=
+TX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z=
+2p8oqUR&amp;s=3D3oLiMOGH91oWG8jx-8mUabt5zTlOPmhRlK7vV95JXDM&amp;e=3D" origi=
+nalsrc=3D"https://mscnewzealand.cmail19.com/t/d-l-sqlhkd-dtilqdddi-y/" shas=
+h=3D"wknXiVdIwc7wk8D++wS1vPhTSNPXLKdPdGGeQ1xH2EXgIpA12+zIA5ur/8q8Yh2yGejLmd=
+IWcVO3LWwrrnbO5fFAOV8KXizunBWodMxzLvQoRjLaCXZj0Mg1ReVIlyhJnIchnDS/7nkxBAFPF=
+s14mw7G9OJmEKTDrJOJujndTMs=3D"><img style=3D"border: 0;" src=3D"https://i1.=
+cmail19.com/static/eb/master/13-the-blueprint-3/images/socialmedia/facebook=
+-white-medium.png" alt=3D"Facebook" height=3D"32" width=3D"32" cm_dontimpor=
+timage=3D""></a></span><span style=3D"padding-right: 4px;"><a style=3D"text=
+-decoration: underline;transition: opacity 0.1s ease-in;color: #000003;disp=
+lay: inline-block;border-radius: 50%;width: 32px;height: 32px;max-height: 3=
+2px;background-color: #050505;" href=3D"https://urldefense.proofpoint.com/v=
+2/url?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-2=
+53A-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi=
+-2Dj-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e7=
+6423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C=
+638686301130362048-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYi=
+OiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-=
+257C-257C-257C-26sdata-3DlcaCCrShhJ-252FHhqPk65XQTZX-252FvW5v4HTo-252FhsXBU=
+TRGX4-253D-26reserved-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqO=
+f-v5A_CdpgnVfiiMM&amp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=
+=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=
+=3D2O1PIj5ZH9Hrha8ZizZojodbYFZxwDACdBOirSJo1Tk&amp;e=3D" originalsrc=3D"htt=
+ps://mscnewzealand.cmail19.com/t/d-l-sqlhkd-dtilqdddi-j/" shash=3D"dL9GHYSD=
+yZX81qRdwonjoIr6jqgdlBSMDEfvkr0Lo8XjUFTAR1VmU1+88XPZUpYvBqHu6IHSw2FP0mim9Y7=
+fLN0ofIOnmwLJPkk1dvzKQgYs87JMOeiPhLtH3DuvWFoZFbDwZLMB/065Qry97keo/tQmjBuhOZ=
+XHQ4N4f9Qwo/I=3D"><img style=3D"border: 0;" src=3D"https://i4.cmail19.com/s=
+tatic/eb/master/13-the-blueprint-3/images/socialmedia/twitter-white-medium.=
+png" alt=3D"Twitter" height=3D"32" width=3D"32" cm_dontimportimage=3D""></a=
+></span><span style=3D"padding-right: 4px;"><a style=3D"text-decoration: un=
+derline;transition: opacity 0.1s ease-in;color: #000003;display: inline-blo=
+ck;border-radius: 50%;width: 32px;height: 32px;max-height: 32px;background-=
+color: #050505;" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps=
+-3A__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fms=
+cnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dt-252F-26dat=
+a-3D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11=
+ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130373=
+038-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCI=
+sIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-=
+26sdata-3D3bLCcddnWStAoyPsE5-252B9FGybeCt-252BVLKgcUNRqB-252FJy-252F4-253D-=
+26reserved-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_Cdpgn=
+VfiiMM&amp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyG=
+k4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3D8dOSnm7rHv=
+4n1MRyyWtiaaxq3IF-oWylrMelweIW_v4&amp;e=3D" originalsrc=3D"https://mscnewze=
+aland.cmail19.com/t/d-l-sqlhkd-dtilqdddi-t/" shash=3D"zcYiK8Ec+KnvcVC/n9igH=
+LR1mn+pBdVSsbdW7RJPf7AHsVodz9TZAxA/vwnWxo9IRQI3L4Oc7rAcl23dPl/3JafbmhA/Ag/r=
+mbo/5YuowYDfNGc+XifxG20vqu+t/L3YhGArKz6YMDFy+OqjL5aI+xfFkdkOaXujTfDdLt0qJ8I=
+=3D"><img style=3D"border: 0;" src=3D"https://i10.cmail19.com/static/eb/mas=
+ter/13-the-blueprint-3/images/socialmedia/instagram-white-medium.png" alt=
+=3D"Instagram" height=3D"32" width=3D"32" cm_dontimportimage=3D""></a></spa=
+n><span style=3D"padding-right: 4px;"><a style=3D"text-decoration: underlin=
+e;transition: opacity 0.1s ease-in;color: #000003;display: inline-block;bor=
+der-radius: 50%;width: 32px;height: 32px;max-height: 32px;background-color:=
+ #050505;" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__e=
+ur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewze=
+aland.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Di-252F-26data-3D05=
+-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8=
+-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130384205-25=
+7CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiO=
+iJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdat=
+a-3DJu6xnK7jsgoA6Fez-252BE8QPGMmIs9-252B1qMXFO7voJGPBm4-253D-26reserved-3D0=
+&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=
+=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP-zQt=
+1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3DaREQHynP-DKrjIMQZNgfcu=
+jipoNCNHKX_m-HOdlelK8&amp;e=3D" originalsrc=3D"https://mscnewzealand.cmail1=
+9.com/t/d-l-sqlhkd-dtilqdddi-i/" shash=3D"bb3/QbruFcGww5SO0/TBoszc8xNu9nlQz=
+C7sRp5XxYQCtBqrp90b4qjNArS3QxjKSiOWAuVeTSrilLHdW2v/AIeUoMb2wYtZdmwOePyADa5U=
+04Yzb/oH4DLUYdP3cnosgZLkJzLkL1oz7QS/LRfSCSqFOmPwMvXUyPyVbGhrLOE=3D"><img st=
+yle=3D"border: 0;" src=3D"https://i2.cmail19.com/static/eb/master/13-the-bl=
+ueprint-3/images/socialmedia/linkedin-white-medium.png" alt=3D"LinkedIn" he=
+ight=3D"32" width=3D"32" cm_dontimportimage=3D""></a></span><span style=3D"=
+padding-right: 4px;"><a style=3D"text-decoration: underline;transition: opa=
+city 0.1s ease-in;color: #000003;display: inline-block;border-radius: 50%;w=
+idth: 32px;height: 32px;max-height: 32px;background-color: #050505;" href=
+=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur01.safelinks.=
+protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzealand.cmail19.c=
+om-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dd-252F-26data-3D05-257C02-257Cdan=
+iel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-257C088e9b00ff=
+d0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130395230-257CUnknown-257CT=
+WFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFO=
+IjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3D52ArD7qNVDJ=
+3WD2cRO9K1obhxqL3jActIIshidCi6sU-253D-26reserved-3D0&amp;d=3DDwMF-g&amp;c=
+=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3DOYQaI65GgnsXqG8er1ze=
+C14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvs=
+TrFIYT7L3aAU9Z2p8oqUR&amp;s=3DN-i3lI_2qPiQdaLk1qNKdStXlif1Xn3fQFokNLud5yQ&a=
+mp;e=3D" originalsrc=3D"https://mscnewzealand.cmail19.com/t/d-l-sqlhkd-dtil=
+qdddi-d/" shash=3D"A083Aw6GATX5LRGqMmDqBqdb7BWaY7FGod3RXFw94LKhC88/8t0vVcD1=
+Vp75JFMkXTIFWFb/WwR89x5P2rAv59cumcw7Gku8BiBAX6SYwepSQjquLQ2bcMpQW773MUGyEJI=
+3bSdZAGZLTOoZ/rX4stcWiiETyM78ZhTricvKh3Q=3D"><img style=3D"border: 0;" src=
+=3D"https://i6.cmail19.com/static/eb/master/13-the-blueprint-3/images/socia=
+lmedia/youtube-white-medium.png" alt=3D"YouTube" height=3D"32" width=3D"32"=
+ cm_dontimportimage=3D""></a></span></div>
+</div>
+</div>
+<div style=3D"Margin-left: 20px;Margin-right: 20px;">
+<div style=3D"mso-line-height-rule: exactly;line-height: 1px;font-size: 1px=
+;">&nbsp;</div>
+</div>
+</div>
+<!--[if mso]></td><td class=3D"layout__edges">&nbsp;</td></tr></table><![en=
+dif]--></div>
+</div>
+</div>
+<div style=3D"mso-line-height-rule: exactly;line-height: 20px;font-size: 20=
+px;">&nbsp;</div>
+</div>
+<table style=3D"border-collapse: collapse;table-layout: fixed;" cellpadding=
+=3D"0" cellspacing=3D"0" width=3D"100%">
+<tbody>
+<tr>
+<td style=3D"background-color: #f5f5f5">
+<div role=3D"contentinfo">
+<div style=3D"line-height:1px;font-size:1px;" id=3D"footer-top-spacing">&nb=
+sp;</div>
+<div class=3D"layout email-flexible-footer email-footer" style=3D"Margin: 0=
+ auto;max-width: 600px;min-width: 320px; width: 320px;width: calc(28000% - =
+167400px);overflow-wrap: break-word;word-wrap: break-word;word-break: break=
+-word;" id=3D"footer-content">
+<div class=3D"layout__inner left-aligned-footer" style=3D"border-collapse: =
+collapse;display: table;width: 100%;">
+<!--[if mso]><table align=3D"center" cellpadding=3D"0" cellspacing=3D"0" ro=
+le=3D"presentation"><tr class=3D"layout-email-footer"><![endif]--><!--[if m=
+so]><td><table cellpadding=3D"0" cellspacing=3D"0"><![endif]--><!--[if mso]=
+><td valign=3D"top"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;font-size: 12px;line-height=
+: 19px;color: #030303;font-family: sans-serif;display: none;">
+<div class=3D"footer-logo emb-logo-margin-box" style=3D"font-size: 26px;lin=
+e-height: 32px;Margin-top: 6px;Margin-bottom: 0px;color: #7b663d;font-famil=
+y: Roboto,Tahoma,sans-serif;" align=3D"center">
+<div emb-flexible-footer-logo=3D"" align=3D"center"></div>
+</div>
+</div>
+<!--[if mso]></td><![endif]--><!--[if mso]><td valign=3D"top"><![endif]-->
+<div class=3D"column" style=3D"text-align: left;font-size: 12px;line-height=
+: 19px;color: #030303;font-family: sans-serif;display: none;">
+<div style=3D"margin-left: 0;margin-right: 0;Margin-top: 10px;Margin-bottom=
+: 10px;">
+<div class=3D"footer__share-button"></div>
+</div>
+</div>
+<!--[if mso]></td><![endif]--><!--[if mso]><td valign=3D"top"><![endif]-->
+<table style=3D"border-collapse: collapse;table-layout: fixed;display: inli=
+ne-block;width: 600px;" cellpadding=3D"0" cellspacing=3D"0">
+<tbody>
+<tr>
+<td>
+<div class=3D"column js-footer-additional-info" style=3D"text-align: left;f=
+ont-size: 12px;line-height: 19px;color: #030303;font-family: sans-serif;wid=
+th: 600px;">
+<div style=3D"margin-left: 0;margin-right: 0;Margin-top: 10px;Margin-bottom=
+: 10px;">
+<div class=3D"email-footer__additional-info" style=3D"font-size: 12px;line-=
+height: 19px;margin-bottom: 18px;margin-top: 0px;">
+<div bind-to=3D"address">
+<p class=3D"email-flexible-footer__additionalinfo--center" style=3D"Margin-=
+top: 0;Margin-bottom: 0;text-align: left;">
+MSC&nbsp;Mediterranean Shipping Company</p>
+<p class=3D"email-flexible-footer__additionalinfo--center" style=3D"Margin-=
+top: 0;Margin-bottom: 0;">
+Lvl 4, 70 - 72 Gloucester Street, Christchurch 8013&nbsp;New Zealand</p>
+<p class=3D"email-flexible-footer__additionalinfo--center" style=3D"Margin-=
+top: 0;Margin-bottom: 0;text-align: left;">
+<strong>T</strong>: +643 977 6999&nbsp; <strong>W</strong>:&nbsp;<a style=
+=3D"text-decoration: underline;transition: opacity 0.1s ease-in;color: #030=
+303;" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A__eur01.=
+safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscnewzealand=
+.cmail19.com-252Ft-252Fd-2Dl-2Dsqlhkd-2Ddtilqdddi-2Dh-252F-26data-3D05-257C=
+02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce90f8-257C=
+088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130406147-257CUnk=
+nown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW=
+4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26sdata-3Do=
+0e41HHtiAh9OAt5m53JSHLIMQQoJRebZhQgGew9iIA-253D-26reserved-3D0&amp;d=3DDwMF=
+-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3DOYQaI65GgnsX=
+qG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cB=
+ZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3Dr_g7UegzHjhsR_lSVdyXAUqt1ksc6cjr23aXv=
+2UuAAk&amp;e=3D" originalsrc=3D"https://mscnewzealand.cmail19.com/t/d-l-sql=
+hkd-dtilqdddi-h/" shash=3D"nwzVppxAHTthPqn42r64JBpbYu9BYDFzDIVCY3ZOI1wcTJQm=
+LevCtuHS6hcV62cQu80xsxWUT/PEqnxf68E7ornBVyXTLPPhvMuyvKspeBoJHywsubMFUNUEaMI=
+j8p+QfbpkuTyBHmoDpLSRUnOtKCtjrTqZniBOMU3aPG6wJfA=3D">www.msc.com</a></p>
+</div>
+</div>
+<div class=3D"email-footer__additional-info" style=3D"font-size: 12px;line-=
+height: 19px;margin-bottom: 15px;Margin-top: 18px;">
+<div bind-to=3D"permission">
+<p class=3D"email-flexible-footer__additionalinfo--center" style=3D"Margin-=
+top: 0;Margin-bottom: 0;text-align: left;">
+In order to comply with the General Data Protection Regulation, you may exe=
+rcise your rights of access, rectification, cancellation, limitation, oppos=
+ition and portability free of charge by sending an e-mail to:&nbsp;<br>
+<a style=3D"text-decoration: underline;transition: opacity 0.1s ease-in;col=
+or: #030303;" href=3D"mailto:ch001-data.protection@msc.com">data.protection=
+@msc.com</a>, please visit&nbsp;<a style=3D"text-decoration: underline;tran=
+sition: opacity 0.1s ease-in;color: #030303;" href=3D"https://urldefense.pr=
+oofpoint.com/v2/url?u=3Dhttps-3A__eur01.safelinks.protection.outlook.com_-3=
+Furl-3Dhttps-253A-252F-252Fmscnewzealand.cmail19.com-252Ft-252Fd-2Dl-2Dsqlh=
+kd-2Ddtilqdddi-2Dk-252F-26data-3D05-257C02-257Cdaniel.fielder-2540msc.com-2=
+57Ca372323e3e76423349fe08dd11ce90f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-25=
+7C0-257C0-257C638686301130417132-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcG=
+kiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-25=
+3D-253D-257C0-257C-257C-257C-26sdata-3DgnAe1kk9ZhG-252Bkx5wFIIMSiimTV83cBrX=
+J4PvASGwFhc-253D-26reserved-3D0&amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7=
+jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3DOYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM=
+&amp;m=3DFRDavqyGk4QWwhtP-zQt1_9KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&a=
+mp;s=3Dv0___J1oX7xj6UBv9bgMzUIY1rW9Ks0oX_LjrHC1nQk&amp;e=3D" originalsrc=3D=
+"https://mscnewzealand.cmail19.com/t/d-l-sqlhkd-dtilqdddi-k/" shash=3D"Xz2o=
+xlJNtaBTdCHWPaU8129Ls3lqQYtlrnNYIVa/xAqyoJJxSSLewyaL+IRPgK5o/62VxX536jx1lvA=
+05H8qBwEMM+HwavETjHGi2yH8Xtxty110R+JK11NtXzpQZuNkFIuc1JUZRA++m6pHkjt+dBq8qX=
+8l4Jknox+mMfjADgY=3D">Privacy
+ Policy | MSC</a>&nbsp;for more information.</p>
+<p class=3D"email-flexible-footer__additionalinfo--center" style=3D"Margin-=
+top: 0;Margin-bottom: 0;text-align: left;">
+=A9 Copyright 2024 =96 All Rights Reserved</p>
+</div>
+</div>
+<div class=3D"email-footer__additional-info" style=3D"font-size: 12px;line-=
+height: 19px;margin-bottom: 15px;">
+<a style=3D"text-decoration: underline;transition: opacity 0.1s ease-in;col=
+or: #030303;" href=3D"https://urldefense.proofpoint.com/v2/url?u=3Dhttps-3A=
+__eur01.safelinks.protection.outlook.com_-3Furl-3Dhttps-253A-252F-252Fmscne=
+wzealand.cmail19.com-252Ft-252Fd-2Du-2Dsqlhkd-2Ddtilqdddi-2Do-252F-26data-3=
+D05-257C02-257Cdaniel.fielder-2540msc.com-257Ca372323e3e76423349fe08dd11ce9=
+0f8-257C088e9b00ffd0458ebfa1acf4c596d3cb-257C0-257C0-257C638686301130427945=
+-257CUnknown-257CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIl=
+AiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ-253D-253D-257C0-257C-257C-257C-26s=
+data-3D-252FIEv5hvVlIdIS4twLwxM6HMcWooIutV8V0vqann0ZJM-253D-26reserved-3D0&=
+amp;d=3DDwMF-g&amp;c=3DeuGZstcaTDllvimEN8b7jXrwqOf-v5A_CdpgnVfiiMM&amp;r=3D=
+OYQaI65GgnsXqG8er1zeC14CBa6rYVZnQeTX4cgtgnM&amp;m=3DFRDavqyGk4QWwhtP-zQt1_9=
+KXUq4DTBL0cBZPZZpPvsTrFIYT7L3aAU9Z2p8oqUR&amp;s=3DIoE7FWnU3qZ2NLC9uQGvsn8M0=
+Yo86fYPC8No6Ukhlok&amp;e=3D" originalsrc=3D"https://mscnewzealand.cmail19.c=
+om/t/d-u-sqlhkd-dtilqdddi-o/" shash=3D"zg/PLObv0CkpCuF9aEimhHTckBW+XAI8iya/=
+IY0j7lRClEDXgRdqK4k+9jyPNwyh3QECTkyn1rkNQKS4VE2aRjFXkXH3/+GYRf1o7pIQiXfIu7h=
+bh+KVtqQQR34+3YyHD0DxY84XmksH93ZUMMP0zzUdngMBqgXhMuZM5Shm210=3D" lang=3D"en=
+">Unsubscribe</a>
+</div>
+<!--[if mso]>&nbsp;<![endif]--></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!--[if mso]></table></td><![endif]--><!--[if mso]></td></tr></table><![end=
+if]--></div>
+</div>
+<div style=3D"line-height:100px;font-size:100px;" id=3D"footer-bottom-spaci=
+ng">&nbsp;</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<style type=3D"text/css">
+@media (max-width:619px){.email-flexible-footer .left-aligned-footer .colum=
+n,.email-flexible-footer .center-aligned-footer,.email-flexible-footer .rig=
+ht-aligned-footer .column{max-width:100% !important;text-align:center !impo=
+rtant;width:100% !important}.flexible-footer-logo{margin-left:0px !importan=
+t;margin-right:0px !important}.email-flexible-footer .left-aligned-footer .=
+flexible-footer__share-button__container,.email-flexible-footer .center-ali=
+gned-footer .flexible-footer__share-button__container,.email-flexible-foote=
+r .right-aligned-footer .flexible-footer__share-button__container{display:i=
+nline-block;margin-left:5px !important;margin-right:5px !important}.email-f=
+lexible-footer__additionalinfo--center{text-align:center !important}.email-=
+flexible-footer .left-aligned-footer table,.email-flexible-footer .center-a=
+ligned-footer table,.email-flexible-footer .right-aligned-footer=20
+table{display:table !important;width:100% !important}.email-flexible-footer=
+ .footer__share-button,.email-flexible-footer .email-footer__additional-inf=
+o{margin-left:20px;margin-right:20px}}
+</style><img style=3D"visibility: hidden !important; display: block !import=
+ant; height:1px !important; width:1px !important; border: 0 !important; mar=
+gin: 0 !important; padding: 0 !important" src=3D"https://mscnewzealand.cmai=
+l19.com/t/d-o-sqlhkd-dtilqdddi/o.gif" width=3D"1" height=3D"1" border=3D"0"=
+ alt=3D"">
+</div>
+</body>
+</html>
+
+--_000_cm1708197292217sqlhkddtilqdddidcmail19com_--

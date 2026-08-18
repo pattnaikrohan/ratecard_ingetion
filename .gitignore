@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+.venv/
+*.egg
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Data & DB (large files)
+data/
+*.db
+
+# Large Excel files in root
+Freightify_Upload_job_*.xlsm
+
+# Test directories
+Test_PDFs_and_Images/
+Test_Rate_Cards/
+
+# Compressed archives
+*.zip
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
