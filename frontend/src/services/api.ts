@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.PROD
+  ? 'https://ratebridge-b6ephcg7anbfajdp.australiaeast-01.azurewebsites.net/api'
+  : '/api';
 
 export const api = {
   uploadFile: async (file: File, exportPolicy: string = 'PARTIAL') => {
