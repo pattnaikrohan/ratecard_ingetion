@@ -525,6 +525,14 @@ class GenericExcelPlugin(BaseParser):
                     continue
 
                 # ── FCL Format: multiple container columns ──
+                # Filter out obvious add-on tables before splitting by "/"
+                _o_chk = origin_val.strip().lower()
+                if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class|haz\s*surcharge|haz\s*add|psa\s*add|via\s+sin\s+shipment)', _o_chk):
+                    continue
+                _d_chk = dest_val.strip().lower()
+                if _d_chk.startswith("usd ") or "do not accept" in _d_chk:
+                    continue
+
                 # Handle destinations with "/" separator
                 dest_list = [d.strip() for d in dest_val.split("/") if d.strip()] if dest_val else [""]
                 if not dest_list:

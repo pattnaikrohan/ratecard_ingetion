@@ -72,6 +72,14 @@ class RateValidationEngine:
         if len(dest) > 100 and not self._looks_like_port(dest):
             return True
 
+        # 5. Surcharge / Add-on table rows (e.g. "CLASS 1", "PSA Group 1", "DG Class")
+        if re.match(r'^(class\s*[\d\.]|psa\s*group|dg\s*class)', origin_clean):
+            return True
+            
+        # 6. Misaligned columns from secondary tables (e.g. price in destination column)
+        if dest_clean.startswith("usd ") or "do not accept" in dest_clean:
+            return True
+
         return False
 
     def _looks_like_port(self, text: str) -> bool:
