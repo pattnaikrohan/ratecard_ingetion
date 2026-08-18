@@ -7,3 +7,7 @@ python-multipart
 python-dotenv
 gunicorn
 azure-storage-blob
+pandas
+openai
+cloudscraper
+beautifulsoup4
