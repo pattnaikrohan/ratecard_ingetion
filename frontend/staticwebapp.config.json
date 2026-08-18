@@ -1,7 +1,19 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/favicon.svg", "/icons.svg"]
+    "exclude": ["/assets/*.js", "/assets/*.css", "/assets/*.png", "/assets/*.jpg", "/assets/*.svg", "/favicon.svg", "/icons.svg"]
+  },
+  "mimeTypes": {
+    ".js": "application/javascript",
+    ".mjs": "application/javascript",
+    ".css": "text/css",
+    ".svg": "image/svg+xml",
+    ".json": "application/json",
+    ".woff": "font/woff",
+    ".woff2": "font/woff2",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".ico": "image/x-icon"
   },
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
