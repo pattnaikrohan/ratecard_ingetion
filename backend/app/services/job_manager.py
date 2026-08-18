@@ -71,41 +71,43 @@ class JobManager:
             # ── Route to appropriate parser ──
             if fn.endswith(".eml") or fn.endswith(".msg"):
                 self.db.update_job_status(job_id, "PARSING", progress=20, log_msg="Parsing email: extracting all attachments...")
-                sheet = eml_parser.parse(file_path, job_id)
+                sheet = await asyncio.to_thread(eml_parser.parse, file_path, job_id)
 
             elif azure_parser.can_parse(file_path, original_filename):
                 self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Invoking Microsoft Azure Document Intelligence layout OCR model...")
-                sheet = azure_parser.parse(file_path, job_id)
+                sheet = await asyncio.to_thread(azure_parser.parse, file_path, job_id)
 
             elif fn.endswith(".xlsx") or fn.endswith(".xls") or fn.endswith(".xlsm"):
                 if fn.endswith(".xls"):
                     self.db.update_job_status(job_id, "PARSING", progress=22, log_msg="Converting legacy .xls format to .xlsx...")
                     try:
-                        dfs = pd.read_excel(file_path, sheet_name=None, engine='xlrd')
-                        new_path = file_path.with_suffix(".xlsx")
-                        with pd.ExcelWriter(new_path, engine='openpyxl') as writer:
-                            for sheet_name, df in dfs.items():
-                                df.to_excel(writer, sheet_name=sheet_name, index=False)
-                        file_path = new_path
+                        def convert_xls():
+                            dfs = pd.read_excel(file_path, sheet_name=None, engine='xlrd')
+                            new_path = file_path.with_suffix(".xlsx")
+                            with pd.ExcelWriter(new_path, engine='openpyxl') as writer:
+                                for sheet_name, df in dfs.items():
+                                    df.to_excel(writer, sheet_name=sheet_name, index=False)
+                            return new_path
+                        file_path = await asyncio.to_thread(convert_xls)
                         original_filename = original_filename + "x"
                     except Exception as e:
                         self.db.update_job_status(job_id, "PARSING", progress=22, log_msg=f"Warning: Failed to convert .xls: {e}")
 
                 if maersk_plugin.can_parse(file_path, original_filename):
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Detected Maersk rate card format, using BAS+Surcharges parser...")
-                    sheet = maersk_plugin.parse(file_path, job_id)
+                    sheet = await asyncio.to_thread(maersk_plugin.parse, file_path, job_id)
                 elif one_plugin.can_parse(file_path, original_filename):
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Detected ONE rate card format...")
-                    sheet = one_plugin.parse(file_path, job_id)
+                    sheet = await asyncio.to_thread(one_plugin.parse, file_path, job_id)
                 else:
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Using intelligent generic Excel parser with auto-header detection...")
-                    sheet = generic_excel_plugin.parse(file_path, job_id)
+                    sheet = await asyncio.to_thread(generic_excel_plugin.parse, file_path, job_id)
 
             else:
                 # Unknown format — try generic Excel as last resort
                 self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Unknown file format, attempting generic parse...")
                 try:
-                    sheet = self.generic_excel_plugin.parse(file_path, job_id)
+                    sheet = await asyncio.to_thread(self.generic_excel_plugin.parse, file_path, job_id)
                 except Exception:
                     sheet = CanonicalRateSheet(
                         job_id=job_id,
@@ -156,7 +158,7 @@ class JobManager:
             if warn_cnt > 0 or err_cnt > 0 or crit_cnt > 0:
                 self.db.update_job_status(job_id, "VALIDATING", progress=70, log_msg="Running AI-powered validation reasoning (GPT-4o)...")
                 ai_mapper = AIColumnMapper.get_instance()
-                sheet.rates = ai_mapper.validate_with_reasoning(sheet.rates, sheet.carrier_code)
+                sheet.rates = await asyncio.to_thread(ai_mapper.validate_with_reasoning, sheet.rates, sheet.carrier_code)
 
             proc_time_ms = round((time.time() - start_time) * 1000, 2)
             sheet.summary = JobSummary(
