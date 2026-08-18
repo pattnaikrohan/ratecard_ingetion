@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowRight, X, Minus, Maximize2, Sparkles, CheckCircle2, ShieldCheck, Cpu, Database, FileSpreadsheet, AlertCircle, Ship, Anchor, Compass } from 'lucide-react';
+import { ArrowRight, X, Minus, Maximize2, CheckCircle2, ShieldCheck, FileSpreadsheet, AlertCircle, Ship, Anchor, Compass } from 'lucide-react';
 import { api } from '../services/api';
 
 interface BatchProcessingDockProps {
@@ -89,7 +89,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
   const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
-    const rootEl = document.getElementById('root');
+
     if (isOpen && !isMinimized) {
       document.body.style.overflow = 'hidden';
     } else {

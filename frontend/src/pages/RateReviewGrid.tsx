@@ -16,7 +16,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   const [isApproving, setIsApproving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [hasLoaded, setHasLoaded] = useState(false);
+
 
   useEffect(() => {
     if (!jobId) {
