@@ -126,6 +126,9 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     );
   }
 
+  const isWorkerProcessing = (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) || (isLoading && !jobData);
+  const isFailed = jobData?.status === 'FAILED';
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 150;
 
