@@ -31,6 +31,7 @@ class JobManager:
         self.azure_parser = AzureDocumentIntelligenceParser()
         self.validator = RateValidationEngine()
         self.exporter = FreightifyExporter()
+        self._export_tasks = {}  # job_id -> asyncio.Task for debouncing concurrent exports
 
     @classmethod
     def get_instance(cls) -> "JobManager":
@@ -239,6 +240,9 @@ class JobManager:
 
         await asyncio.to_thread(self.exporter.export, sheet, output_filename, export_policy)
 
+        # Upload to Azure Blob for fast download
+        StorageService.upload_output_to_blob(output_filename)
+
         self.db.update_job_status(
             job_id, 
             "COMPLETED", 
@@ -279,3 +283,18 @@ class JobManager:
             import traceback
             traceback.print_exc()
             return ""
+
+    def schedule_pre_export(self, job_id: str, export_policy: str = "PARTIAL"):
+        """Schedule a pre-export task, cancelling any pending one for the same job."""
+        try:
+            if job_id in self._export_tasks:
+                existing = self._export_tasks[job_id]
+                if not existing.done():
+                    existing.cancel()
+                    print(f"[Pipeline] Cancelled stale export task for {job_id}")
+
+            loop = asyncio.get_running_loop()
+            task = loop.create_task(self.pre_generate_export(job_id, export_policy))
+            self._export_tasks[job_id] = task
+        except RuntimeError:
+            pass

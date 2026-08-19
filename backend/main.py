@@ -19,7 +19,7 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
             elif "/api/ai/learned-synonyms" in path:
                 response.headers["Cache-Control"] = "public, max-age=120"
             elif path in ("/api/jobs", "/api/jobs/"):
-                response.headers["Cache-Control"] = "public, max-age=5"
+                response.headers["Cache-Control"] = "public, max-age=1"
         return response
 
 app = FastAPI(

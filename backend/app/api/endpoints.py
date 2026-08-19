@@ -110,30 +110,14 @@ async def revalidate_job(job_id: str, updated_rates: List[RateRow]):
     next_status = "NEEDS_REVIEW" if (err_cnt > 0 or crit_cnt > 0) else "APPROVED"
     db.update_job_status(job_id, next_status, progress=85, log_msg="Re-validated rate rows & saved corrections to Master Data Memory", canonical_sheet=sheet)
     
-    # Regenerate export with corrected data in background
-    try:
-        loop = asyncio.get_running_loop()
-        loop.create_task(job_manager.pre_generate_export(job_id))
-    except RuntimeError:
-        pass
+    # Regenerate export with corrected data (cancels any pending export for this job)
+    job_manager.schedule_pre_export(job_id)
     
     return {"job_id": job_id, "status": next_status, "summary": sheet.summary}
 
 @router.post("/jobs/{job_id}/approve")
 async def approve_job(job_id: str, export_policy: str = "PARTIAL"):
-    job = db.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    # If export was pre-generated, just finalize status — instant approval
-    if job.get("output_file_name"):
-        out_file = StorageService.get_output_path(job["output_file_name"])
-        if out_file.exists():
-            db.update_job_status(job_id, "COMPLETED", progress=100,
-                log_msg="Approved — using pre-generated export file.")
-            return {"job_id": job_id, "status": "COMPLETED", "output_file_name": job["output_file_name"]}
-    
-    # Fallback: generate fresh if not pre-generated
+    # Always regenerate to guarantee export reflects the latest canonical data
     output_filename = await job_manager.generate_export(job_id, export_policy)
     return {"job_id": job_id, "status": "COMPLETED", "output_file_name": output_filename}
 
