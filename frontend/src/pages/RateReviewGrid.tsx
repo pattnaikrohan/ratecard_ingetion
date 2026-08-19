@@ -106,8 +106,16 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
       // Save & re-validate any user-typed modifications first
       await api.revalidateJob(jobId, rates);
       await api.approveJob(jobId, 'PARTIAL');
+
+      // Trigger download via hidden anchor (avoids popup blocker)
       const downloadUrl = api.getDownloadUrl(jobId);
-      window.open(downloadUrl, '_blank');
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `Freightify_Upload_${jobId}.xlsm`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       const data = await api.getJob(jobId);
       setJobData(data);
       if (data.canonical && data.canonical.rates) {
