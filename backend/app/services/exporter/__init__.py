@@ -22,6 +22,9 @@ class FreightifyExporter:
             for s in list(wb.sheetnames):
                 if s != "Template":
                     del wb[s]
+            ws = wb["Template"]
+            # Prune all sample data rows (keep only Row 1 header)
+            ws._cells = {(1, c): cell for (r, c), cell in ws._cells.items() if r == 1}
             wb.save(self.clean_template_path)
             print(f"[Exporter] Clean template created successfully ({self.clean_template_path.stat().st_size / 1024:.1f} KB)")
             return self.clean_template_path
@@ -36,6 +39,9 @@ class FreightifyExporter:
         template_file = self._ensure_clean_template()
         wb = openpyxl.load_workbook(template_file, keep_vba=True)
         ws = wb["Template"]
+
+        # Ensure worksheet only contains row 1 headers (no ghost rows)
+        ws._cells = {(1, c): cell for (r, c), cell in ws._cells.items() if r == 1}
 
         # Filter rows based on export policy
         rows_to_export: List[RateRow] = []
@@ -61,25 +67,50 @@ class FreightifyExporter:
             ws.cell(row=idx, column=13, value=rate.subject_to or "")
             ws.cell(row=idx, column=14, value=rate.remarks or "")
             ws.cell(row=idx, column=16, value=rate.load_type)
-            ws.cell(row=idx, column=17, value=rate.validity_start)
-            ws.cell(row=idx, column=18, value=rate.validity_end)
-            ws.cell(row=idx, column=21, value=rate.contract_number or sheet.contract_number)
+            ws.cell(row=idx, column=17, value=rate.validity_start or sheet.validity_start or "")
+            ws.cell(row=idx, column=18, value=rate.validity_end or sheet.validity_end or "")
+            ws.cell(row=idx, column=21, value=rate.contract_number or sheet.contract_number or "")
             
             # Base Ocean Freight (OFR)
             ws.cell(row=idx, column=22, value=rate.ofr_amount)
             ws.cell(row=idx, column=23, value="per equipment")
             ws.cell(row=idx, column=24, value=rate.ofr_currency or "USD")
 
-            # Additional surcharges mapping
+            # Standard Freightify Surcharge Column Mapping
             for chg in rate.charges:
-                if chg.charge_code in ["DOC", "DOC (Destination)"]:
+                code = (chg.charge_code or "").upper().strip()
+                if code in ["CGS (DESTINATION)", "CGS_DEST", "CGS"]:
+                    ws.cell(row=idx, column=27, value=chg.amount)
+                    ws.cell(row=idx, column=28, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=29, value=chg.currency or rate.ofr_currency or "USD")
+                elif code in ["CGS (ORIGIN)", "CGS_ORIG"]:
+                    ws.cell(row=idx, column=32, value=chg.amount)
+                    ws.cell(row=idx, column=33, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=34, value=chg.currency or rate.ofr_currency or "USD")
+                elif code in ["DOC", "DOC (DESTINATION)", "DOC_DEST"]:
                     ws.cell(row=idx, column=37, value=chg.amount)
-                    ws.cell(row=idx, column=38, value=chg.basis)
-                    ws.cell(row=idx, column=39, value=chg.currency)
-                elif chg.charge_code in ["THC", "THC (Destination)", "DTHC"]:
+                    ws.cell(row=idx, column=38, value=chg.basis or "per B/L")
+                    ws.cell(row=idx, column=39, value=chg.currency or "AUD")
+                elif code in ["THC", "THC (DESTINATION)", "DTHC", "THC_DEST"]:
                     ws.cell(row=idx, column=42, value=chg.amount)
-                    ws.cell(row=idx, column=43, value=chg.basis)
-                    ws.cell(row=idx, column=44, value=chg.currency)
+                    ws.cell(row=idx, column=43, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=44, value=chg.currency or "AUD")
+                elif code in ["EXP", "EXP (ORIGIN)", "EXP_ORIG"]:
+                    ws.cell(row=idx, column=47, value=chg.amount)
+                    ws.cell(row=idx, column=48, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=49, value=chg.currency or "CNY")
+                elif code in ["DOC (ORIGIN)", "DOC_ORIG"]:
+                    ws.cell(row=idx, column=52, value=chg.amount)
+                    ws.cell(row=idx, column=53, value=chg.basis or "per B/L")
+                    ws.cell(row=idx, column=54, value=chg.currency or "CNY")
+                elif code in ["THC (ORIGIN)", "OTHC", "THC_ORIG"]:
+                    ws.cell(row=idx, column=57, value=chg.amount)
+                    ws.cell(row=idx, column=58, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=59, value=chg.currency or "CNY")
+                elif code in ["VP1", "VP1 (FREIGHT)", "VP1_FRT"]:
+                    ws.cell(row=idx, column=62, value=chg.amount)
+                    ws.cell(row=idx, column=63, value=chg.basis or "per equipment")
+                    ws.cell(row=idx, column=64, value=chg.currency or "USD")
 
         output_path = PROCESSED_DIR / output_filename
         wb.save(output_path)
