@@ -110,9 +110,6 @@ async def revalidate_job(job_id: str, updated_rates: List[RateRow]):
     next_status = "NEEDS_REVIEW" if (err_cnt > 0 or crit_cnt > 0) else "APPROVED"
     db.update_job_status(job_id, next_status, progress=85, log_msg="Re-validated rate rows & saved corrections to Master Data Memory", canonical_sheet=sheet)
     
-    # Regenerate export with corrected data (cancels any pending export for this job)
-    job_manager.schedule_pre_export(job_id)
-    
     return {"job_id": job_id, "status": next_status, "summary": sheet.summary}
 
 @router.post("/jobs/{job_id}/approve")
