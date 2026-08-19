@@ -1,4 +1,5 @@
 import openpyxl
+import re
 from pathlib import Path
 from typing import List
 from app.services.parsers.base_parser import BaseParser
@@ -23,12 +24,20 @@ class ONEPlugin(BaseParser):
                 continue
 
             # Read top rows for metadata
-            for top_r in range(1, 5):
-                row_str = " ".join(str(ws.cell(top_r, c).value or "") for c in range(1, 10))
+            for top_r in range(1, 6):
+                row_str = " ".join(str(ws.cell(top_r, c).value or "") for c in range(1, 15))
                 if "MRG" in row_str or "Contract" in row_str:
                     m = re.search(r'([A-Za-z0-9\-_]{4,})', row_str)
                     if m and not contract_number:
                         contract_number = m.group(1)
+                
+                # Check for Validity or Effective/Expiry
+                if re.search(r'(valid|effect|expir)', row_str, re.IGNORECASE):
+                    dates = re.findall(r'(\d{2,4}[-/]\d{1,2}[-/]\d{1,4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})', row_str)
+                    if len(dates) >= 1 and not validity_start:
+                        validity_start = dates[0]
+                    if len(dates) >= 2 and not validity_end:
+                        validity_end = dates[1]
 
             # Read headers from row 3
             headers = [str(ws.cell(3, c).value or "").strip() for c in range(1, ws.max_column + 1)]
