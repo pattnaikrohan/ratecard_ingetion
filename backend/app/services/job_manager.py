@@ -212,9 +212,13 @@ class JobManager:
                     canonical_sheet=sheet
                 )
 
-                # If approved, trigger export
+                # Pre-generate export for instant download (both APPROVED and NEEDS_REVIEW)
+                await self.pre_generate_export(job_id, export_policy)
+
+                # If auto-approved, finalize to COMPLETED
                 if next_status == "APPROVED":
-                    await self.generate_export(job_id, export_policy)
+                    self.db.update_job_status(job_id, "COMPLETED", progress=100,
+                        log_msg="Auto-approved — Freightify workbook ready for download.")
 
         except Exception as e:
             print(f"Error processing job {job_id}: {e}")
@@ -243,3 +247,35 @@ class JobManager:
             output_file=output_filename
         )
         return output_filename
+
+    async def pre_generate_export(self, job_id: str, export_policy: str = "PARTIAL") -> str:
+        """Generate export file without changing job status. Enables instant download."""
+        try:
+            job = self.db.get_job(job_id)
+            if not job or not job.get("canonical"):
+                return ""
+
+            canonical_data = job["canonical"]
+            sheet = CanonicalRateSheet(**canonical_data)
+            output_filename = f"Freightify_Upload_{job_id}.xlsm"
+
+            await asyncio.to_thread(self.exporter.export, sheet, output_filename, export_policy)
+
+            # Upload to Azure Blob for fast download
+            StorageService.upload_output_to_blob(output_filename)
+
+            # Save output filename without changing job status
+            current_status = job["status"]
+            self.db.update_job_status(
+                job_id,
+                current_status,
+                log_msg=f"Pre-generated export: {output_filename}",
+                output_file=output_filename
+            )
+            print(f"[Pipeline] Pre-generated export for {job_id}: {output_filename}")
+            return output_filename
+        except Exception as e:
+            print(f"[Pipeline] Failed to pre-generate export for {job_id}: {e}")
+            import traceback
+            traceback.print_exc()
+            return ""

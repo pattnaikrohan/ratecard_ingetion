@@ -76,3 +76,18 @@ class StorageService:
                 except Exception as e:
                     print(f"Failed to download {output_filename} from Blob Storage: {e}")
         return target
+
+    @staticmethod
+    def upload_output_to_blob(output_filename: str):
+        """Upload an already-saved processed file to Azure Blob Storage."""
+        target = PROCESSED_DIR / output_filename
+        if not target.exists():
+            return
+        blob_client = StorageService._get_blob_client(f"processed/{output_filename}")
+        if blob_client:
+            try:
+                with open(target, "rb") as data:
+                    blob_client.upload_blob(data, overwrite=True)
+                print(f"[Storage] Uploaded {output_filename} to Azure Blob (processed/)")
+            except Exception as e:
+                print(f"[Storage] Failed to upload {output_filename} to Blob: {e}")

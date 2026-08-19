@@ -1,7 +1,26 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 from app.api.endpoints import router as api_router
+
+
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    """Sets Cache-Control headers on GET responses for faster client performance."""
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if request.method == "GET":
+            path = request.url.path
+            if "/api/master-data" in path:
+                response.headers["Cache-Control"] = "public, max-age=300"
+            elif "/api/metrics" in path:
+                response.headers["Cache-Control"] = "public, max-age=30"
+            elif "/api/ai/learned-synonyms" in path:
+                response.headers["Cache-Control"] = "public, max-age=120"
+            elif path in ("/api/jobs", "/api/jobs/"):
+                response.headers["Cache-Control"] = "public, max-age=5"
+        return response
 
 app = FastAPI(
     title="Carrier Rate Card Extraction & Freightify Ingestion Agent API",
@@ -16,6 +35,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(CacheControlMiddleware)
 
 app.include_router(api_router)
 
