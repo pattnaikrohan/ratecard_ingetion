@@ -1,5 +1,6 @@
 import os
 import openpyxl
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from pathlib import Path
 from typing import List
 from app.core.config import TEMPLATE_XLSM, PROCESSED_DIR
@@ -35,13 +36,17 @@ class FreightifyExporter:
     def export(self, sheet: CanonicalRateSheet, output_filename: str, export_policy: str = "PARTIAL") -> Path:
         print(f"Exporting Canonical Rate Sheet ({len(sheet.rates)} rows) to Freightify Workbook {output_filename}...")
         
-        # Load lightweight clean template (0.6s load time vs 16.5s original)
+        # Load lightweight clean template
         template_file = self._ensure_clean_template()
         wb = openpyxl.load_workbook(template_file, keep_vba=True)
         ws = wb["Template"]
 
         # Ensure worksheet only contains row 1 headers (no ghost rows)
         ws._cells = {(1, c): cell for (r, c), cell in ws._cells.items() if r == 1}
+
+        # Styling definitions for visual highlighting in exported Excel
+        warning_fill = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid") # Soft gold/yellow
+        error_fill = PatternFill(start_color="FCE4D6", end_color="FCE4D6", fill_type="solid") # Soft rose/red
 
         # Filter rows based on export policy
         rows_to_export: List[RateRow] = []
@@ -56,25 +61,44 @@ class FreightifyExporter:
                 rows_to_export.append(r)
 
         for idx, rate in enumerate(rows_to_export, start=2):
-            ws.cell(row=idx, column=1, value=rate.carrier_scac)
-            ws.cell(row=idx, column=2, value=rate.origin_locode)
+            c_scac = ws.cell(row=idx, column=1, value=rate.carrier_scac)
+            c_orig = ws.cell(row=idx, column=2, value=rate.origin_locode)
             ws.cell(row=idx, column=3, value=rate.origin_locode)
-            ws.cell(row=idx, column=5, value=rate.destination_locode)
+            c_dest = ws.cell(row=idx, column=5, value=rate.destination_locode)
             ws.cell(row=idx, column=7, value=rate.service_type or "")
             ws.cell(row=idx, column=8, value=rate.cargo_type or "FAK")
             ws.cell(row=idx, column=10, value=rate.commodity or "")
             ws.cell(row=idx, column=12, value=rate.inclusions or "")
             ws.cell(row=idx, column=13, value=rate.subject_to or "")
-            ws.cell(row=idx, column=14, value=rate.remarks or "")
-            ws.cell(row=idx, column=16, value=rate.load_type)
-            ws.cell(row=idx, column=17, value=rate.validity_start or sheet.validity_start or "")
-            ws.cell(row=idx, column=18, value=rate.validity_end or sheet.validity_end or "")
+            
+            # Remarks column notes validation status and reasons
+            remarks_text = rate.remarks or ""
+            if rate.validation_status == "WARNING" and rate.validation_messages:
+                warning_notes = "; ".join(rate.validation_messages)
+                remarks_text = f"[WARNING: {warning_notes}] {remarks_text}".strip()
+            elif rate.validation_status == "ERROR" and rate.validation_messages:
+                error_notes = "; ".join(rate.validation_messages)
+                remarks_text = f"[ERROR: {error_notes}] {remarks_text}".strip()
+            ws.cell(row=idx, column=14, value=remarks_text)
+
+            c_load = ws.cell(row=idx, column=16, value=rate.load_type)
+            c_vstart = ws.cell(row=idx, column=17, value=rate.validity_start or sheet.validity_start or "")
+            c_vend = ws.cell(row=idx, column=18, value=rate.validity_end or sheet.validity_end or "")
             ws.cell(row=idx, column=21, value=rate.contract_number or sheet.contract_number or "")
             
             # Base Ocean Freight (OFR)
-            ws.cell(row=idx, column=22, value=rate.ofr_amount)
+            c_ofr = ws.cell(row=idx, column=22, value=rate.ofr_amount)
             ws.cell(row=idx, column=23, value="per equipment")
             ws.cell(row=idx, column=24, value=rate.ofr_currency or "USD")
+
+            # Apply soft pastel fills based on validation status
+            key_cells = [c_scac, c_orig, c_dest, c_load, c_vstart, c_vend, c_ofr]
+            if rate.validation_status == "WARNING":
+                for kc in key_cells:
+                    kc.fill = warning_fill
+            elif rate.validation_status == "ERROR":
+                for kc in key_cells:
+                    kc.fill = error_fill
 
             # Standard Freightify Surcharge Column Mapping
             for chg in rate.charges:

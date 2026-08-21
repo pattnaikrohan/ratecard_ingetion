@@ -280,8 +280,8 @@ export const IngestHub: React.FC<IngestHubProps> = ({
               ) : (
                 recentJobs.map((job) => {
                   const can = job.canonical || {};
-                  const carrier = can.carrier_code || job.carrier_code || 'UNKN';
-                  const rowCount = (can.rates || []).length || job.total_rows || 0;
+                  const carrier = job.carrier_code || job.summary?.carriers_found?.[0] || can.carrier_code || 'UNKN';
+                  const rowCount = job.total_rows || job.summary?.total_rows || (can.rates || []).length || 0;
                   const contract = can.contract_number || job.contract_number || '—';
                   const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
 

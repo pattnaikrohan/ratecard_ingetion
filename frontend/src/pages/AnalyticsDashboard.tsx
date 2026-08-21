@@ -69,9 +69,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       const can = job.canonical || {};
       const rates = can.rates || [];
       const summary = can.summary || {};
-      const carrier = can.carrier_code || job.carrier_code || 'UNKN';
+      const carrier = job.carrier_code || summary.carriers_found?.[0] || can.carrier_code || 'UNKN';
 
-      const rowCount = rates.length || summary.total_rows || job.total_rows || 0;
+      const rowCount = job.total_rows || summary.total_rows || rates.length || 0;
       const validCount = summary.valid_rows || (job.status === 'COMPLETED' ? rowCount : 0);
       const warnCount = summary.warning_rows || 0;
       const errCount = summary.error_rows || 0;
@@ -606,8 +606,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               ) : (
                 recentJobs.slice(0, 8).map((job) => {
                   const can = job.canonical || {};
-                  const carrier = can.carrier_code || job.carrier_code || 'UNKN';
-                  const rowCount = (can.rates || []).length || job.total_rows || 0;
+                  const carrier = job.carrier_code || job.summary?.carriers_found?.[0] || can.carrier_code || 'UNKN';
+                  const rowCount = job.total_rows || job.summary?.total_rows || (can.rates || []).length || 0;
                   const contract = can.contract_number || job.contract_number || '—';
                   const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
 

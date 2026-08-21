@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Download, RefreshCw, Search, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Download, 
+  RefreshCw, 
+  Search, 
+  ArrowLeft, 
+  CheckCircle2, 
+  AlertTriangle, 
+  XCircle
+} from 'lucide-react';
 import { api } from '../services/api';
 
 interface RateReviewGridProps {
@@ -11,7 +19,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   const [jobData, setJobData] = useState<any>(null);
   const [rates, setRates] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'VALID' | 'WARNING' | 'ERROR'>('ALL');
   const [isRevalidating, setIsRevalidating] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,6 +130,49 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     }
   };
 
+  const isWorkerProcessing = (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) || (isLoading && !jobData);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 100;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
+  // Counts for filter pills
+  const counts = useMemo(() => {
+    let valid = 0;
+    let warning = 0;
+    let error = 0;
+    rates.forEach((r) => {
+      if (r.validation_status === 'VALID') valid++;
+      else if (r.validation_status === 'WARNING') warning++;
+      else if (r.validation_status === 'ERROR' || r.validation_status === 'CRITICAL') error++;
+    });
+    return { total: rates.length, valid, warning, error };
+  }, [rates]);
+
+  const filteredRates = rates.filter((r) => {
+    const matchesSearch =
+      (r.origin_locode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.origin_raw || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.destination_locode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.destination_raw || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.carrier_scac || '').toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'ALL' ||
+      (statusFilter === 'VALID' && r.validation_status === 'VALID') ||
+      (statusFilter === 'WARNING' && r.validation_status === 'WARNING') ||
+      (statusFilter === 'ERROR' && (r.validation_status === 'ERROR' || r.validation_status === 'CRITICAL'));
+
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredRates.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedRates = filteredRates.slice(startIndex, startIndex + pageSize);
+
   if (!jobId) {
     return (
       <div className="bg-white rounded-3xl p-16 text-center space-y-4 border border-slate-200 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
@@ -137,32 +188,6 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
       </div>
     );
   }
-
-  const isWorkerProcessing = (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) || (isLoading && !jobData);
-
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 150;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
-
-  const filteredRates = rates.filter((r) => {
-    const matchesSearch =
-      (r.origin_locode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (r.destination_locode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (r.carrier_scac || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === 'ALL' || r.validation_status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  // const totalPages = Math.max(1, Math.ceil(filteredRates.length / pageSize));
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedRates = filteredRates.slice(startIndex, startIndex + pageSize);
-
-  const summary = jobData?.summary || {};
 
   return (
     <div className="w-full space-y-8 animate-fade-in text-slate-900 pb-20">
@@ -208,33 +233,50 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
         </div>
       </div>
 
-      {/* ── 4-COLUMN SUMMARY STATS ── */}
+      {/* ── 4-COLUMN SUMMARY STATS WITH EXPLANATION ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
           <p className="text-[11px] text-slate-400 uppercase font-black">Total Extracted Rates</p>
-          <p className="text-2xl font-black text-slate-900 font-mono mt-1">{summary.total_rows || rates.length}</p>
+          <p className="text-2xl font-black text-slate-900 font-mono mt-1">{counts.total}</p>
         </div>
         <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
           <p className="text-[11px] text-emerald-600 uppercase font-black">Valid Rates</p>
-          <p className="text-2xl font-black text-emerald-600 font-mono mt-1">{summary.valid_rows || 0}</p>
+          <p className="text-2xl font-black text-emerald-600 font-mono mt-1">{counts.valid}</p>
         </div>
         <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-amber-600 uppercase font-black">Warnings</p>
-          <p className="text-2xl font-black text-amber-600 font-mono mt-1">{summary.warning_rows || 0}</p>
+          <p className="text-[11px] text-amber-600 uppercase font-black">Warning Rows</p>
+          <p className="text-2xl font-black text-amber-600 font-mono mt-1">{counts.warning}</p>
         </div>
         <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-rose-600 uppercase font-black">Errors / Quarantined</p>
-          <p className="text-2xl font-black text-rose-600 font-mono mt-1">{summary.error_rows || 0}</p>
+          <p className="text-[11px] text-rose-600 uppercase font-black">Errors / Blocked</p>
+          <p className="text-2xl font-black text-rose-600 font-mono mt-1">{counts.error}</p>
         </div>
       </div>
+
+      {/* ── INFORMATIVE VALIDATION NOTICE BANNER ── */}
+      {counts.warning > 0 && (
+        <div className="p-4.5 rounded-3xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-3.5 text-xs text-amber-900">
+          <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+            <AlertTriangle className="w-4 h-4" />
+          </div>
+          <div className="space-y-1">
+            <p className="font-black text-amber-950">
+              {counts.warning} Rows have validation warnings (e.g. Base Ocean Freight Rate is $0.00 / Subject to Surcharges)
+            </p>
+            <p className="text-amber-800/90 leading-relaxed">
+              These rows are highlighted in <strong className="font-bold">amber</strong> below. In the exported Freightify <strong className="font-bold">.xlsm</strong> file, all warning rows are automatically highlighted with soft-yellow fill so your operations team can immediately identify them. You can edit any value inline below before exporting.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── DATA GRID CARD ── */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col relative">
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
 
         {/* Filter Toolbar */}
-        <div className="px-8 py-4.5 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/70">
-          <div className="flex items-center gap-3">
+        <div className="px-8 py-5 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/70">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -246,23 +288,30 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
               />
             </div>
 
-            {/* Status Filter */}
+            {/* Status Filter Segmented Selector */}
             <div className="flex items-center bg-slate-200/70 p-1 rounded-xl text-xs font-black">
-              {['ALL', 'VALID', 'WARNING', 'ERROR'].map((s) => (
+              {[
+                { id: 'ALL', label: `All (${counts.total})` },
+                { id: 'VALID', label: `Valid (${counts.valid})` },
+                { id: 'WARNING', label: `Warnings (${counts.warning})` },
+                { id: 'ERROR', label: `Errors (${counts.error})` },
+              ].map((tab) => (
                 <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
+                  key={tab.id}
+                  onClick={() => setStatusFilter(tab.id as any)}
                   className={`px-3 py-1 rounded-lg transition-all ${
-                    statusFilter === s ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                    statusFilter === tab.id 
+                      ? 'bg-white text-slate-900 shadow-2xs' 
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  {s}
+                  {tab.label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="text-xs text-slate-400 font-mono font-bold">
+          <div className="text-xs text-slate-500 font-mono font-bold">
             Showing {filteredRates.length > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + pageSize, filteredRates.length)} of {filteredRates.length}
           </div>
         </div>
@@ -272,22 +321,22 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
           <table className="custom-table w-full align-middle text-slate-900 text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 uppercase text-[10px] tracking-wider font-extrabold">
-                <th className="pl-8 text-left py-3.5">Status</th>
-                <th className="text-left py-3.5">Carrier</th>
-                <th className="text-left py-3.5">Origin Port</th>
-                <th className="text-left py-3.5">Destination Port</th>
-                <th className="text-center py-3.5">Type</th>
-                <th className="text-right py-3.5">Base Rate</th>
-                <th className="text-center py-3.5">Curr</th>
-                <th className="text-center py-3.5">Validity</th>
-                <th className="pr-8 text-center py-3.5">Surcharges</th>
+                <th className="pl-8 text-left py-4">Validation Status & Diagnostics</th>
+                <th className="text-left py-4">Carrier</th>
+                <th className="text-left py-4">Origin Port</th>
+                <th className="text-left py-4">Destination Port</th>
+                <th className="text-center py-4">Type</th>
+                <th className="text-right py-4">Base Rate (OFR)</th>
+                <th className="text-center py-4">Curr</th>
+                <th className="text-center py-4">Validity Window</th>
+                <th className="pr-8 text-center py-4">Attached Charges</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedRates.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="text-center py-20 text-slate-400 font-medium">
-                    No rate rows found matching filter criteria.
+                    No rate rows found matching current search/filter.
                   </td>
                 </tr>
               ) : (
@@ -295,59 +344,137 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                   const actualIdx = startIndex + idx;
                   const isValid = r.validation_status === 'VALID';
                   const isWarn = r.validation_status === 'WARNING';
+                  const isErr = r.validation_status === 'ERROR' || r.validation_status === 'CRITICAL';
+                  const hasZeroRate = r.base_rate === 0 || r.ofr_amount === 0;
+
+                  // Compute validation messages
+                  const messages: string[] = [];
+                  if (Array.isArray(r.validation_items) && r.validation_items.length > 0) {
+                    r.validation_items.forEach((item: any) => {
+                      if (item.message) messages.push(item.message);
+                      else if (item.reason_code) messages.push(item.reason_code.replace(/_/g, ' '));
+                    });
+                  }
+                  if (Array.isArray(r.validation_messages)) {
+                    r.validation_messages.forEach((m: string) => {
+                      if (!messages.includes(m)) messages.push(m);
+                    });
+                  }
+                  if (messages.length === 0 && isWarn) {
+                    if (hasZeroRate) messages.push("Base Ocean Freight Rate is $0.00 (Subject to Surcharges)");
+                    if (!r.validity_start) messages.push("Missing validity start date");
+                  }
 
                   return (
-                    <tr key={actualIdx} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="pl-8 py-3">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
-                          isValid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                          isWarn ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-rose-50 text-rose-700 border-rose-200'
-                        }`}>
-                          {isValid && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                          {r.validation_status || 'VALID'}
-                        </span>
+                    <tr 
+                      key={actualIdx} 
+                      className={`transition-colors ${
+                        isWarn ? 'bg-amber-50/40 hover:bg-amber-100/50 border-l-4 border-l-amber-400' :
+                        isErr ? 'bg-rose-50/40 hover:bg-rose-100/50 border-l-4 border-l-rose-500' :
+                        'hover:bg-slate-50/70'
+                      }`}
+                    >
+                      {/* Status Column with explicit validation message */}
+                      <td className="pl-8 py-3.5 space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
+                            isValid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            isWarn ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-rose-100 text-rose-800 border-rose-300'
+                          }`}>
+                            {isValid && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                            {isWarn && <AlertTriangle className="w-3 h-3 text-amber-600" />}
+                            {isErr && <XCircle className="w-3 h-3 text-rose-600" />}
+                            {r.validation_status || 'VALID'}
+                          </span>
+                        </div>
+
+                        {/* Validation Diagnostic Tag */}
+                        {messages.length > 0 && (
+                          <div className="text-[10px] text-amber-800 font-bold bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-200 max-w-xs truncate" title={messages.join('; ')}>
+                            ⚠️ {messages[0]}
+                          </div>
+                        )}
                       </td>
-                      <td className="py-3 font-mono font-black text-indigo-700">
-                        {r.carrier_scac || 'MAEU'}
+
+                      <td className="py-3.5 font-mono font-black text-indigo-700">
+                        {r.carrier_scac || 'GSL'}
                       </td>
-                      <td className="py-3">
-                        <input
-                          type="text"
-                          value={r.origin_locode || ''}
-                          onChange={(e) => handleCellChange(actualIdx, 'origin_locode', e.target.value)}
-                          className="px-2 py-1 rounded bg-slate-50 border border-slate-200 font-mono text-xs font-black text-slate-900 w-24 focus:bg-white focus:border-[#00AFAF]"
-                        />
-                        <span className="text-[10px] text-slate-400 ml-1.5 truncate max-w-xs">{r.origin_raw}</span>
+
+                      {/* Origin Port */}
+                      <td className="py-3.5">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            value={r.origin_locode || ''}
+                            onChange={(e) => handleCellChange(actualIdx, 'origin_locode', e.target.value)}
+                            className="px-2 py-1 rounded-lg bg-white border border-slate-200 font-mono text-xs font-black text-slate-900 w-24 focus:ring-2 focus:ring-[#00AFAF]/20 focus:border-[#00AFAF]"
+                          />
+                          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]" title={r.origin_raw}>
+                            {r.origin_raw || r.origin_locode}
+                          </span>
+                        </div>
                       </td>
-                      <td className="py-3">
-                        <input
-                          type="text"
-                          value={r.destination_locode || ''}
-                          onChange={(e) => handleCellChange(actualIdx, 'destination_locode', e.target.value)}
-                          className="px-2 py-1 rounded bg-slate-50 border border-slate-200 font-mono text-xs font-black text-slate-900 w-24 focus:bg-white focus:border-[#00AFAF]"
-                        />
-                        <span className="text-[10px] text-slate-400 ml-1.5 truncate max-w-xs">{r.destination_raw}</span>
+
+                      {/* Destination Port */}
+                      <td className="py-3.5">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            value={r.destination_locode || ''}
+                            onChange={(e) => handleCellChange(actualIdx, 'destination_locode', e.target.value)}
+                            className="px-2 py-1 rounded-lg bg-white border border-slate-200 font-mono text-xs font-black text-slate-900 w-24 focus:ring-2 focus:ring-[#00AFAF]/20 focus:border-[#00AFAF]"
+                          />
+                          <span className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]" title={r.destination_raw}>
+                            {r.destination_raw || r.destination_locode}
+                          </span>
+                        </div>
                       </td>
-                      <td className="text-center py-3 font-mono font-bold text-slate-700">
+
+                      {/* Load Type */}
+                      <td className="text-center py-3.5 font-mono font-black text-slate-800">
                         {r.load_type || '20GP'}
                       </td>
-                      <td className="text-right py-3 font-mono font-black text-slate-900">
-                        <input
-                          type="number"
-                          value={r.base_rate ?? 0}
-                          onChange={(e) => handleCellChange(actualIdx, 'base_rate', parseFloat(e.target.value) || 0)}
-                          className="px-2 py-1 rounded bg-slate-50 border border-slate-200 font-mono text-xs font-black text-right text-slate-900 w-20 focus:bg-white focus:border-[#00AFAF]"
-                        />
+
+                      {/* Base Rate Input (Highlighted with amber if $0.00) */}
+                      <td className="text-right py-3.5 font-mono font-black text-slate-900">
+                        <div className="inline-flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={r.base_rate ?? r.ofr_amount ?? 0}
+                            onChange={(e) => handleCellChange(actualIdx, 'base_rate', parseFloat(e.target.value) || 0)}
+                            className={`px-2 py-1 rounded-lg font-mono text-xs font-black text-right w-20 focus:ring-2 focus:ring-[#00AFAF]/20 ${
+                              hasZeroRate 
+                                ? 'bg-amber-100 border-2 border-amber-400 text-amber-950 font-black' 
+                                : 'bg-white border border-slate-200 text-slate-900'
+                            }`}
+                            title={hasZeroRate ? "Base Rate is $0.00 — edit inline if needed" : ""}
+                          />
+                        </div>
                       </td>
-                      <td className="text-center py-3 font-mono text-slate-500 font-bold">
-                        {r.currency || 'USD'}
+
+                      {/* Currency */}
+                      <td className="text-center py-3.5 font-mono text-slate-500 font-bold">
+                        {r.currency || r.ofr_currency || 'USD'}
                       </td>
-                      <td className="text-center py-3 font-mono text-[10px] text-slate-500">
-                        {r.validity_start ? `${r.validity_start} → ${r.validity_end || ''}` : <span className="text-amber-600 italic">Missing</span>}
+
+                      {/* Validity */}
+                      <td className="text-center py-3.5 font-mono text-[10px] text-slate-600">
+                        {r.validity_start ? (
+                          <div>
+                            <div>{r.validity_start}</div>
+                            <div className="text-slate-400">→ {r.validity_end || 'Open'}</div>
+                          </div>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 font-bold">
+                            Missing
+                          </span>
+                        )}
                       </td>
-                      <td className="pr-8 text-center py-3">
+
+                      {/* Attached Surcharges */}
+                      <td className="pr-8 text-center py-3.5">
                         {(r.charges || []).length > 0 ? (
-                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono font-bold text-[10px] border border-slate-200">
+                          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 font-mono font-bold text-[10px] shadow-2xs" title={r.charges.map((c: any) => `${c.charge_code}: ${c.amount} ${c.currency}`).join(', ')}>
                             +{r.charges.length} Surcharges
                           </span>
                         ) : (
@@ -361,6 +488,31 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div className="px-8 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-medium">
+              Page {currentPage} of {totalPages} ({filteredRates.length} rows)
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
     </div>

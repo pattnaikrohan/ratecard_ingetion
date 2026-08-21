@@ -83,13 +83,16 @@ class DatabaseManager:
                 pass
 
     def restore_from_blob(self):
+        if self.db_path.exists() and self.db_path.stat().st_size > 0:
+            return
         from app.services.storage import StorageService
         blob_client = StorageService._get_blob_client("rate_agent.db")
-        if blob_client and blob_client.exists():
+        if blob_client:
             try:
-                with open(self.db_path, "wb") as f:
-                    f.write(blob_client.download_blob().readall())
-                print(f"Restored SQLite DB from Azure Blob Storage")
+                if blob_client.exists(timeout=1):
+                    with open(self.db_path, "wb") as f:
+                        f.write(blob_client.download_blob().readall())
+                    print(f"Restored SQLite DB from Azure Blob Storage")
             except Exception as e:
                 print(f"Failed to restore SQLite DB from Blob Storage: {e}")
 
@@ -153,7 +156,13 @@ class DatabaseManager:
             result = []
             for r in rows:
                 item = dict(r)
-                item["summary"] = json.loads(item["summary_json"]) if item["summary_json"] else {}
+                summary = json.loads(item["summary_json"]) if item["summary_json"] else {}
+                item["summary"] = summary
+                item["total_rows"] = summary.get("total_rows", 0)
+                item["valid_rows"] = summary.get("valid_rows", 0)
+                item["warning_rows"] = summary.get("warning_rows", 0)
+                item["error_rows"] = summary.get("error_rows", 0)
+                item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
                 result.append(item)
             return result
 

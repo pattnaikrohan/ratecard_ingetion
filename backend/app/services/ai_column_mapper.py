@@ -2,11 +2,11 @@ import os
 import json
 import hashlib
 from typing import List, Dict, Any, Optional, Set
-from app.core.config import AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_OPENAI_DEPLOYMENT
+from app.core.config import AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_OPENAI_DEPLOYMENT, DATA_DIR
 from app.models.canonical import RateRow
 
-CACHE_FILE = "data/ai_mapping_cache.json"
-LEARNED_SYNONYMS_FILE = "data/learned_synonyms.json"
+CACHE_FILE = str(DATA_DIR / "ai_mapping_cache.json")
+LEARNED_SYNONYMS_FILE = str(DATA_DIR / "learned_synonyms.json")
 
 class AIColumnMapper:
     _instance = None
