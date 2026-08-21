@@ -44,6 +44,14 @@ class RateRow(BaseModel):
     validation_status: str = "VALID"  # VALID, WARNING, ERROR, CRITICAL
     validation_items: List[ValidationItem] = Field(default_factory=list)
 
+    @property
+    def validation_messages(self) -> List[str]:
+        return [item.message for item in self.validation_items if item.message]
+
+    @property
+    def base_rate(self) -> float:
+        return self.ofr_amount
+
 class JobSummary(BaseModel):
     total_rows: int = 0
     valid_rows: int = 0

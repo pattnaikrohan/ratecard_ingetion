@@ -73,11 +73,15 @@ class FreightifyExporter:
             
             # Remarks column notes validation status and reasons
             remarks_text = rate.remarks or ""
-            if rate.validation_status == "WARNING" and rate.validation_messages:
-                warning_notes = "; ".join(rate.validation_messages)
+            msgs = getattr(rate, "validation_messages", [])
+            if not msgs and hasattr(rate, "validation_items"):
+                msgs = [item.message for item in rate.validation_items if getattr(item, "message", None)]
+
+            if rate.validation_status == "WARNING" and msgs:
+                warning_notes = "; ".join(msgs)
                 remarks_text = f"[WARNING: {warning_notes}] {remarks_text}".strip()
-            elif rate.validation_status == "ERROR" and rate.validation_messages:
-                error_notes = "; ".join(rate.validation_messages)
+            elif rate.validation_status in ["ERROR", "CRITICAL"] and msgs:
+                error_notes = "; ".join(msgs)
                 remarks_text = f"[ERROR: {error_notes}] {remarks_text}".strip()
             ws.cell(row=idx, column=14, value=remarks_text)
 
