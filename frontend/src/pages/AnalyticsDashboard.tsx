@@ -35,10 +35,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [timeFilter, setTimeFilter] = useState<'all' | 'q3' | 'month'>('all');
   const [activeCostTab, setActiveCostTab] = useState<'timeline' | 'breakdown'>('timeline');
 
-  // Dynamic calculations computed strictly from live jobs
+  // Dynamic calculations computed strictly from live persistent jobs
   const dynamicStats = useMemo(() => {
     const totalJobs = recentJobs.length;
-    const completedJobs = recentJobs.filter((j) => j.status === 'COMPLETED' || j.status === 'APPROVED').length;
+    const completedJobs = recentJobs.filter((j) => ['COMPLETED', 'APPROVED', 'NEEDS_REVIEW'].includes(j.status)).length;
     
     let totalRates = 0;
     let validRates = 0;
@@ -63,18 +63,19 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       'HMMU': { name: 'HMM Ocean', bg: 'bg-cyan-50', color: 'text-cyan-700', border: 'border-cyan-200' },
       'CRTS': { name: 'CaroTrans LCL', bg: 'bg-teal-50', color: 'text-teal-700', border: 'border-teal-200' },
       'AAWU': { name: 'AAW Global', bg: 'bg-purple-50', color: 'text-purple-700', border: 'border-purple-200' },
+      'GSL': { name: 'Gold Star Line', bg: 'bg-indigo-50', color: 'text-indigo-700', border: 'border-indigo-200' },
     };
 
     recentJobs.forEach((job) => {
       const can = job.canonical || {};
       const rates = can.rates || [];
-      const summary = can.summary || {};
+      const summary = job.summary || can.summary || {};
       const carrier = job.carrier_code || summary.carriers_found?.[0] || can.carrier_code || 'UNKN';
 
       const rowCount = job.total_rows || summary.total_rows || rates.length || 0;
-      const validCount = summary.valid_rows || (job.status === 'COMPLETED' ? rowCount : 0);
-      const warnCount = summary.warning_rows || 0;
-      const errCount = summary.error_rows || 0;
+      const validCount = job.valid_rows !== undefined ? job.valid_rows : (summary.valid_rows !== undefined ? summary.valid_rows : (['COMPLETED', 'APPROVED', 'NEEDS_REVIEW'].includes(job.status) ? rowCount : 0));
+      const warnCount = job.warning_rows !== undefined ? job.warning_rows : (summary.warning_rows || 0);
+      const errCount = job.error_rows !== undefined ? job.error_rows : (summary.error_rows || 0);
 
       totalRates += rowCount;
       validRates += validCount;
