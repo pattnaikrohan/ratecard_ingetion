@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Database, RefreshCw } from 'lucide-react';
+import { Database, RefreshCw, Sparkles, } from 'lucide-react';
 import { api } from '../services/api';
 
 interface SettingsProps {
@@ -31,42 +31,44 @@ export const SettingsPage: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-6 animate-fade-in select-none text-slate-900 pb-8">
+    <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-16 px-1">
       
-      {/* ── TOP HERO HEADER (Posh Light Theme) ── */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-sm relative overflow-hidden shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ── TOP HERO HEADER (Posh Ambient Glassmorphic Card) ── */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00AFAF]/12 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 space-y-2">
+        <div className="relative z-10 space-y-2.5 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
-              <Settings className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="px-3.5 py-1 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#00AFAF]" />
               RateBridge Engine Configuration
             </span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-mono font-black flex items-center gap-1.5 shadow-2xs">
+            <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-mono font-black flex items-center gap-1.5 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              Master Data Synchronized
+              Master Data Active
             </span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Master Data & Ingestion Settings
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-3xl leading-relaxed">
+          <p className="text-sm text-slate-500 font-medium leading-relaxed">
             Manage global UNLOCODE port dictionaries, container equipment aliases, self-learned carrier synonyms, and export validation policies.
           </p>
         </div>
       </div>
 
-      {/* ── MASTER DATA STATS & RELOAD ── */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-5">
+      {/* ── MASTER DATA STATS & RELOAD (Luxury Porcelain) ── */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] space-y-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
+
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
-              <Database className="w-5 h-5" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#00AFAF] flex items-center justify-center">
+              <Database className="w-5.5 h-5.5" />
             </div>
             <div>
-              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Freightify Master Data Status</h2>
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Freightify Master Data Database</h2>
               <p className="text-xs text-slate-500 font-medium mt-0.5">UNLOCODE port index and carrier SCAC synonym database</p>
             </div>
           </div>
@@ -74,45 +76,46 @@ export const SettingsPage: React.FC<SettingsProps> = ({
           <button
             onClick={handleReloadMasterData}
             disabled={isReloading}
-            className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 disabled:opacity-50"
+            style={{ backgroundColor: '#00AFAF' }}
+            className="px-5 py-2.5 rounded-2xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20 flex items-center gap-2 disabled:opacity-50 hover:brightness-105"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isReloading ? 'animate-spin' : ''}`} />
             <span>Reload Master Data</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80">
             <p className="text-[11px] font-black text-slate-400 uppercase">UNLOCODE Ports</p>
-            <p className="text-2xl font-black text-slate-900 font-mono mt-1">
-              {masterDataStatus?.ports_count?.toLocaleString() || '13,670'}
+            <p className="text-3xl font-black text-slate-900 font-mono mt-1">
+              {masterDataStatus?.ports_count?.toLocaleString('en-US') || '13,670'}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80">
             <p className="text-[11px] font-black text-slate-400 uppercase">Carrier SCACs</p>
-            <p className="text-2xl font-black text-purple-600 font-mono mt-1">
+            <p className="text-3xl font-black text-purple-600 font-mono mt-1">
               {masterDataStatus?.carriers_count || '164'}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80">
             <p className="text-[11px] font-black text-slate-400 uppercase">Port Synonyms</p>
-            <p className="text-2xl font-black text-indigo-600 font-mono mt-1">
-              {masterDataStatus?.port_synonyms_count?.toLocaleString() || '14,515'}
+            <p className="text-3xl font-black text-indigo-600 font-mono mt-1">
+              {masterDataStatus?.port_synonyms_count?.toLocaleString('en-US') || '14,515'}
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80">
             <p className="text-[11px] font-black text-slate-400 uppercase">Self-Learned Aliases</p>
-            <p className="text-2xl font-black text-emerald-600 font-mono mt-1">
-              {masterDataStatus?.learned_synonyms_count?.toLocaleString() || '1,438'}
+            <p className="text-3xl font-black text-[#00AFAF] font-mono mt-1">
+              {masterDataStatus?.learned_synonyms_count?.toLocaleString('en-US') || '1,438'}
             </p>
           </div>
         </div>
       </div>
 
       {/* ── EXPORT VALIDATION POLICY CARD ── */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-4">
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] space-y-5">
         <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Default Export Validation Policy</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
             {
               id: 'STRICT',
@@ -133,19 +136,19 @@ export const SettingsPage: React.FC<SettingsProps> = ({
             <div
               key={pol.id}
               onClick={() => setExportPolicy(pol.id)}
-              className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+              className={`p-5 rounded-3xl border-2 cursor-pointer transition-all ${
                 exportPolicy === pol.id
-                  ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
+                  ? 'border-[#00AFAF] bg-[#00AFAF]/5 shadow-sm'
                   : 'border-slate-200 hover:border-slate-300 bg-white'
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-black text-slate-900">{pol.title}</span>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-black text-slate-900">{pol.title}</span>
                 {exportPolicy === pol.id && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#00AFAF]" />
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{pol.desc}</p>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">{pol.desc}</p>
             </div>
           ))}
         </div>

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  Upload, 
+  UploadCloud, 
   CheckCircle2, 
   Layers, 
   Sparkles, 
   Trash2, 
   AlertTriangle, 
-  Eye
+  Eye, 
+
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -99,42 +100,42 @@ export const IngestHub: React.FC<IngestHubProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-6 animate-fade-in select-none text-slate-900 pb-8">
+    <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-16 px-1">
       
-      {/* ── TOP HERO HEADER (Single unified header without duplicate upload CTA) ── */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-sm relative overflow-hidden shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ── TOP HERO HEADER (Posh Ambient Glassmorphic Card) ── */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00AFAF]/12 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 space-y-2">
+        <div className="relative z-10 space-y-2.5 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              Autonomous RateBridge Ingestion
+            <span className="px-3.5 py-1 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#00AFAF]" />
+              RateBridge Ingestion Workspace
             </span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-mono font-black flex items-center gap-1.5 shadow-2xs">
+            <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-mono font-black flex items-center gap-1.5 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Parser & AI Active
+              Parsers & Autonomous AI Ready
             </span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Carrier Rate Ingestion Workspace
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-3xl leading-relaxed">
+          <p className="text-sm text-slate-500 font-medium leading-relaxed">
             Drop carrier rate cards (.EML, .MSG, .XLSX, .XLSM, .PDF, .PNG, .JPG) to automatically unpivot container matrices, parse surcharges, and generate standardized Freightify workbooks.
           </p>
         </div>
 
         {/* Export Policy Segmented Selector */}
-        <div className="relative z-10 flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shrink-0">
+        <div className="relative z-10 flex items-center gap-2 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 shrink-0">
           <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider pl-2 pr-1">Policy:</span>
           {['STRICT', 'PARTIAL', 'WARNING_PERMISSIVE'].map((p) => (
             <button
               key={p}
               onClick={() => setExportPolicy(p)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ${
                 exportPolicy === p
-                  ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                  ? 'bg-white text-[#00AFAF] shadow-sm border border-slate-200/80'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -145,7 +146,8 @@ export const IngestHub: React.FC<IngestHubProps> = ({
       </div>
 
       {/* ── CENTRAL INGESTION CARD (Single Elegant Dropzone & Notes) ── */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-5">
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] space-y-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
         
         {/* Dropzone Box */}
         <div
@@ -153,10 +155,10 @@ export const IngestHub: React.FC<IngestHubProps> = ({
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => document.getElementById('rateFileInput')?.click()}
-          className={`relative border-2 border-dashed rounded-3xl py-10 px-6 text-center transition-all duration-300 cursor-pointer ${
+          className={`relative border-2 border-dashed rounded-3xl py-12 px-6 text-center transition-all duration-300 cursor-pointer ${
             dragOver
-              ? 'border-indigo-600 bg-indigo-50/90 scale-[1.01] shadow-xl'
-              : 'border-slate-300/90 bg-gradient-to-b from-slate-50/60 via-white to-slate-50/40 hover:border-indigo-400 hover:bg-indigo-50/30 shadow-inner'
+              ? 'border-[#00AFAF] bg-[#00AFAF]/10 scale-[1.01] shadow-xl'
+              : 'border-slate-300/90 bg-gradient-to-b from-slate-50/60 via-white to-slate-50/40 hover:border-[#00AFAF] hover:bg-[#00AFAF]/5 shadow-inner'
           }`}
         >
           <input
@@ -168,31 +170,34 @@ export const IngestHub: React.FC<IngestHubProps> = ({
             onChange={(e) => e.target.files && handleMultiFileUpload(e.target.files)}
           />
 
-          <div className="flex flex-col items-center gap-3">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-md ${
-              dragOver ? 'bg-indigo-600 scale-110 shadow-indigo-300' : 'bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 shadow-indigo-200'
-            }`}>
-              <Upload className="w-6 h-6 text-white" />
+          <div className="flex flex-col items-center gap-3.5">
+            <div 
+              style={{ backgroundColor: '#00AFAF' }}
+              className={`w-16 h-16 rounded-3xl flex items-center justify-center transition-all duration-300 shadow-lg ${
+                dragOver ? 'scale-110 shadow-[#00AFAF]/40' : 'shadow-[#00AFAF]/25'
+              }`}
+            >
+              <UploadCloud className="w-8 h-8 text-white" />
             </div>
 
             <div>
-              <p className="text-base font-black text-slate-900 tracking-tight">
-                Click to browse files or drag & drop carrier rate cards here
+              <p className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                Click to browse rate cards or drag & drop files here
               </p>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Supports single files or batch folder ingestion up to 50 files simultaneously
+                Supports single files or batch folders up to 50 rate cards simultaneously
               </p>
 
               {/* Supported Format Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
                 {[
-                  { name: '.EML / .MSG', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-                  { name: '.XLSX / .XLSM', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-                  { name: '.PDF Document', color: 'bg-rose-50 text-rose-700 border-rose-200' },
-                  { name: '.PNG / .JPG Image', color: 'bg-sky-50 text-sky-700 border-sky-200' },
-                  { name: 'Text / Spot Quotes', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+                  { name: '.EML / .MSG Emails', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+                  { name: '.XLSX / .XLSM Sheets', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                  { name: '.PDF Schedules', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+                  { name: '.PNG / .JPG Matrices', color: 'bg-sky-50 text-sky-700 border-sky-200' },
+                  { name: 'Spot Quotes & Text', color: 'bg-amber-50 text-amber-700 border-amber-200' },
                 ].map((ext) => (
-                  <span key={ext.name} className={`text-[11px] font-black px-3 py-1 rounded-xl border ${ext.color}`}>
+                  <span key={ext.name} className={`text-[11px] font-black px-3.5 py-1 rounded-xl border ${ext.color}`}>
                     {ext.name}
                   </span>
                 ))}
@@ -202,17 +207,17 @@ export const IngestHub: React.FC<IngestHubProps> = ({
         </div>
 
         {/* Supplementary Email Notes & Contract Details Box */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+        <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-black text-slate-800 flex items-center gap-2 uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <Sparkles className="w-4 h-4 text-[#00AFAF]" />
               Supplementary Email Notes & Contract Details (Optional)
             </label>
             {notesText && (
               <button
                 type="button"
                 onClick={() => setNotesText('')}
-                className="text-[11px] font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-100 transition-all"
+                className="text-xs font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-lg border border-rose-100 transition-all"
               >
                 Clear Notes
               </button>
@@ -223,9 +228,9 @@ export const IngestHub: React.FC<IngestHubProps> = ({
             onChange={(e) => setNotesText(e.target.value)}
             rows={2}
             placeholder="Paste supplier email text, contract number (e.g. 299952465), validity dates (e.g. 01-Aug-2026 to 31-Aug-2026), or standard charges (e.g. Documentation Fee $80 NZD, BAF $200 USD)..."
-            className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 custom-scrollbar resize-y shadow-2xs"
+            className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-2xl p-3.5 focus:outline-none focus:ring-2 focus:ring-[#00AFAF]/20 focus:border-[#00AFAF] transition-all placeholder:text-slate-400 custom-scrollbar resize-y shadow-2xs"
           />
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="text-[11px] text-slate-400 font-medium">
             💡 The AI pipeline automatically extracts contract numbers, validity windows, and surcharges from these notes and merges them into every row.
           </p>
         </div>
@@ -233,16 +238,16 @@ export const IngestHub: React.FC<IngestHubProps> = ({
       </div>
 
       {/* ── INGESTION HISTORY & WORKBOOKS TABLE ── */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col">
-        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 bg-slate-50/70 shrink-0">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
+        <div className="px-8 py-5 flex items-center justify-between border-b border-slate-100 bg-slate-50/70 shrink-0">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-600" />
+            <Layers className="w-4 h-4 text-[#00AFAF]" />
             <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
               Ingested Rate Sheets & Workbooks ({recentJobs.length})
             </h3>
           </div>
 
-          <div className="flex items-center gap-3">
+          {recentJobs.length > 0 && (
             <button
               onClick={() => setShowClearModal(true)}
               className="text-xs font-black text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 border border-rose-200 shadow-2xs"
@@ -250,19 +255,19 @@ export const IngestHub: React.FC<IngestHubProps> = ({
               <Trash2 className="w-3.5 h-3.5" />
               <span>Clear History</span>
             </button>
-          </div>
+          )}
         </div>
 
         <div className="overflow-x-auto">
           <table className="custom-table w-full align-middle text-slate-900 text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 uppercase text-[10px] tracking-wider font-extrabold">
-                <th className="pl-6 text-left py-3">Carrier</th>
-                <th className="text-left py-3">Rate File Source</th>
-                <th className="text-left py-3">Contract / Validity</th>
-                <th className="text-center py-3">Rates Extracted</th>
-                <th className="text-center py-3">Status</th>
-                <th className="pr-6 text-right py-3">Actions</th>
+                <th className="pl-8 text-left py-4">Carrier</th>
+                <th className="text-left py-4">Rate File Source</th>
+                <th className="text-left py-4">Contract / Validity</th>
+                <th className="text-center py-4">Rates Extracted</th>
+                <th className="text-center py-4">Status</th>
+                <th className="pr-8 text-right py-4">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -281,23 +286,23 @@ export const IngestHub: React.FC<IngestHubProps> = ({
                   const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
 
                   return (
-                    <tr key={job.job_id} className="hover:bg-indigo-50/40 transition-colors">
-                      <td className="pl-6 py-3 font-mono font-black text-indigo-700">
+                    <tr key={job.job_id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="pl-8 py-4 font-mono font-black text-indigo-700">
                         <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100">
                           {carrier}
                         </span>
                       </td>
-                      <td className="py-3 font-black text-slate-900 max-w-xs truncate">
+                      <td className="py-4 font-black text-slate-900 max-w-xs truncate">
                         {job.file_name}
                       </td>
-                      <td className="py-3 text-slate-500 font-mono text-[11px]">
+                      <td className="py-4 text-slate-500 font-mono text-[11px]">
                         <div>{contract !== '—' ? contract : <span className="text-slate-400 italic">No Contract</span>}</div>
                         <div className="text-[10px] text-slate-400">{validity}</div>
                       </td>
-                      <td className="text-center py-3 font-mono font-bold text-slate-900">
-                        {rowCount.toLocaleString()}
+                      <td className="text-center py-4 font-mono font-bold text-slate-900">
+                        {rowCount.toLocaleString('en-US')}
                       </td>
-                      <td className="text-center py-3">
+                      <td className="text-center py-4">
                         <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
                           job.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                           job.status === 'NEEDS_REVIEW' ? 'bg-amber-50 text-amber-700 border-amber-200' :
@@ -307,12 +312,13 @@ export const IngestHub: React.FC<IngestHubProps> = ({
                           {job.status}
                         </span>
                       </td>
-                      <td className="pr-6 text-right py-3 space-x-2">
+                      <td className="pr-8 text-right py-4 space-x-2">
                         <button
                           onClick={() => onJobCreated(job.job_id)}
-                          className="px-3 py-1 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-[11px] transition-all border border-indigo-200 shadow-2xs inline-flex items-center gap-1"
+                          style={{ backgroundColor: '#00AFAF' }}
+                          className="px-3.5 py-1.5 rounded-xl text-white font-black text-xs transition-all shadow-sm shadow-[#00AFAF]/20 inline-flex items-center gap-1.5"
                         >
-                          <Eye className="w-3 h-3" />
+                          <Eye className="w-3.5 h-3.5" />
                           <span>Review Rates</span>
                         </button>
                       </td>
@@ -328,7 +334,7 @@ export const IngestHub: React.FC<IngestHubProps> = ({
       {/* ── DUPLICATE CONFLICT MODAL ── */}
       {duplicateConflict && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl space-y-4">
+          <div className="bg-white rounded-3xl p-7 max-w-md w-full border border-slate-200 shadow-2xl space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -341,7 +347,8 @@ export const IngestHub: React.FC<IngestHubProps> = ({
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleConfirmReplaceDuplicate}
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20"
+                style={{ backgroundColor: '#00AFAF' }}
+                className="flex-1 py-2.5 rounded-xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20"
               >
                 Re-process & Overwrite
               </button>
@@ -359,7 +366,7 @@ export const IngestHub: React.FC<IngestHubProps> = ({
       {/* ── CLEAR HISTORY MODAL ── */}
       {showClearModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl space-y-4">
+          <div className="bg-white rounded-3xl p-7 max-w-md w-full border border-slate-200 shadow-2xl space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
               <Trash2 className="w-6 h-6" />
             </div>

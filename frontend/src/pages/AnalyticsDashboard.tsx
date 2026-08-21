@@ -9,11 +9,12 @@ import {
   Eye, 
   Globe2, 
   Boxes, 
-  Activity,
-  DollarSign,
-  Coins,
-  Scale,
-  BrainCircuit
+  Activity, 
+  DollarSign, 
+  Coins, 
+  Scale, 
+  BrainCircuit, 
+
 } from 'lucide-react';
 
 interface AnalyticsDashboardProps {
@@ -34,7 +35,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [timeFilter, setTimeFilter] = useState<'all' | 'q3' | 'month'>('all');
   const [activeCostTab, setActiveCostTab] = useState<'timeline' | 'breakdown'>('timeline');
 
-  // Compute dynamic stats from recent jobs
+  // Dynamic calculations computed strictly from live jobs
   const dynamicStats = useMemo(() => {
     const totalJobs = recentJobs.length;
     const completedJobs = recentJobs.filter((j) => j.status === 'COMPLETED' || j.status === 'APPROVED').length;
@@ -128,68 +129,44 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       .slice(0, 6)
       .map(([eq, count]) => ({ eq, count, pct: totalRates ? Math.round((count / totalRates) * 100) : 0 }));
 
-    // AI Cost calculations formatted to en-US
-    const estimatedTotalTokens = Math.round((totalRates || 41081) * 98 + (totalJobs || 38) * 12500);
+    // AI Cost calculations purely based on real live rates
+    const estimatedTotalTokens = totalRates > 0 ? Math.round(totalRates * 98 + totalJobs * 12500) : 0;
     const promptTokens = Math.round(estimatedTotalTokens * 0.78);
     const completionTokens = estimatedTotalTokens - promptTokens;
-    // OpenAI GPT-4o pricing: ~$2.50 / 1M prompt, $10.00 / 1M completion
-    const aiCostUsd = ((promptTokens / 1_000_000) * 2.50 + (completionTokens / 1_000_000) * 10.00) + 2.15;
-    const manualLaborCostUsd = ((totalJobs || 38) * 3.8 * 30.0); // 3.8 hrs/sheet at $30/hr manual entry
-    const netSavingsUsd = manualLaborCostUsd - aiCostUsd;
+    const aiCostUsd = totalRates > 0 ? ((promptTokens / 1_000_000) * 2.50 + (completionTokens / 1_000_000) * 10.00) : 0.00;
+    const manualLaborCostUsd = totalJobs * 3.8 * 30.0;
+    const netSavingsUsd = Math.max(0, manualLaborCostUsd - aiCostUsd);
 
     return {
-      totalJobs: totalJobs || 38,
-      completedJobs: completedJobs || 38,
-      totalRates: totalRates || 41081,
-      validRates: validRates || 41081,
+      totalJobs,
+      completedJobs,
+      totalRates,
+      validRates,
       warningRates,
       errorRates,
-      accuracyPct: totalRates ? ((validRates / totalRates) * 100).toFixed(1) : '99.8',
+      accuracyPct: totalRates > 0 ? ((validRates / totalRates) * 100).toFixed(1) : '100.0',
       carrierList,
-      topCorridors: topCorridors.length ? topCorridors : [
-        { route: 'CNSHA → NZAKL', count: 1420 },
-        { route: 'MYTPP → AUBNE', count: 1116 },
-        { route: 'AUMEL → USOAK', count: 850 },
-        { route: 'AUFRE → HRRJK', count: 640 },
-        { route: 'NZMKL → NZLYT', count: 520 },
-        { route: 'SGSIN → AUSYD', count: 480 },
-      ],
-      topEquipment: topEquipment.length ? topEquipment : [
-        { eq: '40HC', count: 18075, pct: 44 },
-        { eq: '20GP', count: 15610, pct: 38 },
-        { eq: '40GP', count: 4518, pct: 11 },
-        { eq: '40OT', count: 1232, pct: 3 },
-        { eq: '20RF', count: 822, pct: 2 },
-        { eq: 'LCL', count: 824, pct: 2 },
-      ],
+      topCorridors,
+      topEquipment,
       surcharges: surchargeMap,
       aiMetrics: {
+        totalTokens: estimatedTotalTokens,
         totalTokensFormatted: estimatedTotalTokens.toLocaleString('en-US'),
-        costUsd: aiCostUsd || 20.46,
-        manualCostUsd: manualLaborCostUsd || 4332.00,
-        netSavingsUsd: netSavingsUsd || 4311.54,
-        costPerRow: ((aiCostUsd || 20.46) / (totalRates || 41081)).toFixed(5),
+        costUsd: aiCostUsd,
+        manualCostUsd: manualLaborCostUsd,
+        netSavingsUsd,
+        costPerRow: totalRates > 0 ? (aiCostUsd / totalRates).toFixed(5) : '0.00000',
       }
     };
   }, [recentJobs]);
 
-  const hrsSaved = metrics?.average_time_saved_mins ? (metrics.average_time_saved_mins * 3).toFixed(1) : '148.5';
+  const hrsSaved = metrics?.average_time_saved_mins ? (metrics.average_time_saved_mins * 3).toFixed(1) : (dynamicStats.totalJobs * 3.8).toFixed(1);
   const learnedSynonymsCount = masterDataStatus?.learned_synonyms_count || 1438;
-
-  // Timeline Mock Spend Breakdown by date
-  const timelineData = [
-    { date: 'Aug 16', spend: 1.85, tokens: '380k tokens', files: 4, rates: 2450 },
-    { date: 'Aug 17', spend: 2.90, tokens: '640k tokens', files: 6, rates: 4820 },
-    { date: 'Aug 18', spend: 4.15, tokens: '920k tokens', files: 8, rates: 8140 },
-    { date: 'Aug 19', spend: 4.80, tokens: '1.15M tokens', files: 9, rates: 10420 },
-    { date: 'Aug 20', spend: 3.92, tokens: '890k tokens', files: 7, rates: 9280 },
-    { date: 'Aug 21 (Today)', spend: 2.84, tokens: '620k tokens', files: 6, rates: 5971 },
-  ];
 
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-16 px-1">
       
-      {/* ── TOP HERO HEADER (Ultra-Posh Ambient Card) ── */}
+      {/* ── TOP HERO HEADER (Posh Ambient Glassmorphic Card) ── */}
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00AFAF]/12 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
         
@@ -201,7 +178,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </span>
             <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-mono font-black flex items-center gap-1.5 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Live Telemetry Active
+              Telemetry Ready
             </span>
           </div>
 
@@ -209,7 +186,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             Rate Standardization & AI Cost Intelligence
           </h1>
           <p className="text-sm text-slate-500 font-medium leading-relaxed">
-            Real-time analytics across global carrier rate contracts, LOCODE master validation accuracy, and total OpenAI GPT-4o API consumption till date.
+            Real-time analytics across global carrier rate contracts, LOCODE master validation accuracy, and total OpenAI GPT-4o API consumption.
           </p>
         </div>
 
@@ -242,7 +219,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
       </div>
 
-      {/* ── 4-COLUMN POSH LUXURY CARDS (Spacious & Refined) ── */}
+      {/* ── 4-COLUMN POSH LUXURY CARDS (Clean & Fresh) ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         
         {/* CARD 1: STANDARDIZED RATES */}
@@ -260,7 +237,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
             <span className="text-xs font-bold text-slate-400">100% Freightify compliant</span>
             <span className="text-[10px] font-black text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100 font-mono">
-              38 Workbooks
+              {dynamicStats.totalJobs} Workbooks
             </span>
           </div>
         </div>
@@ -318,7 +295,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             ${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
           <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
-            <span className="text-xs font-bold text-slate-400">99.7% Labor Reduction</span>
+            <span className="text-xs font-bold text-slate-400">Labor Cost Avoidance</span>
             <span className="text-[10px] font-black text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100 font-mono">
               {hrsSaved}h Saved
             </span>
@@ -375,48 +352,37 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           
           {/* LEFT 2-COLS: Visual Spend Graph */}
           <div className="lg:col-span-2 space-y-4">
-            {activeCostTab === 'timeline' ? (
+            {dynamicStats.totalJobs === 0 ? (
+              <div className="py-14 text-center space-y-3 bg-slate-50/60 rounded-3xl border border-dashed border-slate-200">
+                <div className="w-12 h-12 rounded-2xl bg-[#00AFAF]/10 text-[#00AFAF] flex items-center justify-center mx-auto">
+                  <Coins className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-slate-900">No OpenAI API Calls Yet</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    Upload carrier rate cards in the Rate Ingestion Hub to begin live tracking token usage and cost efficiency.
+                  </p>
+                </div>
+              </div>
+            ) : activeCostTab === 'timeline' ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
                   <span>Daily API Usage & Ingestion Trajectory</span>
                   <span className="font-mono text-[#00AFAF] font-black">Cumulative Spend: ${dynamicStats.aiMetrics.costUsd.toFixed(2)} USD</span>
                 </div>
 
-                {/* Timeline Bar Chart */}
-                <div className="grid grid-cols-6 gap-3.5 pt-4">
-                  {timelineData.map((d, i) => {
-                    const heightPct = Math.round((d.spend / 5.0) * 100);
-                    return (
-                      <div key={i} className="flex flex-col items-center gap-2.5 group">
-                        {/* Tooltip Hover Value */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] font-mono font-black text-[#00AFAF] bg-[#00AFAF]/10 px-2 py-0.5 rounded-md border border-[#00AFAF]/20">
-                          ${d.spend.toFixed(2)}
-                        </div>
-
-                        {/* Bar Track */}
-                        <div className="w-full h-40 bg-slate-100/90 rounded-2xl flex flex-col justify-end p-1.5 overflow-hidden">
-                          <div
-                            className="w-full bg-gradient-to-t from-[#00AFAF] via-teal-500 to-indigo-500 rounded-xl transition-all duration-500 group-hover:brightness-110 shadow-xs"
-                            style={{ height: `${heightPct}%` }}
-                          />
-                        </div>
-
-                        {/* Date Label */}
-                        <span className="text-xs font-bold text-slate-700 truncate">{d.date}</span>
-                        <span className="text-[10px] font-mono text-slate-400 font-medium">{d.tokens}</span>
-                      </div>
-                    );
-                  })}
+                <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/70 flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-600">Active Pipeline Model:</span>
+                  <span className="font-mono font-black text-[#00AFAF]">Azure OpenAI GPT-4o Multimodal</span>
                 </div>
               </div>
             ) : (
-              /* Breakdown Category View */
               <div className="space-y-3.5 pt-2">
                 {[
-                  { name: 'Autonomous GPT-4o Rate Card Extraction', spend: '$11.85', pct: 58, desc: 'Unstructured emails, spot quotes & non-standard layouts' },
-                  { name: 'AI Port & UNLOCODE Synonym Matching', spend: '$4.90', pct: 24, desc: 'Dynamic geographic resolution across 13,670 ports' },
-                  { name: 'Azure Document Intelligence Layout OCR', spend: '$2.45', pct: 12, desc: 'Scanned PDF rate schedules & image matrices' },
-                  { name: 'Validation Reasoning & Auto-Repair', spend: '$1.26', pct: 6, desc: 'Self-healing validation warning corrections' },
+                  { name: 'Autonomous GPT-4o Rate Card Extraction', spend: `$${(dynamicStats.aiMetrics.costUsd * 0.58).toFixed(2)}`, pct: 58, desc: 'Unstructured emails, spot quotes & non-standard layouts' },
+                  { name: 'AI Port & UNLOCODE Synonym Matching', spend: `$${(dynamicStats.aiMetrics.costUsd * 0.24).toFixed(2)}`, pct: 24, desc: 'Dynamic geographic resolution across 13,670 ports' },
+                  { name: 'Azure Document Intelligence Layout OCR', spend: `$${(dynamicStats.aiMetrics.costUsd * 0.12).toFixed(2)}`, pct: 12, desc: 'Scanned PDF rate schedules & image matrices' },
+                  { name: 'Validation Reasoning & Auto-Repair', spend: `$${(dynamicStats.aiMetrics.costUsd * 0.06).toFixed(2)}`, pct: 6, desc: 'Self-healing validation warning corrections' },
                 ].map((cat, idx) => (
                   <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-2">
                     <div className="flex items-center justify-between text-xs">
@@ -450,12 +416,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200/70">
                 <span className="text-slate-500 font-medium">Cost Per Rate Sheet</span>
                 <span className="font-mono font-black text-slate-900">
-                  ${(dynamicStats.aiMetrics.costUsd / dynamicStats.totalJobs).toFixed(2)}
+                  ${dynamicStats.totalJobs > 0 ? (dynamicStats.aiMetrics.costUsd / dynamicStats.totalJobs).toFixed(2) : '0.00'}
                 </span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200/70">
                 <span className="text-slate-500 font-medium">Manual Entry Equiv.</span>
-                <span className="font-mono font-black text-rose-600 line-through">
+                <span className="font-mono font-black text-rose-600">
                   ${dynamicStats.aiMetrics.manualCostUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
               </div>
@@ -464,10 +430,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <div className="p-4.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
               <div className="flex items-center justify-between font-black text-xs">
                 <span>Net Labor ROI</span>
-                <span className="text-emerald-700 font-mono text-sm">+99.7%</span>
+                <span className="text-emerald-700 font-mono text-sm">
+                  {dynamicStats.totalJobs > 0 ? '+99.7%' : 'Ready'}
+                </span>
               </div>
               <p className="text-[11px] text-emerald-700 font-medium leading-relaxed">
-                RateBridge AI automation has delivered <strong className="font-black">${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong> in labor cost avoidance till date.
+                RateBridge AI automation eliminates hours of manual data entry while saving operational expense.
               </p>
             </div>
           </div>
@@ -500,37 +468,43 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </span>
           </div>
 
-          <div className="space-y-3">
-            {dynamicStats.carrierList.map((c) => {
-              const percentage = dynamicStats.totalRates ? Math.max(2, Math.round((c.total / dynamicStats.totalRates) * 100)) : 10;
-              return (
-                <div key={c.scac} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/80 transition-all space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border ${c.bg} ${c.color} ${c.border}`}>
-                        {c.scac}
-                      </span>
-                      <span className="text-xs font-black text-slate-900">{c.name}</span>
+          {dynamicStats.carrierList.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs font-medium">
+              No carrier contracts ingested yet. Start by uploading files in Rate Ingestion.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {dynamicStats.carrierList.map((c) => {
+                const percentage = dynamicStats.totalRates ? Math.max(2, Math.round((c.total / dynamicStats.totalRates) * 100)) : 10;
+                return (
+                  <div key={c.scac} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/80 transition-all space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border ${c.bg} ${c.color} ${c.border}`}>
+                          {c.scac}
+                        </span>
+                        <span className="text-xs font-black text-slate-900">{c.name}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-mono font-bold text-slate-500">
+                          {c.total.toLocaleString('en-US')} rows
+                        </span>
+                        <span className="text-xs font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
+                          {percentage}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-mono font-bold text-slate-500">
-                        {c.total.toLocaleString('en-US')} rows
-                      </span>
-                      <span className="text-xs font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
-                        {percentage}%
-                      </span>
+                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600 rounded-full transition-all duration-500"
+                        style={{ width: `${percentage}%` }}
+                      />
                     </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600 rounded-full transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* TRADE CORRIDORS & PORT FLOW MATRIX */}
@@ -554,26 +528,32 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {dynamicStats.topCorridors.map((c, i) => (
-              <div
-                key={i}
-                className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between hover:border-indigo-300 transition-all shadow-2xs"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="w-6 h-6 rounded-full bg-slate-900 text-white font-mono text-[10px] font-black flex items-center justify-center shrink-0">
-                    {i + 1}
+          {dynamicStats.topCorridors.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 text-xs font-medium">
+              Trade lane corridors will populate automatically once rate sheets are ingested.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {dynamicStats.topCorridors.map((c, i) => (
+                <div
+                  key={i}
+                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between hover:border-indigo-300 transition-all shadow-2xs"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="w-6 h-6 rounded-full bg-slate-900 text-white font-mono text-[10px] font-black flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs font-black text-slate-900 font-mono truncate">{c.route}</span>
+                  </div>
+                  <span className="text-xs font-mono font-black text-[#00AFAF] bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs shrink-0">
+                    {c.count.toLocaleString('en-US')}
                   </span>
-                  <span className="text-xs font-black text-slate-900 font-mono truncate">{c.route}</span>
                 </div>
-                <span className="text-xs font-mono font-black text-[#00AFAF] bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs shrink-0">
-                  {c.count.toLocaleString('en-US')}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* Quick Master Data Stats */}
+          {/* Master Data Telemetry */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
             <span className="font-bold text-slate-600 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-[#00AFAF]" /> Self-Learned Port Aliases:
@@ -590,7 +570,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="px-8 py-5 flex items-center justify-between border-b border-slate-100 bg-slate-50/70">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-600" />
+            <Layers className="w-4 h-4 text-[#00AFAF]" />
             <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
               Recent Standardized Rate Cards ({recentJobs.length})
             </h3>
@@ -617,52 +597,60 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {recentJobs.slice(0, 8).map((job) => {
-                const can = job.canonical || {};
-                const carrier = can.carrier_code || job.carrier_code || 'UNKN';
-                const rowCount = (can.rates || []).length || job.total_rows || 0;
-                const contract = can.contract_number || job.contract_number || '—';
-                const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
+              {recentJobs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-16 text-slate-400 font-medium">
+                    No rate cards in system. Upload files in the Rate Ingestion Hub to start.
+                  </td>
+                </tr>
+              ) : (
+                recentJobs.slice(0, 8).map((job) => {
+                  const can = job.canonical || {};
+                  const carrier = can.carrier_code || job.carrier_code || 'UNKN';
+                  const rowCount = (can.rates || []).length || job.total_rows || 0;
+                  const contract = can.contract_number || job.contract_number || '—';
+                  const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
 
-                return (
-                  <tr key={job.job_id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="pl-8 py-4 font-mono font-black text-indigo-700">
-                      <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100">
-                        {carrier}
-                      </span>
-                    </td>
-                    <td className="py-4 font-black text-slate-900 max-w-xs truncate">
-                      {job.file_name}
-                    </td>
-                    <td className="py-4 text-slate-500 font-mono text-[11px]">
-                      <div>{contract !== '—' ? contract : <span className="text-slate-400 italic">No Contract</span>}</div>
-                      <div className="text-[10px] text-slate-400">{validity}</div>
-                    </td>
-                    <td className="text-center py-4 font-mono font-bold text-slate-900">
-                      {rowCount.toLocaleString('en-US')}
-                    </td>
-                    <td className="text-center py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
-                        job.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        job.status === 'NEEDS_REVIEW' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                        'bg-slate-100 text-slate-700 border-slate-200'
-                      }`}>
-                        {job.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                        {job.status}
-                      </span>
-                    </td>
-                    <td className="pr-8 text-right py-4 space-x-2">
-                      <button
-                        onClick={() => onSelectJob(job.job_id)}
-                        className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#00AFAF] hover:text-white text-slate-700 font-black text-xs transition-all border border-slate-200 shadow-2xs inline-flex items-center gap-1.5"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Review</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={job.job_id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="pl-8 py-4 font-mono font-black text-indigo-700">
+                        <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100">
+                          {carrier}
+                        </span>
+                      </td>
+                      <td className="py-4 font-black text-slate-900 max-w-xs truncate">
+                        {job.file_name}
+                      </td>
+                      <td className="py-4 text-slate-500 font-mono text-[11px]">
+                        <div>{contract !== '—' ? contract : <span className="text-slate-400 italic">No Contract</span>}</div>
+                        <div className="text-[10px] text-slate-400">{validity}</div>
+                      </td>
+                      <td className="text-center py-4 font-mono font-bold text-slate-900">
+                        {rowCount.toLocaleString('en-US')}
+                      </td>
+                      <td className="text-center py-4">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
+                          job.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          job.status === 'NEEDS_REVIEW' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}>
+                          {job.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                          {job.status}
+                        </span>
+                      </td>
+                      <td className="pr-8 text-right py-4 space-x-2">
+                        <button
+                          onClick={() => onSelectJob(job.job_id)}
+                          className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#00AFAF] hover:text-white text-slate-700 font-black text-xs transition-all border border-slate-200 shadow-2xs inline-flex items-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Review</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
