@@ -173,6 +173,14 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedRates = filteredRates.slice(startIndex, startIndex + pageSize);
 
+  const displayFileName = 
+    jobData?.file_name || 
+    jobData?.canonical?.file_name || 
+    jobData?.output_file_name || 
+    (jobId ? `Rate Card #${jobId}` : 'Rate Card Details');
+
+  const carrierName = jobData?.canonical?.carrier_code || jobData?.carrier_code || jobData?.summary?.carriers_found?.[0] || 'Standardized Rates';
+
   if (!jobId) {
     return (
       <div className="bg-white rounded-3xl p-16 text-center space-y-4 border border-slate-200 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
@@ -190,106 +198,102 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   }
 
   return (
-    <div className="w-full space-y-8 animate-fade-in text-slate-900 pb-20">
+    <div className="w-full space-y-4 animate-fade-in text-slate-900 pb-20">
       
-      {/* ── TOP HERO HEADER (Posh Ambient Glassmorphic Card) ── */}
-      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00AFAF]/12 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ── TOP STREAMLINED CONTROL HEADER ── */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl px-6 py-4 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         
-        <div className="relative z-10 space-y-2.5">
-          <button onClick={onBackToDashboard} className="text-xs text-[#00AFAF] hover:underline flex items-center gap-1 font-bold mb-1">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+        {/* Left: Back Link, Title, Filename & Carrier */}
+        <div className="space-y-1">
+          <button 
+            onClick={onBackToDashboard} 
+            className="text-[11px] text-[#00AFAF] hover:underline flex items-center gap-1 font-black uppercase tracking-wider"
+          >
+            <ArrowLeft className="w-3 h-3" /> Back to Dashboard
           </button>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
               Rate Review & Master Data Alignment
             </h1>
-            <span className="px-3.5 py-1 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] font-mono text-xs font-black">
-              {jobData?.file_name || 'Loading...'}
+            <span className="px-2.5 py-0.5 rounded-lg bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] font-mono text-xs font-black truncate max-w-xs" title={displayFileName}>
+              {displayFileName}
+            </span>
+            <span className="px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 font-mono text-xs font-black">
+              {carrierName}
             </span>
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="relative z-10 flex items-center gap-3 shrink-0">
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={handleRevalidate}
             disabled={isRevalidating || isWorkerProcessing || rates.length === 0}
-            className="px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-black text-xs transition-all border border-slate-200 shadow-2xs inline-flex items-center gap-2 disabled:opacity-50"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-black text-xs transition-all border border-slate-200 shadow-2xs inline-flex items-center gap-1.5 disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRevalidating ? 'animate-spin' : ''}`} />
-            <span>Re-Validate Rows</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isRevalidating ? 'animate-spin text-[#00AFAF]' : ''}`} />
+            <span>Re-Validate</span>
           </button>
 
           <button
             onClick={handleApproveAndDownload}
             disabled={isApproving || isWorkerProcessing || rates.length === 0}
             style={{ backgroundColor: '#00AFAF' }}
-            className="px-6 py-2.5 rounded-2xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20 hover:brightness-105 inline-flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 rounded-xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20 hover:brightness-105 inline-flex items-center gap-1.5 disabled:opacity-50"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             <span>{isApproving ? 'Generating .xlsm...' : 'Export Freightify .XLSM'}</span>
           </button>
         </div>
       </div>
 
-      {/* ── 4-COLUMN SUMMARY STATS WITH EXPLANATION ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-slate-400 uppercase font-black">Total Extracted Rates</p>
-          <p className="text-2xl font-black text-slate-900 font-mono mt-1">{counts.total}</p>
+      {/* ── COMPACT HORIZONTAL STAT CHIPS (Saves 150px vertical height) ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white rounded-2xl py-2.5 px-4 border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Total Rates</span>
+          <span className="font-mono text-base font-black text-slate-900">{counts.total.toLocaleString('en-US')}</span>
         </div>
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-emerald-600 uppercase font-black">Valid Rates</p>
-          <p className="text-2xl font-black text-emerald-600 font-mono mt-1">{counts.valid}</p>
+        <div className="bg-white rounded-2xl py-2.5 px-4 border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <span className="text-[11px] font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Valid
+          </span>
+          <span className="font-mono text-base font-black text-emerald-600">{counts.valid.toLocaleString('en-US')}</span>
         </div>
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-amber-600 uppercase font-black">Warning Rows</p>
-          <p className="text-2xl font-black text-amber-600 font-mono mt-1">{counts.warning}</p>
+        <div className="bg-white rounded-2xl py-2.5 px-4 border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <span className="text-[11px] font-black text-amber-700 uppercase tracking-wider flex items-center gap-1">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Warnings
+          </span>
+          <span className="font-mono text-base font-black text-amber-600">{counts.warning.toLocaleString('en-US')}</span>
         </div>
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-2xs text-center">
-          <p className="text-[11px] text-rose-600 uppercase font-black">Errors / Blocked</p>
-          <p className="text-2xl font-black text-rose-600 font-mono mt-1">{counts.error}</p>
+        <div className="bg-white rounded-2xl py-2.5 px-4 border border-slate-200/80 shadow-2xs flex items-center justify-between">
+          <span className="text-[11px] font-black text-rose-700 uppercase tracking-wider flex items-center gap-1">
+            <XCircle className="w-3.5 h-3.5 text-rose-600" /> Errors
+          </span>
+          <span className="font-mono text-base font-black text-rose-600">{counts.error.toLocaleString('en-US')}</span>
         </div>
       </div>
 
-      {/* ── INFORMATIVE VALIDATION NOTICE BANNER ── */}
-      {counts.warning > 0 && (
-        <div className="p-4.5 rounded-3xl bg-amber-50/90 border border-amber-200/90 flex items-start gap-3.5 text-xs text-amber-900">
-          <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
-            <AlertTriangle className="w-4 h-4" />
-          </div>
-          <div className="space-y-1">
-            <p className="font-black text-amber-950">
-              {counts.warning} Rows have validation warnings (e.g. Base Ocean Freight Rate is $0.00 / Subject to Surcharges)
-            </p>
-            <p className="text-amber-800/90 leading-relaxed">
-              These rows are highlighted in <strong className="font-bold">amber</strong> below. In the exported Freightify <strong className="font-bold">.xlsm</strong> file, all warning rows are automatically highlighted with soft-yellow fill so your operations team can immediately identify them. You can edit any value inline below before exporting.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* ── DATA GRID CARD ── */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col relative">
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
 
         {/* Filter Toolbar */}
-        <div className="px-8 py-5 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/70">
+        <div className="px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search ports, UNLOCODE, or SCAC..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00AFAF]/20 focus:border-[#00AFAF] w-64 shadow-2xs"
+                className="pl-8 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00AFAF]/20 focus:border-[#00AFAF] w-56 shadow-2xs"
               />
             </div>
 
             {/* Status Filter Segmented Selector */}
-            <div className="flex items-center bg-slate-200/70 p-1 rounded-xl text-xs font-black">
+            <div className="flex items-center bg-slate-200/70 p-0.5 rounded-xl text-xs font-black">
               {[
                 { id: 'ALL', label: `All (${counts.total})` },
                 { id: 'VALID', label: `Valid (${counts.valid})` },
@@ -321,21 +325,21 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
           <table className="custom-table w-full align-middle text-slate-900 text-xs">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 uppercase text-[10px] tracking-wider font-extrabold">
-                <th className="pl-8 text-left py-4">Validation Status & Diagnostics</th>
-                <th className="text-left py-4">Carrier</th>
-                <th className="text-left py-4">Origin Port</th>
-                <th className="text-left py-4">Destination Port</th>
-                <th className="text-center py-4">Type</th>
-                <th className="text-right py-4">Base Rate (OFR)</th>
-                <th className="text-center py-4">Curr</th>
-                <th className="text-center py-4">Validity Window</th>
-                <th className="pr-8 text-center py-4">Attached Charges</th>
+                <th className="pl-6 text-left py-3">Status & Diagnostics</th>
+                <th className="text-left py-3">Carrier</th>
+                <th className="text-left py-3">Origin Port</th>
+                <th className="text-left py-3">Destination Port</th>
+                <th className="text-center py-3">Type</th>
+                <th className="text-right py-3">Base Rate (OFR)</th>
+                <th className="text-center py-3">Curr</th>
+                <th className="text-center py-3">Validity Window</th>
+                <th className="pr-6 text-center py-3">Attached Surcharges</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedRates.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-20 text-slate-400 font-medium">
+                  <td colSpan={9} className="text-center py-16 text-slate-400 font-medium">
                     No rate rows found matching current search/filter.
                   </td>
                 </tr>
@@ -375,7 +379,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                       }`}
                     >
                       {/* Status Column with explicit validation message */}
-                      <td className="pl-8 py-3.5 space-y-1">
+                      <td className="pl-6 py-2.5 space-y-1">
                         <div className="flex items-center gap-1.5">
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
                             isValid ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -396,12 +400,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                         )}
                       </td>
 
-                      <td className="py-3.5 font-mono font-black text-indigo-700">
+                      <td className="py-2.5 font-mono font-black text-indigo-700">
                         {r.carrier_scac || 'GSL'}
                       </td>
 
                       {/* Origin Port */}
-                      <td className="py-3.5">
+                      <td className="py-2.5">
                         <div className="flex items-center gap-1.5">
                           <input
                             type="text"
@@ -416,7 +420,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                       </td>
 
                       {/* Destination Port */}
-                      <td className="py-3.5">
+                      <td className="py-2.5">
                         <div className="flex items-center gap-1.5">
                           <input
                             type="text"
@@ -431,12 +435,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                       </td>
 
                       {/* Load Type */}
-                      <td className="text-center py-3.5 font-mono font-black text-slate-800">
+                      <td className="text-center py-2.5 font-mono font-black text-slate-800">
                         {r.load_type || '20GP'}
                       </td>
 
                       {/* Base Rate Input (Highlighted with amber if $0.00) */}
-                      <td className="text-right py-3.5 font-mono font-black text-slate-900">
+                      <td className="text-right py-2.5 font-mono font-black text-slate-900">
                         <div className="inline-flex items-center gap-1">
                           <input
                             type="number"
@@ -453,12 +457,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                       </td>
 
                       {/* Currency */}
-                      <td className="text-center py-3.5 font-mono text-slate-500 font-bold">
+                      <td className="text-center py-2.5 font-mono text-slate-500 font-bold">
                         {r.currency || r.ofr_currency || 'USD'}
                       </td>
 
                       {/* Validity */}
-                      <td className="text-center py-3.5 font-mono text-[10px] text-slate-600">
+                      <td className="text-center py-2.5 font-mono text-[10px] text-slate-600">
                         {r.validity_start ? (
                           <div>
                             <div>{r.validity_start}</div>
@@ -472,9 +476,9 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                       </td>
 
                       {/* Attached Surcharges */}
-                      <td className="pr-8 text-center py-3.5">
+                      <td className="pr-6 text-center py-2.5">
                         {(r.charges || []).length > 0 ? (
-                          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 font-mono font-bold text-[10px] shadow-2xs" title={r.charges.map((c: any) => `${c.charge_code}: ${c.amount} ${c.currency}`).join(', ')}>
+                          <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-700 font-mono font-bold text-[10px] shadow-2xs" title={r.charges.map((c: any) => `${c.charge_code}: ${c.amount} ${c.currency}`).join(', ')}>
                             +{r.charges.length} Surcharges
                           </span>
                         ) : (
@@ -491,7 +495,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
 
         {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="px-8 py-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="px-6 py-3 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
             <span className="text-slate-500 font-medium">
               Page {currentPage} of {totalPages} ({filteredRates.length} rows)
             </span>
@@ -499,14 +503,14 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
+                className="px-3 py-1 rounded-lg bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
               >
                 Previous
               </button>
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
+                className="px-3 py-1 rounded-lg bg-white border border-slate-200 font-black text-slate-700 disabled:opacity-40"
               >
                 Next
               </button>
