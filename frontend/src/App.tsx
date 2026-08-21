@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './pages/Dashboard';
+import { AnalyticsDashboard } from './pages/AnalyticsDashboard';
+import { IngestHub } from './pages/IngestHub';
 import { JobQueue } from './pages/JobQueue';
 import { RateReviewGrid } from './pages/RateReviewGrid';
 import { HistoryPage } from './pages/History';
@@ -38,7 +39,7 @@ export function App() {
   const loadData = async () => {
     try {
       const [jobsData, mdData, metricsData] = await Promise.all([
-        api.listJobs(30),
+        api.listJobs(40),
         api.getMasterData(),
         api.getMetrics(),
       ]);
@@ -78,30 +79,52 @@ export function App() {
   };
 
   return (
-    <div className="h-screen w-screen flex bg-[#f8fafc] text-slate-900 overflow-hidden">
-      {/* Left Navigation Pane (Dark Sidebar) */}
+    <div className="h-screen w-screen flex bg-[#f8fafc] text-slate-900 overflow-hidden font-sans antialiased">
+      {/* Left Navigation Pane (Posh Light Sidebar) */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         masterDataStatus={masterDataStatus}
       />
 
-      {/* Right Workspace Pane (Light Theme Workspace) */}
+      {/* Right Workspace Pane (Posh Porcelain Light Workspace) */}
       <div className="flex-1 h-screen flex flex-col min-w-0 overflow-hidden bg-[#f8fafc]">
-        <main className="flex-1 w-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar p-6">
+        <main className="flex-1 w-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar p-6 lg:p-8">
           {activeTab === 'dashboard' && (
-            <Dashboard
-              onJobCreated={handleSelectJob}
+            <AnalyticsDashboard
               recentJobs={jobs}
               metrics={metrics}
+              masterDataStatus={masterDataStatus}
+              onSelectJob={handleSelectJob}
+              onNavigateToIngest={() => setActiveTab('ingest')}
+            />
+          )}
+
+          {activeTab === 'ingest' && (
+            <IngestHub
+              onJobCreated={handleSelectJob}
+              recentJobs={jobs}
               exportPolicy={exportPolicy}
               setExportPolicy={setExportPolicy}
               onStartBatchProcessing={handleStartBatchProcessing}
             />
           )}
-          {activeTab === 'queue' && <JobQueue jobs={jobs} onSelectJob={handleSelectJob} />}
-          {activeTab === 'review' && <RateReviewGrid jobId={selectedJobId} onBackToDashboard={() => setActiveTab('dashboard')} />}
-          {activeTab === 'history' && <HistoryPage jobs={jobs} onSelectJob={handleSelectJob} />}
+
+          {activeTab === 'queue' && (
+            <JobQueue jobs={jobs} onSelectJob={handleSelectJob} />
+          )}
+
+          {activeTab === 'review' && (
+            <RateReviewGrid 
+              jobId={selectedJobId} 
+              onBackToDashboard={() => setActiveTab('dashboard')} 
+            />
+          )}
+
+          {activeTab === 'history' && (
+            <HistoryPage jobs={jobs} onSelectJob={handleSelectJob} />
+          )}
+
           {activeTab === 'settings' && (
             <SettingsPage
               exportPolicy={exportPolicy}

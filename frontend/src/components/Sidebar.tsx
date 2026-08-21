@@ -1,5 +1,15 @@
 import React from 'react';
-import { Ship, LayoutDashboard, ListFilter, CheckSquare, History, Settings, Sparkles, Database } from 'lucide-react';
+import { 
+  BarChart3, 
+  UploadCloud, 
+  ListFilter, 
+  CheckSquare, 
+  History, 
+  Settings, 
+  Sparkles, 
+  Database,
+  Anchor
+} from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -9,30 +19,29 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, masterDataStatus }) => {
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'queue', label: 'Processing Queue', icon: ListFilter },
-    { id: 'review', label: 'Review Grid', icon: CheckSquare },
-    { id: 'history', label: 'History', icon: History },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'dashboard', label: 'Dashboard', sub: 'Summary & Dynamics', icon: BarChart3 },
+    { id: 'ingest', label: 'Rate Ingestion', sub: 'Upload & Standardize', icon: UploadCloud },
+    { id: 'queue', label: 'Processing Queue', sub: 'Live Worker Pipeline', icon: ListFilter },
+    { id: 'review', label: 'Review Grid', sub: 'Inspect & Edit Rates', icon: CheckSquare },
+    { id: 'history', label: 'History & Exports', sub: 'Freightify .XLSM Files', icon: History },
+    { id: 'settings', label: 'Master Data', sub: 'Synonyms & Config', icon: Settings },
   ];
 
   return (
-    <aside className="w-64 shrink-0 h-screen bg-[#090d16] border-r border-slate-800/80 text-white flex flex-col justify-between select-none z-40 shadow-2xl relative overflow-hidden">
-      {/* Background Subtle Mesh */}
-      <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-indigo-600/10 to-transparent pointer-events-none" />
-
+    <aside className="w-64 shrink-0 h-screen bg-white border-r border-slate-200/90 text-slate-900 flex flex-col justify-between select-none z-40 shadow-xs relative overflow-hidden">
+      
       {/* ── TOP: Brand & Logo ── */}
       <div className="relative z-10">
-        <div className="p-5 border-b border-slate-800/80 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0 border border-indigo-400/30">
-            <Ship className="w-5 h-5 text-white" />
+        <div className="p-5 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/25 shrink-0 border border-indigo-400/30">
+            <Anchor className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-sm font-black text-white tracking-tight truncate flex items-center gap-1.5">
-              Freightify Ingest
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0 animate-pulse" />
+            <h1 className="text-base font-black text-slate-900 tracking-tight truncate flex items-center gap-1.5">
+              RateBridge
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
             </h1>
-            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Enterprise v3.0</p>
+            <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Rate Intelligence</p>
           </div>
         </div>
 
@@ -45,16 +54,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, maste
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-black transition-all duration-300 relative group ${
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-black transition-all duration-200 relative group ${
                   isActive
-                    ? 'bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-600/35 scale-[1.02] border border-indigo-400/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    ? 'bg-indigo-50 text-indigo-700 shadow-2xs border border-indigo-200/80 scale-[1.01]'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent'
                 }`}
               >
-                <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-300' : 'text-slate-400'}`} />
-                <span className="truncate">{tab.label}</span>
+                <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                  isActive ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-slate-900 group-hover:bg-slate-200/70'
+                }`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                
+                <div className="text-left min-w-0 flex-1">
+                  <div className="truncate text-xs font-black">{tab.label}</div>
+                  <div className={`text-[10px] truncate font-medium ${isActive ? 'text-indigo-500' : 'text-slate-400'}`}>
+                    {tab.sub}
+                  </div>
+                </div>
+
                 {isActive && (
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 ml-auto shrink-0 shadow-md shadow-cyan-400 animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-indigo-600 ml-auto shrink-0 shadow-2xs animate-pulse" />
                 )}
               </button>
             );
@@ -62,27 +82,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, maste
         </nav>
       </div>
 
-      {/* ── BOTTOM: Master Data Engine Widget ── */}
-      <div className="p-4 m-3 rounded-2xl bg-slate-900/90 border border-slate-800/90 space-y-3 relative z-10 shadow-xl">
+      {/* ── BOTTOM: Master Data Engine Widget (Light Theme) ── */}
+      <div className="p-4 m-3 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5 relative z-10 shadow-2xs">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-cyan-400" /> Master Data Engine
+          <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-indigo-600" /> Master Data Engine
           </span>
-          <span className="flex items-center gap-1 text-[10px] font-mono font-black text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shadow-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Active
+          <span className="flex items-center gap-1 text-[10px] font-mono font-black text-emerald-700 bg-emerald-100/80 border border-emerald-300 px-2 py-0.5 rounded-full shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Active
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-center pt-1 border-t border-slate-800/80">
-          <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800/80">
+        <div className="grid grid-cols-2 gap-2 text-center pt-1 border-t border-slate-200/70">
+          <div className="p-2 rounded-xl bg-white border border-slate-200/80">
             <p className="text-[10px] text-slate-400 font-bold uppercase">UNLOCODEs</p>
-            <p className="text-xs font-black text-cyan-300 font-mono mt-0.5">
+            <p className="text-xs font-black text-indigo-600 font-mono mt-0.5">
               {masterDataStatus?.ports_count?.toLocaleString() || '13,670'}
             </p>
           </div>
-          <div className="p-2 rounded-xl bg-slate-950/80 border border-slate-800/80">
+          <div className="p-2 rounded-xl bg-white border border-slate-200/80">
             <p className="text-[10px] text-slate-400 font-bold uppercase">Carriers</p>
-            <p className="text-xs font-black text-purple-300 font-mono mt-0.5">
+            <p className="text-xs font-black text-purple-600 font-mono mt-0.5">
               {masterDataStatus?.carriers_count || '164'}
             </p>
           </div>

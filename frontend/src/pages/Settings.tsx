@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Database, Shield, CheckCircle2, Settings, Cpu, Sparkles } from 'lucide-react';
+import { Settings, Database, RefreshCw } from 'lucide-react';
 import { api } from '../services/api';
 
 interface SettingsProps {
@@ -9,7 +9,12 @@ interface SettingsProps {
   onMasterDataReloaded: () => void;
 }
 
-export const SettingsPage: React.FC<SettingsProps> = ({ exportPolicy, setExportPolicy, masterDataStatus, onMasterDataReloaded }) => {
+export const SettingsPage: React.FC<SettingsProps> = ({
+  exportPolicy,
+  setExportPolicy,
+  masterDataStatus,
+  onMasterDataReloaded,
+}) => {
   const [isReloading, setIsReloading] = useState(false);
 
   const handleReloadMasterData = async () => {
@@ -17,7 +22,7 @@ export const SettingsPage: React.FC<SettingsProps> = ({ exportPolicy, setExportP
       setIsReloading(true);
       await api.reloadMasterData();
       onMasterDataReloaded();
-      alert('Master Data reloaded successfully into memory!');
+      alert('Master Data successfully reloaded and port index rebuilt!');
     } catch (err) {
       alert('Error reloading master data: ' + err);
     } finally {
@@ -26,122 +31,126 @@ export const SettingsPage: React.FC<SettingsProps> = ({ exportPolicy, setExportP
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-4 animate-fade-in select-none overflow-y-auto custom-scrollbar text-slate-900 pr-1">
+    <div className="w-full flex-1 flex flex-col min-h-0 space-y-6 animate-fade-in select-none text-slate-900 pb-8">
       
-      {/* ── TOP HERO BANNER ── */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-5 text-white shadow-xl border border-indigo-900/40 relative overflow-hidden shrink-0 flex items-center justify-between gap-6">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-cyan-300 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-              <Settings className="w-3.5 h-3.5 text-cyan-400" /> Platform Configuration
+      {/* ── TOP HERO HEADER (Posh Light Theme) ── */}
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-sm relative overflow-hidden shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 space-y-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+              <Settings className="w-3.5 h-3.5 text-indigo-600" />
+              RateBridge Engine Configuration
+            </span>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] font-mono font-black flex items-center gap-1.5 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              Master Data Synchronized
             </span>
           </div>
-          <h2 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
-            Engine & Master Data Alignment Controls
-          </h2>
-          <p className="text-xs text-slate-300 font-medium mt-1">
-            Configure default export policies and manage UNLOCODE master data cache in RAM
+
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            Master Data & Ingestion Settings
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-3xl leading-relaxed">
+            Manage global UNLOCODE port dictionaries, container equipment aliases, self-learned carrier synonyms, and export validation policies.
           </p>
         </div>
       </div>
 
-      {/* ── SETTINGS CARDS CONTAINER ── */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 space-y-4">
-        {/* Export Policy Card */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-              <Shield className="w-5 h-5 text-indigo-600" />
+      {/* ── MASTER DATA STATS & RELOAD ── */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-5">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+              <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Export Policy Rule</h3>
-              <p className="text-xs text-slate-500 font-medium">How validation exceptions are handled during Freightify .xlsm export generation</p>
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Freightify Master Data Status</h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">UNLOCODE port index and carrier SCAC synonym database</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { id: 'STRICT', label: 'Strict Validation', desc: 'Any error blocks .xlsm export until resolved.' },
-              { id: 'PARTIAL', label: 'Partial Export', desc: 'Exports valid rows into Freightify workbook, flags exceptions.' },
-              { id: 'WARNING_PERMISSIVE', label: 'Permissive Export', desc: 'Exports all rate rows, including non-fatal warnings.' },
-            ].map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setExportPolicy(p.id)}
-                className={`text-left p-4 rounded-2xl border-2 transition-all ${
-                  exportPolicy === p.id
-                    ? 'border-indigo-600 bg-indigo-50/60 shadow-sm'
-                    : 'border-slate-200 hover:border-slate-300 bg-white'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-black text-slate-900">{p.label}</span>
-                  {exportPolicy === p.id ? (
-                    <CheckCircle2 className="w-4 h-4 text-indigo-600" />
-                  ) : (
-                    <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
-                  )}
-                </div>
-                <p className="text-xs text-slate-500 font-medium">{p.desc}</p>
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={handleReloadMasterData}
+            disabled={isReloading}
+            className="px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isReloading ? 'animate-spin' : ''}`} />
+            <span>Reload Master Data</span>
+          </button>
         </div>
 
-        {/* Master Data Engine Cache */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center">
-                <Database className="w-5 h-5 text-sky-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Master Data RAM Cache</h3>
-                <p className="text-xs text-slate-500 font-medium">Version {masterDataStatus?.version || '1.09'} (Freightify Master Sheet)</p>
-              </div>
-            </div>
-            <button
-              onClick={handleReloadMasterData}
-              disabled={isReloading}
-              className="btn-primary text-xs py-2 px-4 rounded-xl shadow-xs"
-            >
-              <RefreshCw className={`w-4 h-4 ${isReloading ? 'animate-spin' : ''}`} />
-              Reload Master Cache
-            </button>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <p className="text-[11px] font-black text-slate-400 uppercase">UNLOCODE Ports</p>
+            <p className="text-2xl font-black text-slate-900 font-mono mt-1">
+              {masterDataStatus?.ports_count?.toLocaleString() || '13,670'}
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { label: 'Port UNLOCODEs', value: masterDataStatus?.ports_count?.toLocaleString() || '13,670', color: 'text-sky-600 bg-sky-50 border-sky-100' },
-              { label: 'Carrier SCACs', value: masterDataStatus?.carriers_count || '164', color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
-              { label: 'Load Types', value: masterDataStatus?.load_types?.length || '18', color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-            ].map((s) => (
-              <div key={s.label} className={`rounded-2xl p-4 text-center border ${s.color}`}>
-                <p className="text-xs font-extrabold uppercase tracking-wider">{s.label}</p>
-                <p className="text-2xl font-black font-mono mt-1">{s.value}</p>
-              </div>
-            ))}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <p className="text-[11px] font-black text-slate-400 uppercase">Carrier SCACs</p>
+            <p className="text-2xl font-black text-purple-600 font-mono mt-1">
+              {masterDataStatus?.carriers_count || '164'}
+            </p>
           </div>
-        </div>
-
-        {/* Azure AI Integration Status */}
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Azure Document Intelligence AI</h3>
-                <p className="text-xs text-slate-500 font-medium">Resource: <span className="font-bold text-slate-700">Freightify-rate-extraction</span> (v3.0 REST API prebuilt-layout)</p>
-              </div>
-            </div>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono font-black flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Live & Connected
-            </span>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <p className="text-[11px] font-black text-slate-400 uppercase">Port Synonyms</p>
+            <p className="text-2xl font-black text-indigo-600 font-mono mt-1">
+              {masterDataStatus?.port_synonyms_count?.toLocaleString() || '14,515'}
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <p className="text-[11px] font-black text-slate-400 uppercase">Self-Learned Aliases</p>
+            <p className="text-2xl font-black text-emerald-600 font-mono mt-1">
+              {masterDataStatus?.learned_synonyms_count?.toLocaleString() || '1,438'}
+            </p>
           </div>
         </div>
       </div>
+
+      {/* ── EXPORT VALIDATION POLICY CARD ── */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-4">
+        <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Default Export Validation Policy</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              id: 'STRICT',
+              title: 'Strict Mode',
+              desc: 'Exports only 100% valid rows. Any row with missing validity or unmapped port is omitted from the .xlsm export.',
+            },
+            {
+              id: 'PARTIAL',
+              title: 'Partial Export (Recommended)',
+              desc: 'Exports valid and warning rows with highlighted flags. Completely invalid error rows are quarantined.',
+            },
+            {
+              id: 'WARNING_PERMISSIVE',
+              title: 'Permissive Mode',
+              desc: 'Exports all extracted rows into the Freightify workbook regardless of validation warnings.',
+            },
+          ].map((pol) => (
+            <div
+              key={pol.id}
+              onClick={() => setExportPolicy(pol.id)}
+              className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                exportPolicy === pol.id
+                  ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
+                  : 'border-slate-200 hover:border-slate-300 bg-white'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-black text-slate-900">{pol.title}</span>
+                {exportPolicy === pol.id && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{pol.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 };
