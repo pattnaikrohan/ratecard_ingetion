@@ -149,26 +149,39 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     }, 100);
 
     const poll = setInterval(async () => {
-      if (jobIds.length === 0) return;
+      const validIds = jobIds.filter((id) => id && !id.startsWith('failed_'));
+      if (validIds.length === 0) return;
       try {
-        const updated: Record<string, any> = { ...jobStates };
-        for (const id of jobIds) { 
+        const promises = validIds.map(async (id) => {
           try {
-            updated[id] = await api.getJob(id); 
+            const data = await api.getJob(id);
+            return [id, data];
           } catch {
-            updated[id] = { status: 'FAILED', progress: 100, log_msg: 'Job not found or server error.' };
+            return [id, { status: 'FAILED', progress: 100, log_msg: 'Server error fetching job.' }];
           }
-        }
-        setJobStates(updated);
+        });
+        const results = await Promise.all(promises);
+        setJobStates((prev) => {
+          const next = { ...prev };
+          results.forEach(([id, data]) => {
+            if (id) next[id as string] = data;
+          });
+          return next;
+        });
       } catch { /* silent */ }
-    }, 500);
+    }, 600);
 
     return () => { clearInterval(sim); clearInterval(poll); };
   }, [isOpen, files.length, jobIds, activeIndex, showComplete, jobStates]);
 
   useEffect(() => {
-    const allDone = jobIds.length > 0 && jobIds.length === files.length &&
-      jobIds.every((id) => ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(jobStates[id]?.status));
+    const hasAllIds = jobIds.length === files.length && jobIds.every(Boolean);
+    const allDone = hasAllIds && jobIds.every((id) => {
+      if (id?.startsWith('failed_')) return true;
+      const s = jobStates[id]?.status;
+      return ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(s);
+    });
+
     if (allDone) {
       setShowComplete(true);
       setSimulatedProgress(100);
@@ -311,10 +324,11 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
             <div className="max-h-[260px] overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
               {files.map((f, i) => {
-                const job = jobStates[jobIds[i]];
-                const isFailed = job?.status === 'FAILED';
-                const isDone = ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(job?.status);
-                const isActive = (i === activeIndex || (!job && i <= activeIndex)) && !showComplete && !isFailed && !isDone;
+                const jobId = jobIds[i];
+                const job = jobId ? jobStates[jobId] : null;
+                const isFailed = jobId?.startsWith('failed_') || job?.status === 'FAILED';
+                const isDone = ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(job?.status) || (showComplete && !isFailed);
+                const isActive = !isDone && !isFailed && (i === activeIndex || (!job && i <= activeIndex));
                 return (
                   <div
                     key={i}
@@ -403,9 +417,10 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
             <div className="max-h-[260px] overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
               {files.map((f, i) => {
-                const job = jobStates[jobIds[i]];
-                const isFailed = job?.status === 'FAILED';
-                const isDone = ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(job?.status);
+                const jobId = jobIds[i];
+                const job = jobId ? jobStates[jobId] : null;
+                const isFailed = jobId?.startsWith('failed_') || job?.status === 'FAILED';
+                const isDone = ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(job?.status) || (showComplete && !isFailed);
                 return (
                   <div
                     key={i}
