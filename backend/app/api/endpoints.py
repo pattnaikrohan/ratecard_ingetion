@@ -16,16 +16,16 @@ db = DatabaseManager.get_instance()
 md = MasterDataEngine.get_instance()
 
 @router.post("/upload")
-async def upload_rate_card(file: UploadFile = File(...), export_policy: str = Form("PARTIAL")):
+async def upload_rate_card(file: UploadFile = File(...), export_policy: str = Form("PARTIAL"), notes: Optional[str] = Form(None)):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     
     file_bytes = await file.read()
-    job_id = job_manager.submit_job(file_bytes, file.filename, export_policy)
+    job_id = job_manager.submit_job(file_bytes, file.filename, export_policy, notes=notes)
     return {"job_id": job_id, "file_name": file.filename, "status": "QUEUED", "message": "File uploaded successfully"}
 
 @router.post("/upload-batch")
-async def upload_batch_rate_cards(files: List[UploadFile] = File(...), export_policy: str = Form("PARTIAL")):
+async def upload_batch_rate_cards(files: List[UploadFile] = File(...), export_policy: str = Form("PARTIAL"), notes: Optional[str] = Form(None)):
     if not files:
         raise HTTPException(status_code=400, detail="No files provided")
     
@@ -33,7 +33,7 @@ async def upload_batch_rate_cards(files: List[UploadFile] = File(...), export_po
     for file in files:
         if file.filename:
             file_bytes = await file.read()
-            job_id = job_manager.submit_job(file_bytes, file.filename, export_policy)
+            job_id = job_manager.submit_job(file_bytes, file.filename, export_policy, notes=notes)
             results.append({"job_id": job_id, "file_name": file.filename, "status": "QUEUED"})
             
     return {"total_files": len(results), "jobs": results, "message": f"Successfully queued batch of {len(results)} files"}

@@ -10,16 +10,10 @@ class StorageService:
         if not AZURE_STORAGE_SAS_URL:
             return None
         try:
-            # AZURE_STORAGE_SAS_URL includes the container name and SAS token
-            blob_service_client = BlobServiceClient(account_url=AZURE_STORAGE_SAS_URL)
-            # The SAS URL typically points to a container if it has a container name in the path, 
-            # but usually BlobServiceClient expects the account URL.
-            # Let's extract account URL and SAS token to use ContainerClient directly.
             from azure.storage.blob import ContainerClient
-            container_client = ContainerClient.from_container_url(AZURE_STORAGE_SAS_URL)
+            container_client = ContainerClient.from_container_url(AZURE_STORAGE_SAS_URL, connection_timeout=2, read_timeout=2)
             return container_client.get_blob_client(blob_name)
-        except Exception as e:
-            print(f"Error getting blob client for {blob_name}: {e}")
+        except Exception:
             return None
 
     @staticmethod
@@ -33,7 +27,7 @@ class StorageService:
         blob_client = StorageService._get_blob_client(f"uploads/{filename}")
         if blob_client:
             try:
-                blob_client.upload_blob(file_bytes, overwrite=True)
+                blob_client.upload_blob(file_bytes, overwrite=True, timeout=2)
                 print(f"Uploaded {filename} to Azure Blob Storage (uploads/)")
             except Exception as e:
                 print(f"Failed to upload {filename} to Blob Storage: {e}")
@@ -55,7 +49,7 @@ class StorageService:
         if blob_client:
             try:
                 with open(target, "rb") as data:
-                    blob_client.upload_blob(data, overwrite=True)
+                    blob_client.upload_blob(data, overwrite=True, timeout=2)
                 print(f"Uploaded {output_filename} to Azure Blob Storage (processed/)")
             except Exception as e:
                 print(f"Failed to upload {output_filename} to Blob Storage: {e}")
@@ -87,7 +81,7 @@ class StorageService:
         if blob_client:
             try:
                 with open(target, "rb") as data:
-                    blob_client.upload_blob(data, overwrite=True)
+                    blob_client.upload_blob(data, overwrite=True, timeout=2)
                 print(f"[Storage] Uploaded {output_filename} to Azure Blob (processed/)")
             except Exception as e:
                 print(f"[Storage] Failed to upload {output_filename} to Blob: {e}")

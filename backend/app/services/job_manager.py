@@ -1,6 +1,8 @@
+import re
 import uuid
 import time
 import asyncio
+from typing import Optional, List, Dict
 from pathlib import Path
 import pandas as pd
 from app.core.database import DatabaseManager
@@ -39,7 +41,7 @@ class JobManager:
             cls._instance = JobManager()
         return cls._instance
 
-    def submit_job(self, file_bytes: bytes, filename: str, export_policy: str = "PARTIAL") -> str:
+    def submit_job(self, file_bytes: bytes, filename: str, export_policy: str = "PARTIAL", notes: Optional[str] = None) -> str:
         job_id = f"job_{int(time.time())}_{uuid.uuid4().hex[:4]}"
         file_path = StorageService.save_upload(file_bytes, f"{job_id}_{filename}")
         
@@ -47,13 +49,13 @@ class JobManager:
         
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(self._process_pipeline(job_id, file_path, filename, export_policy))
+            loop.create_task(self._process_pipeline(job_id, file_path, filename, export_policy, notes=notes))
         except RuntimeError:
-            asyncio.run(self._process_pipeline(job_id, file_path, filename, export_policy))
+            asyncio.run(self._process_pipeline(job_id, file_path, filename, export_policy, notes=notes))
 
         return job_id
 
-    async def _process_pipeline(self, job_id: str, file_path: Path, original_filename: str, export_policy: str):
+    async def _process_pipeline(self, job_id: str, file_path: Path, original_filename: str, export_policy: str, notes: Optional[str] = None):
         start_time = time.time()
         try:
             # 1. PARSING PHASE
@@ -117,7 +119,48 @@ class JobManager:
                         summary=JobSummary(total_rows=0)
                     )
 
+            # If deterministic parser found no rates or sheet is empty, trigger Autonomous AI Extraction (GPT-4o)
+            if sheet is None or len(sheet.rates) == 0:
+                self.db.update_job_status(job_id, "PARSING", progress=30, log_msg="Standard table parser found 0 rows — activating Autonomous AI Extractor (GPT-4o Multimodal/Text)...")
+                try:
+                    raw_text = ""
+                    with open(file_path, "rb") as f:
+                        raw_bytes = f.read()
+                    raw_text = raw_bytes.decode("utf-8", errors="ignore")
+
+                    ai_mapper = AIColumnMapper.get_instance()
+                    ai_sheet = await asyncio.to_thread(ai_mapper.extract_rates_from_raw_text, raw_text, original_filename, job_id, notes=notes)
+                    if ai_sheet and len(ai_sheet.rates) > 0:
+                        sheet = ai_sheet
+                        self.db.update_job_status(job_id, "PARSING", progress=35, log_msg=f"Autonomous AI Extractor successfully extracted {len(sheet.rates)} rates!")
+                except Exception as ai_err:
+                    print(f"[AI Ingestion] AI fallback error: {ai_err}")
+
+            if sheet is None:
+                sheet = CanonicalRateSheet(job_id=job_id, file_name=original_filename, rates=[], summary=JobSummary(total_rows=0))
+
             self.db.update_job_status(job_id, "NORMALIZING", progress=40, log_msg=f"Extracted {len(sheet.rates)} rate rows into Canonical JSON format.")
+
+            # Enrich from supplementary notes if provided
+            if notes and notes.strip():
+                self.db.update_job_status(job_id, "NORMALIZING", progress=45, log_msg="Enriching rate card with supplementary email / contract notes...")
+                # Contract extraction
+                c_match = re.search(r'\b(?:contract|agreement|service\s*contract|sc)\s*(?:no|number|#)?[:\s]+([A-Za-z0-9\-_/]{4,})', notes, re.IGNORECASE)
+                if c_match and not sheet.contract_number:
+                    sheet.contract_number = c_match.group(1).strip()
+                # Validity extraction
+                v_match = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', notes, re.IGNORECASE)
+                if v_match and not sheet.validity_start:
+                    sheet.validity_start = v_match.group(1).strip()
+                    sheet.validity_end = v_match.group(2).strip()
+                # Propagate to rows
+                for r in sheet.rates:
+                    if not r.contract_number and sheet.contract_number:
+                        r.contract_number = sheet.contract_number
+                    if not r.validity_start and sheet.validity_start:
+                        r.validity_start = sheet.validity_start
+                    if not r.validity_end and sheet.validity_end:
+                        r.validity_end = sheet.validity_end
 
             # 2. DESTINATION GROUP EXPANSION
             # Expand "AUS MAIN PORTS", "AUBP" etc. into individual port rows BEFORE validation

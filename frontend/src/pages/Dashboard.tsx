@@ -8,13 +8,14 @@ interface DashboardProps {
   metrics: any;
   exportPolicy: string;
   setExportPolicy: (policy: string) => void;
-  onStartBatchProcessing: (files: File[]) => void;
+  onStartBatchProcessing: (files: File[], notes?: string) => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   onJobCreated, recentJobs, metrics, exportPolicy, setExportPolicy, onStartBatchProcessing
 }) => {
   const [dragOver, setDragOver] = useState(false);
+  const [notesText, setNotesText] = useState('');
 
   // Modals state
   const [showClearModal, setShowClearModal] = useState(false);
@@ -48,14 +49,14 @@ export const Dashboard: React.FC<DashboardProps> = ({
       return;
     }
 
-    onStartBatchProcessing(fileArray);
+    onStartBatchProcessing(fileArray, notesText);
   };
 
   const handleConfirmReplaceDuplicate = async () => {
     if (!duplicateConflict) return;
     const { file, remainingFiles } = duplicateConflict;
     setDuplicateConflict(null);
-    onStartBatchProcessing([file, ...remainingFiles]);
+    onStartBatchProcessing([file, ...remainingFiles], notesText);
   };
 
   const handleSkipDuplicate = async () => {
@@ -63,7 +64,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     const { remainingFiles } = duplicateConflict;
     setDuplicateConflict(null);
     if (remainingFiles.length > 0) {
-      onStartBatchProcessing(remainingFiles);
+      onStartBatchProcessing(remainingFiles, notesText);
     }
   };
 
@@ -255,6 +256,32 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Supplementary Email Notes & Contract Details Card */}
+        <div className="mt-3.5 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-[11px] font-black text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              Supplementary Email Notes & Contract Details (Optional)
+            </label>
+            {notesText && (
+              <button
+                type="button"
+                onClick={() => setNotesText('')}
+                className="text-[10px] font-bold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100"
+              >
+                Clear Notes
+              </button>
+            )}
+          </div>
+          <textarea
+            value={notesText}
+            onChange={(e) => setNotesText(e.target.value)}
+            rows={2}
+            placeholder="Paste supplier email text, contract number (e.g. 299952465), validity dates (e.g. 01-Aug-2026 to 31-Aug-2026), or standard charges (e.g. Documentation Fee $80 NZD, BAF $200 USD) here..."
+            className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 custom-scrollbar resize-y"
+          />
         </div>
       </div>
 

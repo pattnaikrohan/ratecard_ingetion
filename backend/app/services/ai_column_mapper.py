@@ -226,7 +226,8 @@ Omit keys from col_map if they are not present in the headers. Do not include co
                     {"role": "user", "content": user_prompt}
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.0
+                temperature=0.0,
+                timeout=5.0
             )
             
             result_text = response.choices[0].message.content
@@ -330,7 +331,8 @@ Return a JSON object:
                         {"role": "user", "content": user_prompt}
                     ],
                     response_format={"type": "json_object"},
-                    temperature=0.0
+                    temperature=0.0,
+                    timeout=5.0
                 )
 
                 result_json = json.loads(response.choices[0].message.content)
@@ -454,7 +456,8 @@ Return a JSON object:
                     {"role": "user", "content": user_prompt}
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.0
+                temperature=0.0,
+                timeout=5.0
             )
             
             result_json = json.loads(response.choices[0].message.content)
@@ -471,3 +474,138 @@ Return a JSON object:
             
         return rates
 
+    def extract_rates_from_raw_text(self, text: str, filename: str, job_id: str, notes: Optional[str] = None) -> Optional[Any]:
+        """
+        Autonomous AI Extraction: When deterministic parsing cannot find standard tables,
+        GPT-4o parses unstructured text, conversational emails, or non-standard documents
+        directly into Canonical Rate format.
+        """
+        if not self.client or not text or len(text.strip()) < 10:
+            return None
+
+        print(f"[AI Extractor] Activating Autonomous AI Extraction for {filename}...")
+        
+        system_prompt = """You are an expert ocean freight rate extraction AI for Freightify.
+Analyze the provided unstructured rate document / email / text and extract all carrier freight rates into standard JSON.
+
+Extract the following:
+1. "carrier_code": Standard 4-letter SCAC (e.g. MAEU for Maersk, OOLU for OOCL, ANNU for ANL, MSCU for MSC, CMDU for CMA CGM, ONEY for ONE, COSU for COSCO, HLCU for Hapag-Lloyd).
+2. "contract_number": Service contract / agreement number if present (otherwise null).
+3. "validity_start": ISO YYYY-MM-DD start date (e.g. 2026-08-01) if present (otherwise null).
+4. "validity_end": ISO YYYY-MM-DD expiry date (e.g. 2026-09-30) if present (otherwise null).
+5. "rates": Array of rate objects with:
+   - "origin": City or port name of loading (e.g. "Fremantle", "Melbourne", "Shanghai")
+   - "origin_locode": 5-character UN/LOCODE (e.g. "AUFRE", "AUMEL", "CNSHA")
+   - "destination": City or port name of discharge (e.g. "Rijeka", "Auckland", "Los Angeles")
+   - "destination_locode": 5-character UN/LOCODE (e.g. "HRRJK", "NZAKL", "USLAX")
+   - "load_type": Standard container type ("20GP", "40GP", "40HC", "45HC", "20RF", "40RF", "20OT", "40OT", "20FR", "40FR", "20NOR", "40NOR", "LCL")
+   - "ofr_amount": Base ocean freight numeric amount (e.g. 2850.0)
+   - "ofr_currency": 3-letter currency code (e.g. "USD", "AUD", "NZD", "EUR")
+   - "charges": Array of attached surcharge objects: [{"charge_code": "BAF", "charge_name": "Bunker", "amount": 200.0, "currency": "USD", "basis": "per equipment"}]
+   - "transit_time": Transit time string (e.g. "14 Days", "7 Days") if mentioned
+   - "remarks": Routing notes or routing details (e.g. "Via Singapore")
+   - "inclusions": Included charges (e.g. "FCR; EBS")
+
+Return STRICTLY this JSON structure:
+{
+  "carrier_code": "OOLU",
+  "contract_number": "...",
+  "validity_start": "YYYY-MM-DD",
+  "validity_end": "YYYY-MM-DD",
+  "rates": [ ... ]
+}
+"""
+
+        combined_text = f"Source Document ({filename}):\n{text[:12000]}"
+        if notes and notes.strip():
+            combined_text += f"\n\nSupplementary Notes / Context:\n{notes.strip()}"
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.deployment,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": combined_text}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0,
+                timeout=12.0
+            )
+
+            result_json = json.loads(response.choices[0].message.content)
+            raw_rates = result_json.get("rates", [])
+            if not raw_rates:
+                print("[AI Extractor] No rates found by AI in text.")
+                return None
+
+            from app.models.canonical import CanonicalRateSheet, RateRow, ChargeItem, JobSummary
+            from app.core.master_data import MasterDataEngine
+            md = MasterDataEngine.get_instance()
+
+            carrier = result_json.get("carrier_code") or "UNKN"
+            contract = result_json.get("contract_number") or ""
+            val_start = result_json.get("validity_start") or ""
+            val_end = result_json.get("validity_end") or ""
+
+            parsed_rows: List[RateRow] = []
+            for idx, r in enumerate(raw_rates, start=1):
+                o_raw = r.get("origin") or ""
+                d_raw = r.get("destination") or ""
+                
+                # Resolve LOCODEs through master data
+                o_locode, o_name, _ = md.resolve_port(r.get("origin_locode") or o_raw)
+                d_locode, d_name, _ = md.resolve_port(r.get("destination_locode") or d_raw)
+                
+                # Load type resolution
+                lt, _ = md.resolve_load_type(r.get("load_type") or "20GP")
+
+                # Surcharges
+                charges: List[ChargeItem] = []
+                for c in r.get("charges", []):
+                    charges.append(ChargeItem(
+                        charge_code=c.get("charge_code") or "SUR",
+                        charge_name=c.get("charge_name") or c.get("charge_code") or "Surcharge",
+                        amount=float(c.get("amount") or 0),
+                        currency=c.get("currency") or r.get("ofr_currency") or "USD",
+                        basis=c.get("basis") or "per equipment"
+                    ))
+
+                parsed_rows.append(RateRow(
+                    row_index=idx,
+                    carrier_scac=carrier,
+                    origin_raw=o_raw,
+                    origin_locode=o_locode or o_raw,
+                    origin_name=o_name or o_raw,
+                    destination_raw=d_raw,
+                    destination_locode=d_locode or d_raw,
+                    destination_name=d_name or d_raw,
+                    load_type=lt,
+                    ofr_amount=float(r.get("ofr_amount") or 0),
+                    ofr_currency=r.get("ofr_currency") or "USD",
+                    charges=charges,
+                    validity_start=val_start,
+                    validity_end=val_end,
+                    contract_number=contract,
+                    remarks=r.get("transit_time") or r.get("remarks") or "",
+                    inclusions=r.get("inclusions") or ""
+                ))
+
+            print(f"[AI Extractor] Successfully extracted {len(parsed_rows)} rates via GPT-4o!")
+            return CanonicalRateSheet(
+                job_id=job_id,
+                file_name=filename,
+                carrier_code=carrier,
+                contract_number=contract,
+                validity_start=val_start,
+                validity_end=val_end,
+                rates=parsed_rows,
+                summary=JobSummary(
+                    total_rows=len(parsed_rows),
+                    valid_rows=len(parsed_rows),
+                    carriers_found=[carrier]
+                )
+            )
+
+        except Exception as e:
+            print(f"[AI Extractor] Error during AI extraction: {e}")
+            return None

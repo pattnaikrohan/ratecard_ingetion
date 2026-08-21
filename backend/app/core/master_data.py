@@ -36,6 +36,7 @@ class MasterDataEngine:
         self._learned_carriers: Dict[str, str] = {}
         self._learned_groups: Dict[str, List[str]] = {}
         self._dirty = False  # Needs save
+        self._port_cache: Dict[str, Tuple[str, str, bool]] = {}
 
     @classmethod
     def get_instance(cls) -> "MasterDataEngine":
@@ -71,7 +72,8 @@ class MasterDataEngine:
                         clean_name = re.sub(r'[\(\),/-]', ' ', p_name).upper()
                         tokens = [t for t in clean_name.split() if len(t) > 2]
                         for t in tokens:
-                            if t not in self.token_map:
+                            # Exact name match takes precedence over multi-word tokens (e.g. Auckland > Bishop Auckland)
+                            if t not in self.token_map or p_name.upper().strip() == t:
                                 self.token_map[t] = (p_code, p_name)
 
                 cargo = str(vals[5]).strip().upper() if len(vals) > 5 and vals[5] else ""
@@ -160,6 +162,10 @@ class MasterDataEngine:
             "PIL": "PILU", "PACIFIC INTERNATIONAL LINES": "PILU",
             # EMC
             "EMC": "EMCU", "EMIRATES SHIPPING": "EMCU",
+            # ANL
+            "ANL": "ANNU", "ANL CONTAINER LINE": "ANNU", "AUTNB": "ANNU",
+            # Coastal Bridge / ONE / Maersk
+            "COASTAL BRIDGE": "O3W", "COASTAL": "O3W", "O3E": "MAEU", "O3W": "MAEU",
             # Swire
             "SWIRE": "CHML", "SWIRE SHIPPING": "CHML",
             # SM Line
@@ -210,12 +216,18 @@ class MasterDataEngine:
             "BRISBANE": "AUBNE", "AUBNE": "AUBNE", "BNE": "AUBNE",
             "ADELAIDE": "AUADL", "AUADL": "AUADL", "ADL": "AUADL",
             "FREMANTLE": "AUFRE", "AUFRE": "AUFRE", "FRE": "AUFRE", "PERTH": "AUFRE",
+            "FREMANTLE, WESTERN AUSTRALIA, AUSTRALIA": "AUFRE", "FREMANTLE, AUSTRALIA": "AUFRE",
             "DARWIN": "AUDRW", "AUDRW": "AUDRW",
             "TOWNSVILLE": "AUTSV", "AUTSV": "AUTSV",
             "GEELONG": "AUGEX", "AUGEX": "AUGEX",
 
             # ──── NEW ZEALAND ────
             "AUCKLAND": "NZAKL", "NZAKL": "NZAKL", "AKL": "NZAKL",
+            "AUCKLAND, NZ": "NZAKL", "AUCKLAND, NEW ZEALAND": "NZAKL",
+            "AUCKLAND, NEW ZEALAND(DIRECT)": "NZAKL",
+            "AUCKLAND METROPORT": "NZMKL", "AUCKLAND METROPORT, NZ": "NZMKL",
+            "AUCKLAND METROPORT, NEW ZEALAND": "NZMKL", "AUCKLAND METROPORT, NEW ZEALAND(VIA TAURANGA)": "NZMKL",
+            "AUCKLAND METRO": "NZMKL", "METROPORT AUCKLAND": "NZMKL", "METROPORT": "NZMKL",
             "TAURANGA": "NZTRG", "NZTRG": "NZTRG", "TRG": "NZTRG", "MT MAUNGANUI": "NZTRG",
             "LYTTELTON": "NZLYT", "NZLYT": "NZLYT", "LYT": "NZLYT", "CHRISTCHURCH": "NZLYT",
             "WELLINGTON": "NZWLG", "NZWLG": "NZWLG",
@@ -223,6 +235,22 @@ class MasterDataEngine:
             "NELSON": "NZNSN", "NZNSN": "NZNSN",
             "TIMARU": "NZTIU", "NZTIU": "NZTIU",
             "PORT CHALMERS": "NZPOE",
+        })
+
+        # Explicit token map overrides for top ports
+        self.token_map.update({
+            "AUCKLAND": ("NZAKL", "Auckland"),
+            "METROPORT": ("NZMKL", "Metroport/Auckland"),
+            "RIJEKA": ("HRRJK", "Rijeka"),
+            "FREMANTLE": ("AUFRE", "Fremantle"),
+            "MELBOURNE": ("AUMEL", "Melbourne"),
+            "SYDNEY": ("AUSYD", "Sydney"),
+            "BRISBANE": ("AUBNE", "Brisbane"),
+            "ADELAIDE": ("AUADL", "Adelaide"),
+            "SEATTLE": ("USSEA", "Seattle, WA"),
+            "OAKLAND": ("USOAK", "Oakland, CA"),
+            "LONG BEACH": ("USLGB", "Long Beach, CA"),
+            "LOS ANGELES": ("USLAX", "Los Angeles, CA"),
 
             # ──── SOUTH EAST ASIA ────
             "SINGAPORE": "SGSIN", "SGSIN": "SGSIN", "SIN": "SGSIN", "SG": "SGSIN",
@@ -323,6 +351,7 @@ class MasterDataEngine:
             "UMMSAID": "QAMES",
 
             # ──── EUROPE ────
+            "RIJEKA": "HRRJK", "HRRJK": "HRRJK", "RIJEKA, CROATIA": "HRRJK",
             "ANTWERP": "BEANR", "BEANR": "BEANR", "ANR": "BEANR",
             "ROTTERDAM": "NLRTM", "NLRTM": "NLRTM", "RTM": "NLRTM",
             "HAMBURG": "DEHAM", "DEHAM": "DEHAM", "HAM": "DEHAM",
@@ -685,6 +714,12 @@ class MasterDataEngine:
             locode = self.port_synonyms[clean]
             return locode, self.ports.get(locode, {}).get("name", clean), True
 
+        # 2b. Clean parentheses (e.g. "Auckland, New Zealand(Direct)" -> "Auckland, New Zealand")
+        no_parens = re.sub(r'\(.*?\)', '', clean).strip()
+        if no_parens in self.port_synonyms:
+            locode = self.port_synonyms[no_parens]
+            return locode, self.ports.get(locode, {}).get("name", no_parens), True
+
         # 3. Clean country suffix (e.g. "Ogan Komering Ilir, Indonesia" -> "Ogan Komering Ilir")
         city_only = clean.split(',')[0].strip()
         if city_only != clean and city_only in self.port_synonyms:
@@ -716,7 +751,13 @@ class MasterDataEngine:
         
         for t in tokens:
             if t in self.token_map:
-                locode, p_name = self.token_map[t]
+                val = self.token_map[t]
+                if isinstance(val, (tuple, list)):
+                    locode = val[0]
+                    p_name = val[1] if len(val) > 1 else self.get_port_name(locode)
+                else:
+                    locode = str(val)
+                    p_name = self.ports.get(locode, {}).get('name', locode)
                 return locode, p_name, True
 
         # 6. Fuzzy matching — check if any port name CONTAINS the search term or vice versa

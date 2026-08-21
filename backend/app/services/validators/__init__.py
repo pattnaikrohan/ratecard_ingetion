@@ -222,15 +222,16 @@ class RateValidationEngine:
 
     def expand_destination_groups(self, rates: List[RateRow]) -> List[RateRow]:
         """
-        Expand rate rows that have destination/origin group aliases (e.g., 'AUS MAIN PORTS')
-        or comma-separated port lists (e.g. 'INKSR,INMOR,INPNT') into multiple rows.
+        Expand rate rows that have destination/origin group aliases (e.g., 'AUS MAIN PORTS', 'AUBP')
+        or comma-separated LOCODE lists (e.g. 'INKSR,INMOR,INPNT') into multiple rows.
         """
         expanded: List[RateRow] = []
         next_idx = max((r.row_index for r in rates), default=0) + 1
 
         for row in rates:
             dest_input = (row.destination_raw or row.destination_locode).strip()
-            if dest_input and self.md.is_destination_group(dest_input):
+            # Only expand explicit group codes (e.g. AUBP, AUEC, PRDA) and NOT city, state, country names
+            if dest_input and self.md.is_destination_group(dest_input) and len(dest_input) <= 15:
                 locodes = self.md.expand_destination_group(dest_input)
                 for locode in locodes:
                     port_info = self.md.ports.get(locode, {})
@@ -241,23 +242,26 @@ class RateValidationEngine:
                     new_row.destination_raw = row.destination_raw
                     next_idx += 1
                     expanded.append(new_row)
-            elif dest_input and "," in dest_input and len(dest_input) < 80:
-                ports = [p.strip() for p in dest_input.split(",") if p.strip()]
+            # Only expand comma-separated strings if every part is a 5-letter UNLOCODE (e.g. "USLAX,USLGB,USOAK")
+            elif dest_input and "," in dest_input and all(len(p.strip()) == 5 and p.strip().isalpha() for p in dest_input.split(",")):
+                ports = [p.strip().upper() for p in dest_input.split(",") if p.strip()]
                 for p in ports:
+                    port_info = self.md.ports.get(p, {})
                     new_row = row.model_copy()
                     new_row.row_index = next_idx
                     new_row.destination_raw = p
                     new_row.destination_locode = p
+                    new_row.destination_name = port_info.get("name", p)
                     next_idx += 1
                     expanded.append(new_row)
             else:
                 expanded.append(row)
 
-        # Also expand origin groups and comma-separated origins
+        # Also expand origin groups and comma-separated origin LOCODEs
         final: List[RateRow] = []
         for row in expanded:
             orig_input = (row.origin_raw or row.origin_locode).strip()
-            if orig_input and self.md.is_destination_group(orig_input):
+            if orig_input and self.md.is_destination_group(orig_input) and len(orig_input) <= 15:
                 locodes = self.md.expand_destination_group(orig_input)
                 for locode in locodes:
                     port_info = self.md.ports.get(locode, {})
@@ -268,13 +272,15 @@ class RateValidationEngine:
                     new_row.origin_raw = row.origin_raw
                     next_idx += 1
                     final.append(new_row)
-            elif orig_input and "," in orig_input and len(orig_input) < 80:
-                ports = [p.strip() for p in orig_input.split(",") if p.strip()]
+            elif orig_input and "," in orig_input and all(len(p.strip()) == 5 and p.strip().isalpha() for p in orig_input.split(",")):
+                ports = [p.strip().upper() for p in orig_input.split(",") if p.strip()]
                 for p in ports:
+                    port_info = self.md.ports.get(p, {})
                     new_row = row.model_copy()
                     new_row.row_index = next_idx
                     new_row.origin_raw = p
                     new_row.origin_locode = p
+                    new_row.origin_name = port_info.get("name", p)
                     next_idx += 1
                     final.append(new_row)
             else:

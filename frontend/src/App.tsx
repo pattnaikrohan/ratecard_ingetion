@@ -55,7 +55,7 @@ export function App() {
     setActiveTab('review');
   };
 
-  const handleStartBatchProcessing = async (fileArray: File[]) => {
+  const handleStartBatchProcessing = async (fileArray: File[], notes?: string) => {
     if (fileArray.length === 0) return;
     setBatchDockState({
       isOpen: true,
@@ -68,7 +68,7 @@ export function App() {
     for (let i = 0; i < fileArray.length; i++) {
       setBatchDockState((prev) => ({ ...prev, activeIndex: i }));
       try {
-        const res = await api.uploadFile(fileArray[i], exportPolicy);
+        const res = await api.uploadFile(fileArray[i], exportPolicy, notes);
         createdJobIds.push(res.job_id);
         setBatchDockState((prev) => ({ ...prev, jobIds: [...createdJobIds] }));
       } catch (err) {

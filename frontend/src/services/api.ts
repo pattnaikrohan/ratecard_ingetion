@@ -5,10 +5,13 @@ const API_BASE_URL = import.meta.env.PROD
   : '/api';
 
 export const api = {
-  uploadFile: async (file: File, exportPolicy: string = 'PARTIAL') => {
+  uploadFile: async (file: File, exportPolicy: string = 'PARTIAL', notes?: string) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('export_policy', exportPolicy);
+    if (notes && notes.trim()) {
+      formData.append('notes', notes.trim());
+    }
 
     const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -16,10 +19,13 @@ export const api = {
     return response.data;
   },
 
-  uploadFilesBatch: async (files: File[], exportPolicy: string = 'PARTIAL') => {
+  uploadFilesBatch: async (files: File[], exportPolicy: string = 'PARTIAL', notes?: string) => {
     const formData = new FormData();
     files.forEach((f) => formData.append('files', f));
     formData.append('export_policy', exportPolicy);
+    if (notes && notes.trim()) {
+      formData.append('notes', notes.trim());
+    }
 
     const response = await axios.post(`${API_BASE_URL}/upload-batch`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },

@@ -291,21 +291,23 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
             <thead>
               <tr>
                 <th className="min-w-[100px] text-center">Status</th>
-                <th className="min-w-[110px] text-center">SCAC</th>
+                <th className="min-w-[100px] text-center">SCAC</th>
                 <th className="min-w-[240px] text-left">Origin Port (LOCODE)</th>
                 <th className="min-w-[240px] text-left">Destination Port (LOCODE)</th>
-                <th className="min-w-[130px] text-center">Load Type</th>
-                <th className="min-w-[140px] text-right">OFR Amount</th>
-                <th className="min-w-[100px] text-center">Currency</th>
-                <th className="min-w-[250px] text-center">Validity Window</th>
-                <th className="min-w-[140px] text-center">Contract No</th>
-                <th className="min-w-[280px] text-left">Validation Message</th>
+                <th className="min-w-[110px] text-center">Load Type</th>
+                <th className="min-w-[120px] text-right">OFR Amount</th>
+                <th className="min-w-[80px] text-center">Currency</th>
+                <th className="min-w-[130px] text-center">Surcharges</th>
+                <th className="min-w-[110px] text-center">Transit Time</th>
+                <th className="min-w-[230px] text-center">Validity Window</th>
+                <th className="min-w-[130px] text-center">Contract No</th>
+                <th className="min-w-[260px] text-left">Validation Message</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rates.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-16 text-slate-400 text-xs font-medium">
+                  <td colSpan={12} className="text-center py-16 text-slate-400 text-xs font-medium">
                     {isWorkerProcessing ? (
                       <div className="flex flex-col items-center justify-center gap-3">
                         <Cpu className="w-8 h-8 text-indigo-600 animate-spin" />
@@ -333,7 +335,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                 </tr>
               ) : filteredRates.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-12 text-slate-400 text-xs font-medium">
+                  <td colSpan={12} className="text-center py-12 text-slate-400 text-xs font-medium">
                     No rate rows matching the selected search/status filter.
                   </td>
                 </tr>
@@ -425,35 +427,66 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
                           type="text"
                           value={row.ofr_currency || 'USD'}
                           onChange={(e) => handleCellChange(targetIdx, 'ofr_currency', e.target.value.toUpperCase())}
-                          className="table-cell-input text-xs font-mono font-bold h-9 text-slate-700 text-center w-full min-w-[70px]"
+                          className="table-cell-input text-xs font-mono font-bold h-9 text-slate-700 text-center w-full min-w-[65px]"
                         />
                       </td>
+                      {/* Surcharges breakdown column */}
                       <td className="align-middle text-center py-2 px-3">
-                        <div className="flex items-center gap-1 min-w-[220px]">
+                        {(row.charges && row.charges.length > 0) ? (
+                          <div
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-[11px] font-black cursor-help transition-all shadow-2xs"
+                            title={row.charges.map((c: any) => `${c.charge_code} (${c.charge_name || c.charge_code}): ${c.amount} ${c.currency}`).join('\n')}
+                          >
+                            <span>+{row.charges.length} Items</span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] font-bold text-slate-400">—</span>
+                        )}
+                      </td>
+                      {/* Transit Time column */}
+                      <td className="align-middle text-center py-2 px-3">
+                        <input
+                          type="text"
+                          value={row.remarks || ''}
+                          placeholder="—"
+                          onChange={(e) => handleCellChange(targetIdx, 'remarks', e.target.value)}
+                          className="table-cell-input text-[11px] font-bold h-9 text-slate-700 text-center w-full min-w-[90px]"
+                        />
+                      </td>
+                      {/* Validity Window with Missing Warning Highlight */}
+                      <td className="align-middle text-center py-2 px-3">
+                        <div className={`flex items-center gap-1 min-w-[210px] p-1 rounded-xl transition-all ${
+                          (!row.validity_start && !row.validity_end)
+                            ? 'bg-amber-50/80 border border-amber-300 ring-2 ring-amber-100'
+                            : ''
+                        }`}>
                           <input
                             type="text"
                             value={row.validity_start || ''}
-                            placeholder="YYYY-MM-DD"
+                            placeholder="Start Date"
                             onChange={(e) => handleCellChange(targetIdx, 'validity_start', e.target.value)}
-                            className="table-cell-input text-[11px] font-mono font-bold h-9 text-slate-800 text-center w-full"
+                            className="table-cell-input text-[11px] font-mono font-bold h-8 text-slate-800 text-center w-full"
                           />
                           <span className="text-indigo-500 font-extrabold shrink-0">→</span>
                           <input
                             type="text"
                             value={row.validity_end || ''}
-                            placeholder="YYYY-MM-DD"
+                            placeholder="End Date"
                             onChange={(e) => handleCellChange(targetIdx, 'validity_end', e.target.value)}
-                            className="table-cell-input text-[11px] font-mono font-bold h-9 text-slate-800 text-center w-full"
+                            className="table-cell-input text-[11px] font-mono font-bold h-8 text-slate-800 text-center w-full"
                           />
                         </div>
                       </td>
+                      {/* Contract No with Blank State */}
                       <td className="align-middle text-center py-2 px-3">
                         <input
                           type="text"
                           value={row.contract_number || ''}
-                          placeholder="Contract #"
+                          placeholder="— Unspecified —"
                           onChange={(e) => handleCellChange(targetIdx, 'contract_number', e.target.value)}
-                          className="table-cell-input text-xs font-mono font-semibold h-9 text-slate-700 text-center w-full min-w-[110px]"
+                          className={`table-cell-input text-xs font-mono h-9 text-center w-full min-w-[110px] ${
+                            !row.contract_number ? 'italic text-slate-400 bg-slate-50/50' : 'font-bold text-slate-800'
+                          }`}
                         />
                       </td>
                       <td className="align-middle py-2 px-3">

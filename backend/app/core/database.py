@@ -24,11 +24,7 @@ class DatabaseManager:
         return conn
 
     def _init_db(self):
-        # Ensure we try to pull the latest DB from cloud before initializing
-        try:
-            self.restore_from_blob()
-        except Exception:
-            pass
+        pass
 
         with self._get_conn() as conn:
             cursor = conn.cursor()
@@ -82,10 +78,9 @@ class DatabaseManager:
         if blob_client:
             try:
                 with open(self.db_path, "rb") as data:
-                    blob_client.upload_blob(data, overwrite=True)
-                print(f"Backed up SQLite DB to Azure Blob Storage")
-            except Exception as e:
-                print(f"Failed to backup SQLite DB to Blob Storage: {e}")
+                    blob_client.upload_blob(data, overwrite=True, timeout=1)
+            except Exception:
+                pass
 
     def restore_from_blob(self):
         from app.services.storage import StorageService
