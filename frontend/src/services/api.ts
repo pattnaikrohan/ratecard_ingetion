@@ -81,4 +81,8 @@ export const api = {
     const response = await axios.post(`${API_BASE_URL}/jobs/clear`);
     return response.data;
   },
+  clearAllJobs: async () => {
+    const response = await axios.post(`${API_BASE_URL}/jobs/clear`);
+    return response.data;
+  },
 };

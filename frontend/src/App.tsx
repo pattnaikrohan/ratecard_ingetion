@@ -8,6 +8,7 @@ import { HistoryPage } from './pages/History';
 import { SettingsPage } from './pages/Settings';
 import { BatchProcessingDock } from './components/BatchProcessingDock';
 import { api } from './services/api';
+import { Trash2, AlertTriangle, X } from 'lucide-react';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -16,6 +17,8 @@ export function App() {
   const [masterDataStatus, setMasterDataStatus] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null);
   const [exportPolicy, setExportPolicy] = useState('PARTIAL');
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Persistent Batch Processing Dock State across all navigation tabs
   const [batchDockState, setBatchDockState] = useState<{
@@ -56,22 +59,40 @@ export function App() {
     setActiveTab('review');
   };
 
+  const handleConfirmClearData = async () => {
+    try {
+      setIsClearing(true);
+      await api.clearJobs();
+      setJobs([]);
+      setSelectedJobId(null);
+      setBatchDockState({ isOpen: false, files: [], jobIds: [], activeIndex: 0 });
+      await loadData();
+      setIsClearModalOpen(false);
+    } catch (err) {
+      console.error('Error clearing data:', err);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   const handleStartBatchProcessing = async (fileArray: File[], notes?: string) => {
     if (fileArray.length === 0) return;
     setBatchDockState({
       isOpen: true,
       files: fileArray,
-      jobIds: [],
+      jobIds: new Array(fileArray.length).fill(''),
       activeIndex: 0,
     });
 
-    const createdJobIds: string[] = [];
     for (let i = 0; i < fileArray.length; i++) {
       setBatchDockState((prev) => ({ ...prev, activeIndex: i }));
       try {
         const res = await api.uploadFile(fileArray[i], exportPolicy, notes);
-        createdJobIds.push(res.job_id);
-        setBatchDockState((prev) => ({ ...prev, jobIds: [...createdJobIds] }));
+        setBatchDockState((prev) => {
+          const updated = [...prev.jobIds];
+          updated[i] = res.job_id;
+          return { ...prev, jobIds: updated };
+        });
       } catch (err) {
         console.error(`Error uploading file ${fileArray[i].name}:`, err);
       }
@@ -85,6 +106,7 @@ export function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         masterDataStatus={masterDataStatus}
+        onClearData={() => setIsClearModalOpen(true)}
       />
 
       {/* Right Workspace Pane (Smooth Native Scrolling Container) */}
@@ -97,6 +119,7 @@ export function App() {
               masterDataStatus={masterDataStatus}
               onSelectJob={handleSelectJob}
               onNavigateToIngest={() => setActiveTab('ingest')}
+              onClearData={() => setIsClearModalOpen(true)}
             />
           )}
 
@@ -111,21 +134,27 @@ export function App() {
           )}
 
           {activeTab === 'queue' && (
-            <JobQueue jobs={jobs} onSelectJob={handleSelectJob} />
+            <JobQueue
+              jobs={jobs}
+              onSelectJob={handleSelectJob}
+            />
           )}
 
           {activeTab === 'review' && (
-            <RateReviewGrid 
-              jobId={selectedJobId} 
+            <RateReviewGrid
+              jobId={selectedJobId}
               jobs={jobs}
-              onSelectJob={handleSelectJob}
+              onSelectJob={setSelectedJobId}
               onNavigateToIngest={() => setActiveTab('ingest')}
-              onBackToDashboard={() => setActiveTab('dashboard')} 
+              onBackToDashboard={() => setActiveTab('dashboard')}
             />
           )}
 
           {activeTab === 'history' && (
-            <HistoryPage jobs={jobs} onSelectJob={handleSelectJob} />
+            <HistoryPage
+              jobs={jobs}
+              onSelectJob={handleSelectJob}
+            />
           )}
 
           {activeTab === 'settings' && (
@@ -139,7 +168,7 @@ export function App() {
         </main>
       </div>
 
-      {/* Persistent Root Batch Processing Dock */}
+      {/* Persistent Ultra-Posh Batch Processing Dock */}
       <BatchProcessingDock
         isOpen={batchDockState.isOpen}
         onClose={() => setBatchDockState((prev) => ({ ...prev, isOpen: false }))}
@@ -148,6 +177,70 @@ export function App() {
         activeIndex={batchDockState.activeIndex}
         onInspectJob={handleSelectJob}
       />
+
+      {/* Clear Data Confirmation Modal */}
+      {isClearModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200/90 relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setIsClearModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                <Trash2 className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900">Clear Ingested Data</h3>
+                <p className="text-xs text-slate-500 font-medium">Persistent Database Reset</p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 mb-6 text-xs text-amber-800 space-y-1.5">
+              <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+                <span>Permanent Action</span>
+              </div>
+              <p>
+                This will wipe all rate cards, extracted rows, metrics telemetry, and SQLite/Azure Blob records.
+                Your data remains permanently persistent across page refreshes until you click this button.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsClearModalOpen(false)}
+                disabled={isClearing}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClearData}
+                disabled={isClearing}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-lg shadow-rose-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isClearing ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Wiping Database...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Wipe & Reset Everything</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

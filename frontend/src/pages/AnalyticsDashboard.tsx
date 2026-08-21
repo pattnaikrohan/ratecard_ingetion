@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Layers, 
+  Layers,
+  Trash2, 
   Ship, 
   CheckCircle2, 
   Sparkles, 
@@ -23,6 +24,7 @@ interface AnalyticsDashboardProps {
   masterDataStatus: any;
   onSelectJob: (jobId: string) => void;
   onNavigateToIngest: () => void;
+  onClearData?: () => void;
 }
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
@@ -31,6 +33,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   masterDataStatus,
   onSelectJob,
   onNavigateToIngest,
+  onClearData,
 }) => {
   const [timeFilter, setTimeFilter] = useState<'all' | 'q3' | 'month'>('all');
   const [activeCostTab, setActiveCostTab] = useState<'timeline' | 'breakdown'>('timeline');
@@ -576,13 +579,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               Recent Standardized Rate Cards ({recentJobs.length})
             </h3>
           </div>
-          <button
-            onClick={onNavigateToIngest}
-            className="text-xs font-black text-[#00AFAF] hover:underline flex items-center gap-1"
-          >
-            <span>Go to Ingestion Hub</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-4">
+            {onClearData && (
+              <button
+                onClick={onClearData}
+                className="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Clear Data</span>
+              </button>
+            )}
+            <button
+              onClick={onNavigateToIngest}
+              className="text-xs font-black text-[#00AFAF] hover:underline flex items-center gap-1"
+            >
+              <span>Go to Ingestion Hub</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">

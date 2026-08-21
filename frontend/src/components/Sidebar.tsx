@@ -8,16 +8,18 @@ import {
   Settings, 
   Sparkles, 
   Database,
-  Anchor
+  Anchor,
+  Trash2
 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   masterDataStatus: any;
+  onClearData?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, masterDataStatus }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, masterDataStatus, onClearData }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', sub: 'Analytics & AI Cost', icon: BarChart3 },
     { id: 'ingest', label: 'Rate Ingestion', sub: 'Upload & Standardize', icon: UploadCloud },
@@ -87,9 +89,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, maste
         </nav>
       </div>
 
-      {/* ── BOTTOM: Master Data Status (Frosted Glass Panel) ── */}
-      <div className="p-4 relative z-10">
-        <div className="p-3.5 rounded-2xl bg-[#008f8f]/40 backdrop-blur-md border border-white/20 text-white space-y-2 shadow-inner">
+      {/* ── BOTTOM: Master Data Status & Explicit Clear Data Button ── */}
+      <div className="p-4 relative z-10 space-y-2">
+        <div className="p-3 rounded-2xl bg-[#008f8f]/40 backdrop-blur-md border border-white/20 text-white space-y-2 shadow-inner">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 text-white">
               <Database className="w-3.5 h-3.5 text-teal-200" />
@@ -108,6 +110,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, maste
             </div>
           </div>
         </div>
+
+        {onClearData && (
+          <button
+            onClick={onClearData}
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-[11px] font-bold text-white/85 hover:text-white bg-black/20 hover:bg-rose-600/85 border border-white/10 hover:border-rose-400/40 transition-all cursor-pointer shadow-xs group"
+          >
+            <Trash2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+            <span>Clear Ingested Data</span>
+          </button>
+        )}
       </div>
     </aside>
   );
