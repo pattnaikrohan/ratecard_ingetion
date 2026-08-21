@@ -121,14 +121,34 @@ async def approve_job(job_id: str, export_policy: str = "PARTIAL"):
 @router.get("/jobs/{job_id}/download")
 async def download_output_sheet(job_id: str):
     job = db.get_job(job_id)
-    if not job or not job.get("output_file_name"):
-        raise HTTPException(status_code=404, detail="Export file not ready for download")
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
     
-    out_file = StorageService.get_output_path(job["output_file_name"])
-    if not out_file.exists():
-        raise HTTPException(status_code=404, detail="Output file missing from storage")
+    # Auto-generate export on the fly if output file was not pre-generated or missing
+    output_filename = job.get("output_file_name")
+    if not output_filename or not StorageService.get_output_path(output_filename).exists():
+        if job.get("canonical") and job["canonical"].get("rates"):
+            try:
+                output_filename = await job_manager.generate_export(job_id, job.get("export_policy", "PARTIAL"))
+            except Exception as e:
+                print(f"[Download] Error generating on-the-fly export: {e}")
         
-    return FileResponse(out_file, media_type="application/vnd.ms-excel.sheet.macroEnabled.12", filename=job["output_file_name"])
+    if not output_filename:
+        raise HTTPException(status_code=404, detail="Export file could not be generated for this job")
+    
+    out_file = StorageService.get_output_path(output_filename)
+    if not out_file.exists():
+        raise HTTPException(status_code=404, detail=f"Output file {output_filename} missing from storage")
+        
+    return FileResponse(
+        out_file,
+        media_type="application/vnd.ms-excel.sheet.macroEnabled.12",
+        filename=output_filename,
+        headers={
+            "Content-Disposition": f'attachment; filename="{output_filename}"',
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
 
 @router.get("/master-data")
 async def get_master_data_summary():

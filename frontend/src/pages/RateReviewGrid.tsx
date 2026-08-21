@@ -129,13 +129,8 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
       await api.revalidateJob(effectiveJobId, rates);
       await api.approveJob(effectiveJobId, 'PARTIAL');
 
-      const downloadUrl = api.getDownloadUrl(effectiveJobId);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = `Freightify_Upload_${effectiveJobId}.xlsm`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const exportFileName = jobData?.output_file_name || `Freightify_Upload_${effectiveJobId}.xlsm`;
+      await api.downloadJobExport(effectiveJobId, exportFileName);
 
       const data = await api.getJob(effectiveJobId);
       setJobData(data);

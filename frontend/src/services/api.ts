@@ -62,6 +62,23 @@ export const api = {
     return `${API_BASE_URL}/jobs/${jobId}/download`;
   },
 
+  downloadJobExport: async (jobId: string, customFilename?: string) => {
+    const response = await axios.get(`${API_BASE_URL}/jobs/${jobId}/download`, {
+      responseType: 'blob',
+    });
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.ms-excel.sheet.macroEnabled.12',
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = customFilename || `Freightify_Upload_${jobId}.xlsm`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  },
+
   getMasterData: async () => {
     const response = await axios.get(`${API_BASE_URL}/master-data`);
     return response.data;
