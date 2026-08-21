@@ -87,9 +87,9 @@ export function App() {
         masterDataStatus={masterDataStatus}
       />
 
-      {/* Right Workspace Pane (Posh Porcelain Light Workspace) */}
-      <div className="flex-1 h-screen flex flex-col min-w-0 overflow-hidden bg-[#f8fafc]">
-        <main className="flex-1 w-full flex flex-col min-h-0 overflow-y-auto custom-scrollbar p-6 lg:p-8">
+      {/* Right Workspace Pane (Smooth Native Scrolling Container) */}
+      <div className="flex-1 h-screen min-w-0 overflow-y-auto overflow-x-hidden bg-[#f8fafc]">
+        <main className="w-full min-h-full p-6 lg:p-8 pb-32">
           {activeTab === 'dashboard' && (
             <AnalyticsDashboard
               recentJobs={jobs}

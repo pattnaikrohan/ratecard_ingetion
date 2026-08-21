@@ -31,7 +31,7 @@ export const SettingsPage: React.FC<SettingsProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-16 px-1">
+    <div className="w-full space-y-8 animate-fade-in text-slate-900 pb-20">
       
       {/* ── TOP HERO HEADER (Posh Ambient Glassmorphic Card) ── */}
       <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
