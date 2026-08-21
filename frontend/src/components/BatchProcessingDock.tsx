@@ -129,24 +129,9 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     }
   }, [isOpen, files]);
 
+  // Continuous parallel polling for active job statuses
   useEffect(() => {
     if (!isOpen || files.length === 0) return;
-
-    const sim = setInterval(() => {
-      setSimulatedProgress((prev) => {
-        if (showComplete) return 100;
-        const activeJobId = jobIds[activeIndex];
-        const currentJob = activeJobId ? jobStates[activeJobId] : null;
-        let realProg = 75;
-        if (currentJob?.status === 'FAILED' || currentJob?.status === 'COMPLETED' || currentJob?.status === 'NEEDS_REVIEW' || currentJob?.status === 'APPROVED') {
-          realProg = 100;
-        } else if (currentJob?.progress) {
-          realProg = currentJob.progress;
-        }
-        if (prev < realProg) return Math.min(prev + 5, realProg);
-        return prev;
-      });
-    }, 100);
 
     const poll = setInterval(async () => {
       const validIds = jobIds.filter((id) => id && !id.startsWith('failed_'));
@@ -171,28 +156,96 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
       } catch { /* silent */ }
     }, 600);
 
-    return () => { clearInterval(sim); clearInterval(poll); };
-  }, [isOpen, files.length, jobIds, activeIndex, showComplete, jobStates]);
+    return () => { clearInterval(poll); };
+  }, [isOpen, files.length, jobIds]);
 
+  // Accurate Multi-File Batch Progress Calculation:
+  // Each file represents (100 / totalFiles)% of the overall progress
+  const totalFiles = Math.max(1, files.length);
+
+  const { computedBatchProgress, allJobsFinished, finishedCount, failedCount, successCount } = React.useMemo(() => {
+    if (files.length === 0) {
+      return { computedBatchProgress: 0, allJobsFinished: false, finishedCount: 0, failedCount: 0, successCount: 0 };
+    }
+
+    let progressSum = 0;
+    let finished = 0;
+    let failed = 0;
+    let success = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      const jobId = jobIds[i];
+
+      // If job not yet assigned
+      if (!jobId) {
+        if (i < activeIndex) {
+          progressSum += 80;
+        } else if (i === activeIndex) {
+          progressSum += 25;
+        } else {
+          progressSum += 0;
+        }
+        continue;
+      }
+
+      // Explicit upload failure
+      if (jobId.startsWith('failed_')) {
+        failed++;
+        finished++;
+        progressSum += 100;
+        continue;
+      }
+
+      const job = jobStates[jobId];
+      if (!job) {
+        if (i < activeIndex) progressSum += 85;
+        else if (i === activeIndex) progressSum += 35;
+        continue;
+      }
+
+      const status = job.status;
+      const isDone = ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(status);
+      const isFail = status === 'FAILED';
+
+      if (isDone) {
+        success++;
+        finished++;
+        progressSum += 100;
+      } else if (isFail) {
+        failed++;
+        finished++;
+        progressSum += 100;
+      } else {
+        const itemProg = typeof job.progress === 'number' ? job.progress : (i === activeIndex ? 50 : 20);
+        progressSum += Math.max(15, Math.min(95, itemProg));
+      }
+    }
+
+    const allFinished = finished === files.length && jobIds.length === files.length && jobIds.every(Boolean);
+    const overallPct = allFinished ? 100 : Math.min(99, Math.round(progressSum / totalFiles));
+
+    return {
+      computedBatchProgress: Math.max(overallPct, files.length > 0 ? 5 : 0),
+      allJobsFinished: allFinished,
+      finishedCount: finished,
+      failedCount: failed,
+      successCount: success,
+    };
+  }, [files.length, jobIds, jobStates, activeIndex, totalFiles]);
+
+  // Synchronize smooth progress transition
   useEffect(() => {
-    const hasAllIds = jobIds.length === files.length && jobIds.every(Boolean);
-    const allDone = hasAllIds && jobIds.every((id) => {
-      if (id?.startsWith('failed_')) return true;
-      const s = jobStates[id]?.status;
-      return ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(s);
-    });
-
-    if (allDone) {
+    if (allJobsFinished) {
       setShowComplete(true);
       setSimulatedProgress(100);
+    } else {
+      setSimulatedProgress(computedBatchProgress);
     }
-  }, [jobStates, jobIds, files]);
+  }, [allJobsFinished, computedBatchProgress]);
 
   if (!isOpen) return null;
 
-  const failedCount = jobIds.filter((id) => jobStates[id]?.status === 'FAILED').length;
-  const successCount = jobIds.filter((id) => ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED'].includes(jobStates[id]?.status)).length;
-  const allFailed = jobIds.length > 0 && failedCount === jobIds.length;
+  const allFailed = files.length > 0 && failedCount === files.length;
   const hasPartialErrors = failedCount > 0 && !allFailed;
 
   // Calculate total extracted rates across jobs
@@ -201,7 +254,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     return sum + (j?.total_rows || j?.summary?.total_rows || j?.canonical?.rates?.length || 0);
   }, 0);
 
-  const displayProgress = showComplete ? 100 : Math.max(simulatedProgress, showComplete ? 100 : 10);
+  const displayProgress = showComplete ? 100 : simulatedProgress;
   const currentStage = displayProgress < 20 ? 0 : displayProgress < 40 ? 1 : displayProgress < 60 ? 2 : displayProgress < 80 ? 3 : 4;
 
   // ── MINIMIZED WIDGET DOCK (Bottom Right) ──
@@ -300,8 +353,8 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
         <p className="text-xs sm:text-xs md:text-sm font-medium text-slate-500 mt-1 max-w-lg mx-auto truncate">
           {showComplete
-            ? `Successfully unpivoted and validated ${totalExtractedRates.toLocaleString('en-US')} rate rows from ${successCount} file(s).`
-            : `Active Cargo: ${files[activeIndex]?.name || ''}`}
+            ? `Successfully unpivoted and validated ${totalExtractedRates.toLocaleString('en-US')} rate rows across ${successCount} file(s).`
+            : `Processed ${finishedCount} of ${files.length} files (${displayProgress}% overall) • Active: ${files[activeIndex]?.name || ''}`}
         </p>
       </header>
 
