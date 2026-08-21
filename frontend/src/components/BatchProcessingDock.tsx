@@ -28,71 +28,74 @@ interface BatchProcessingDockProps {
 }
 
 const STAGES = [
-  { label: 'Ingesting Rate Cards', desc: 'Parsing EML, PDF, PNG & Excel files', tag: 'INGEST' },
-  { label: 'Carrier SCAC Recognition', desc: 'Auto-detecting ocean carrier code', tag: 'CARRIER' },
-  { label: 'Matrix Unpivoting', desc: 'Mapping 20GP, 40GP, 40HC, 45GP, DG', tag: 'MATRIX' },
-  { label: '13,670 UNLOCODE Alignment', desc: 'Matching origin & destination ports', tag: 'UNLOCODE' },
-  { label: 'Freightify .xlsm Generation', desc: 'Building standardized upload sheet', tag: 'FREIGHTIFY' },
+  { label: 'Ingesting Rate Cards', desc: 'Parsing EML, PDF, PNG & Excel files' },
+  { label: 'Carrier SCAC Recognition', desc: 'Auto-detecting ocean carrier code' },
+  { label: 'Matrix Unpivoting', desc: 'Mapping 20GP, 40GP, 40HC, 45GP, DG' },
+  { label: '13,670 UNLOCODE Alignment', desc: 'Matching origin & destination ports' },
+  { label: 'Freightify .xlsm Generation', desc: 'Building standardized upload sheet' },
 ];
 
-/* ── Posh Holographic AI Core Graphic (Frosted Teal Glass, Dual Orbital Rings & Dynamic Live Metrics) ── */
+/* ── Posh Holographic AI Core Graphic (Stabilized & High-DPI Optimized) ── */
 const RateBridgeCore: React.FC<{ 
   activeStage: number; 
   happy?: boolean; 
   hasFailed?: boolean;
   totalRates: number;
 }> = ({ activeStage, happy, hasFailed, totalRates }) => (
-  <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 flex flex-col items-center justify-center select-none shrink-0">
+  <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex flex-col items-center justify-center select-none shrink-0">
     
     {/* Volumetric Glowing Ambient Aura */}
-    <div className={`absolute inset-0 rounded-full blur-3xl opacity-60 transition-all duration-700 ${
+    <div className={`absolute inset-0 rounded-full blur-3xl opacity-50 transition-all duration-700 pointer-events-none ${
       hasFailed 
-        ? 'bg-rose-500/25' 
+        ? 'bg-rose-500/20' 
         : happy 
-        ? 'bg-emerald-400/35' 
-        : 'bg-gradient-to-tr from-[#00AFAF]/45 via-teal-400/30 to-sky-400/30'
+        ? 'bg-emerald-400/25' 
+        : 'bg-gradient-to-tr from-[#00AFAF]/35 via-teal-400/20 to-sky-400/20'
     }`} />
 
-    {/* Outer Orbital Compass Ring (Clockwise) */}
+    {/* Outer Orbital Compass Ring */}
     <div 
-      className={`absolute inset-1 rounded-full border-2 border-dashed transition-colors duration-500 ${
-        hasFailed ? 'border-rose-300/80' : happy ? 'border-emerald-300/80' : 'border-[#00AFAF]/50'
+      className={`absolute inset-2 rounded-full border-2 border-dashed transition-colors duration-500 will-change-transform ${
+        hasFailed ? 'border-rose-300/70' : happy ? 'border-emerald-300/70' : 'border-[#00AFAF]/40'
       }`}
-      style={{ animation: 'spin-slow 22s linear infinite' }}
+      style={{ animation: 'spin-slow 24s linear infinite' }}
     />
 
-    {/* Inner Counter-Rotating Precision Ring (Counter-Clockwise) */}
+    {/* Inner Precision Compass Ring */}
     <div 
-      className="absolute inset-6 rounded-full border border-dashed border-teal-300/40"
-      style={{ animation: 'spin-reverse 16s linear infinite' }}
+      className="absolute inset-7 rounded-full border border-dashed border-teal-300/40 will-change-transform"
+      style={{ animation: 'spin-reverse 18s linear infinite' }}
     />
 
     {/* Inner Frosted Glass Nav Orb */}
-    <div className="absolute inset-9 rounded-full border border-teal-200/80 bg-white/70 backdrop-blur-xl shadow-[inset_0_2px_12px_rgba(0,175,175,0.1)]" />
+    <div className="absolute inset-10 rounded-full border border-teal-200/70 bg-white/60 backdrop-blur-xl shadow-[inset_0_2px_10px_rgba(0,175,175,0.08)]" />
 
     {/* Central Luxury Porcelain Core Node */}
-    <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-[36px] bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(0,175,175,0.12)] flex flex-col items-center justify-center p-5 text-center transition-all duration-500">
+    <div className="relative w-44 h-44 rounded-[32px] bg-white border border-slate-200/90 shadow-[0_16px_40px_rgba(0,175,175,0.1)] flex flex-col items-center justify-center p-4 text-center transition-all duration-300">
       {hasFailed ? (
         <div className="flex flex-col items-center gap-2 animate-bounce">
-          <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-200">
-            <AlertCircle className="w-7 h-7" />
+          <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-200">
+            <AlertCircle className="w-6 h-6" />
           </div>
           <span className="text-xs font-black text-rose-600 uppercase tracking-wider">Parsing Error</span>
         </div>
       ) : happy ? (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-1.5">
           <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200 animate-pulse">
-              <CheckCircle2 className="w-7 h-7" />
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#00AFAF] border-2 border-white animate-ping" />
+            <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#00AFAF] border-2 border-white animate-ping" />
           </div>
-          <div className="space-y-0.5 mt-1">
+          <div className="space-y-0.5 mt-0.5">
             <span className="text-[11px] font-black text-emerald-700 uppercase tracking-widest font-mono bg-emerald-50 px-3 py-0.5 rounded-full border border-emerald-200 inline-block">
               Standardized ✓
             </span>
-            <p className="text-[10px] text-slate-500 font-bold">
+            <p className="text-[11px] text-slate-800 font-extrabold font-mono">
               {totalRates.toLocaleString('en-US')} Rates Validated
+            </p>
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+              100% UNLOCODE Aligned
             </p>
           </div>
         </div>
@@ -101,18 +104,18 @@ const RateBridgeCore: React.FC<{
           <div className="relative">
             <div 
               style={{ backgroundColor: '#00AFAF' }}
-              className="w-13 h-13 rounded-2xl text-white flex items-center justify-center shadow-lg shadow-[#00AFAF]/30"
+              className="w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg shadow-[#00AFAF]/25"
             >
-              <Ship className="w-7 h-7 text-white animate-pulse" />
+              <Ship className="w-6 h-6 text-white animate-pulse" />
             </div>
             <div className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white animate-ping" />
           </div>
           
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#008f8f] font-mono bg-[#00AFAF]/10 px-3 py-0.5 rounded-full border border-[#00AFAF]/20 inline-block truncate max-w-[150px]">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#008f8f] font-mono bg-[#00AFAF]/10 px-2.5 py-0.5 rounded-full border border-[#00AFAF]/20 inline-block truncate max-w-[140px]">
               {STAGES[activeStage]?.label || 'Standardizing'}
             </span>
-            <p className="text-[10px] text-slate-400 font-bold truncate max-w-[150px]">
+            <p className="text-[10px] text-slate-400 font-bold truncate max-w-[140px]">
               {STAGES[activeStage]?.desc}
             </p>
           </div>
@@ -186,7 +189,6 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
   }, [isOpen, files.length, jobIds]);
 
   // Accurate Multi-File Batch Progress Calculation:
-  // Each file represents (100 / totalFiles)% of the overall progress
   const totalFiles = Math.max(1, files.length);
 
   const { computedBatchProgress, allJobsFinished, finishedCount, failedCount, successCount } = React.useMemo(() => {
@@ -202,19 +204,12 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     for (let i = 0; i < files.length; i++) {
       const jobId = jobIds[i];
 
-      // If job not yet assigned
       if (!jobId) {
-        if (i < activeIndex) {
-          progressSum += 80;
-        } else if (i === activeIndex) {
-          progressSum += 25;
-        } else {
-          progressSum += 0;
-        }
+        if (i < activeIndex) progressSum += 80;
+        else if (i === activeIndex) progressSum += 25;
         continue;
       }
 
-      // Explicit upload failure
       if (jobId.startsWith('failed_')) {
         failed++;
         finished++;
@@ -339,8 +334,8 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     <div className="fixed inset-0 top-0 left-0 w-screen h-screen z-[9999] overflow-hidden flex flex-col justify-between select-none animate-fade-in bg-[#f8fafc]">
       
       {/* Background Volumetric Ambient Lighting */}
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-[#00AFAF]/15 via-teal-500/8 to-transparent rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[700px] h-[700px] bg-gradient-to-tr from-sky-500/10 via-[#00AFAF]/8 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[#00AFAF]/12 via-teal-500/6 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-sky-500/8 via-[#00AFAF]/6 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Top Header Window Controls */}
       <div className="absolute top-6 right-8 z-50 flex items-center gap-2.5">
@@ -361,15 +356,15 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
       </div>
 
       {/* ── TOP HERO TITLE & EXECUTIVE STATS BAR ── */}
-      <header className="relative z-10 pt-8 pb-2 px-6 text-center shrink-0">
-        <div className="flex justify-center items-center gap-2 mb-2.5">
+      <header className="relative z-10 pt-7 pb-2 px-6 text-center shrink-0">
+        <div className="flex justify-center items-center gap-2 mb-2">
           <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase shadow-2xs border ${
             allFailed ? 'bg-rose-50 text-rose-700 border-rose-200' :
             hasPartialErrors ? 'bg-amber-50 text-amber-700 border-amber-200' :
             'text-[#008f8f] border-[#00AFAF]/25 bg-[#00AFAF]/10'
           }`}>
             <Sparkles className="w-3.5 h-3.5 text-[#00AFAF]" />
-            RateBridge Autonomous Conversion Blueprint
+            RATEBRIDGE AUTONOMOUS CONVERSION BLUEPRINT
           </span>
         </div>
 
@@ -381,33 +376,34 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
         {/* Live Metric Chips Ribbon */}
         <div className="flex flex-wrap items-center justify-center gap-2.5 mt-3">
-          <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
+          <span className="px-3.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-[#00AFAF]" />
             {files.length} Files Ingested
           </span>
-          <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
+          <span className="px-3.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-amber-500" />
             {totalExtractedRates.toLocaleString('en-US')} Rates Extracted
           </span>
-          <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
+          <span className="px-3.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
             <Globe2 className="w-3.5 h-3.5 text-emerald-600" />
             13,670 UNLOCODE Aligned
           </span>
-          <span className="px-3 py-1 rounded-xl bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] font-mono text-xs font-black shadow-2xs">
+          <span className="px-3.5 py-1 rounded-xl bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] font-mono text-xs font-black shadow-2xs flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#00AFAF] animate-pulse" />
             {displayProgress}% Overall Progress
           </span>
         </div>
       </header>
 
-      {/* ── MAIN 3-STAGE CONVEYOR PIPELINE ── */}
+      {/* ── MAIN 3-STAGE CONVEYOR PIPELINE (Perfect Geometry & Spacing) ── */}
       <main className="relative z-10 flex-1 flex items-center justify-center min-h-0 px-4 sm:px-6 md:px-8 py-2 overflow-x-auto">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-3 sm:gap-6 md:gap-8">
           
-          {/* ── LEFT DOCK: Origin Cargo Ingestion Card ── */}
-          <div className="w-60 sm:w-72 md:w-80 shrink-0 flex flex-col justify-center bg-white/95 backdrop-blur-2xl p-5 rounded-[32px] border border-slate-200/90 shadow-[0_16px_40px_-8px_rgba(0,175,175,0.08)] relative overflow-hidden">
+          {/* ── LEFT DOCK: Origin Rate Cards ── */}
+          <div className="w-[340px] sm:w-[360px] md:w-[380px] shrink-0 flex flex-col justify-between bg-white/95 backdrop-blur-2xl p-5 rounded-[32px] border border-slate-200/90 shadow-[0_16px_40px_-8px_rgba(0,175,175,0.08)] relative overflow-hidden h-[380px]">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-teal-400 to-[#00AFAF]" />
             
-            <div className="flex items-center justify-between mb-3.5 px-1">
+            <div className="flex items-center justify-between mb-3 px-1">
               <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <Anchor className="w-4 h-4 text-[#00AFAF]" /> Origin Rate Cards
               </span>
@@ -416,7 +412,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
               </span>
             </div>
 
-            <div className="max-h-[270px] overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
               {files.map((f, i) => {
                 const jobId = jobIds[i];
                 const job = jobId ? jobStates[jobId] : null;
@@ -430,9 +426,9 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                   <div
                     key={i}
                     className={`p-3 rounded-2xl border transition-all duration-300 flex items-center gap-3 ${
-                      isFailed ? 'bg-rose-50/90 border-rose-300 shadow-2xs' :
-                      isDone ? 'bg-emerald-50/80 border-emerald-300/80 shadow-2xs' :
-                      isActive ? 'bg-white border-2 border-[#00AFAF] shadow-lg shadow-[#00AFAF]/15 ring-4 ring-[#00AFAF]/10 scale-[1.02]' :
+                      isFailed ? 'bg-rose-50/90 border-l-4 border-l-rose-500 border-rose-200 shadow-2xs' :
+                      isDone ? 'bg-emerald-50/70 border-l-4 border-l-emerald-500 border-emerald-200/80 shadow-2xs hover:bg-emerald-50/90' :
+                      isActive ? 'bg-white border-2 border-[#00AFAF] shadow-lg shadow-[#00AFAF]/15 ring-4 ring-[#00AFAF]/10 scale-[1.01]' :
                       'bg-slate-50 border-slate-200 opacity-60'
                     }`}
                   >
@@ -448,7 +444,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1">
                         <p className="text-xs font-black text-slate-900 truncate" title={f.name}>{f.name}</p>
-                        <span className="text-[9px] font-mono font-bold text-slate-400 uppercase shrink-0">.{ext}</span>
+                        <span className="text-[9px] font-mono font-black text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded uppercase shrink-0">.{ext}</span>
                       </div>
                       <p className={`text-[10px] font-black uppercase tracking-wider mt-0.5 flex items-center gap-1 ${
                         isFailed ? 'text-rose-600' : isDone ? 'text-emerald-700' : isActive ? 'text-[#008f8f]' : 'text-slate-400'
@@ -462,7 +458,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
             </div>
           </div>
 
-          {/* ── LEFT PIPELINE CONNECTOR ── */}
+          {/* ── LEFT PIPELINE CONNECTOR (Stabilized Stream) ── */}
           <div className="flex-1 min-w-[36px] flex flex-col items-center justify-center gap-2 self-center">
             <div className="w-full h-3 bg-slate-100 rounded-full relative overflow-hidden shadow-inner border border-slate-200/80">
               <div
@@ -472,12 +468,12 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                 style={{ width: `${displayProgress}%` }}
               />
             </div>
-            <span className="text-[10px] font-black text-[#008f8f] uppercase tracking-widest font-mono text-center px-2 py-0.5 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/20 shadow-2xs">
+            <span className="text-[10px] font-black text-[#008f8f] uppercase tracking-widest font-mono text-center px-2.5 py-0.5 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/20 shadow-2xs truncate">
               {!showComplete ? '⚡ Unpivoting' : 'Loaded ✓'}
             </span>
           </div>
 
-          {/* ── CENTER HOLOGRAPHIC SHIP AI NODE ── */}
+          {/* ── CENTER HOLOGRAPHIC AI REACTOR NODE ── */}
           <div className="shrink-0 flex flex-col items-center justify-center relative self-center">
             <RateBridgeCore 
               activeStage={currentStage} 
@@ -494,7 +490,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
             </div>
           </div>
 
-          {/* ── RIGHT PIPELINE CONNECTOR ── */}
+          {/* ── RIGHT PIPELINE CONNECTOR (Stabilized Stream) ── */}
           <div className="flex-1 min-w-[36px] flex flex-col items-center justify-center gap-2 self-center">
             <div className="w-full h-3 bg-emerald-50 rounded-full relative overflow-hidden shadow-inner border border-emerald-200/60">
               <div
@@ -504,16 +500,16 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                 style={{ width: `${displayProgress}%` }}
               />
             </div>
-            <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest font-mono text-center px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 shadow-2xs">
+            <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest font-mono text-center px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 shadow-2xs truncate">
               {!showComplete ? '🌐 13,670 Ports' : 'Discharged ✓'}
             </span>
           </div>
 
-          {/* ── RIGHT DOCK: Freightify Workbooks Card ── */}
-          <div className="w-60 sm:w-72 md:w-80 shrink-0 flex flex-col justify-center bg-white/95 backdrop-blur-2xl p-5 rounded-[32px] border border-slate-200/90 shadow-[0_16px_40px_-8px_rgba(0,175,175,0.08)] relative overflow-hidden">
+          {/* ── RIGHT DOCK: Freightify Exports ── */}
+          <div className="w-[340px] sm:w-[360px] md:w-[380px] shrink-0 flex flex-col justify-between bg-white/95 backdrop-blur-2xl p-5 rounded-[32px] border border-slate-200/90 shadow-[0_16px_40px_-8px_rgba(0,175,175,0.08)] relative overflow-hidden h-[380px]">
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
             
-            <div className="flex items-center justify-between mb-3.5 px-1">
+            <div className="flex items-center justify-between mb-3 px-1">
               <span className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Freightify Exports
               </span>
@@ -522,7 +518,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
               </span>
             </div>
 
-            <div className="max-h-[270px] overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
               {files.map((f, i) => {
                 const jobId = jobIds[i];
                 const job = jobId ? jobStates[jobId] : null;
@@ -534,8 +530,8 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                   <div
                     key={i}
                     className={`p-3 rounded-2xl border transition-all duration-500 flex items-center gap-3 ${
-                      isFailed ? 'bg-rose-50/90 border-rose-200' :
-                      isDone ? 'bg-emerald-50/80 border-emerald-300/80 shadow-2xs' :
+                      isFailed ? 'bg-rose-50/90 border-l-4 border-l-rose-500 border-rose-200' :
+                      isDone ? 'bg-emerald-50/70 border-l-4 border-l-emerald-500 border-emerald-200/80 shadow-2xs hover:bg-emerald-50/90' :
                       'bg-slate-50 border-slate-200 opacity-50'
                     }`}
                   >
@@ -548,9 +544,12 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-black text-slate-900 truncate" title={outName}>
-                        {outName}
-                      </p>
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="text-xs font-black text-slate-900 truncate" title={outName}>
+                          {outName}
+                        </p>
+                        <span className="text-[9px] font-mono font-black text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded uppercase shrink-0">.XLSM</span>
+                      </div>
                       <p className={`text-[10px] font-extrabold uppercase tracking-wider mt-0.5 flex items-center gap-1 ${
                         isFailed ? 'text-rose-600' : isDone ? 'text-emerald-700' : 'text-slate-400'
                       }`}>
