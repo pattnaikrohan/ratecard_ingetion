@@ -6,16 +6,31 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   AlertTriangle, 
-  XCircle
+  XCircle,
+  Layers,
+  UploadCloud,
+  FileText,
 } from 'lucide-react';
 import { api } from '../services/api';
 
 interface RateReviewGridProps {
   jobId: string | null;
+  jobs?: any[];
+  onSelectJob?: (jobId: string) => void;
+  onNavigateToIngest?: () => void;
   onBackToDashboard: () => void;
 }
 
-export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToDashboard }) => {
+export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ 
+  jobId, 
+  jobs = [], 
+  onSelectJob, 
+  onNavigateToIngest, 
+  onBackToDashboard 
+}) => {
+  // Determine effective active jobId (auto-select first job if none selected)
+  const effectiveJobId = jobId || (jobs.length > 0 ? jobs[0].job_id : null);
+
   const [jobData, setJobData] = useState<any>(null);
   const [rates, setRates] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,9 +41,19 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
 
   const fetchingRef = React.useRef(false);
 
+  // Auto-select first job in parent if jobId was not set but jobs exist
   useEffect(() => {
-    if (!jobId) {
+    if (!jobId && jobs.length > 0 && onSelectJob) {
+      onSelectJob(jobs[0].job_id);
+    }
+  }, [jobId, jobs, onSelectJob]);
+
+  // Fetch job details whenever effectiveJobId changes
+  useEffect(() => {
+    if (!effectiveJobId) {
       setIsLoading(false);
+      setJobData(null);
+      setRates([]);
       return;
     }
 
@@ -39,20 +64,14 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
       if (fetchingRef.current) return;
       fetchingRef.current = true;
       try {
-        const data = await api.getJob(jobId);
+        const data = await api.getJob(effectiveJobId);
         if (!isSubscribed) return;
 
         setJobData(data);
         setIsLoading(false);
 
-        const isProcessing = ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(data.status);
         if (data.canonical && data.canonical.rates) {
-          setRates((prev) => {
-            if (prev.length === 0 || isProcessing) {
-              return data.canonical.rates;
-            }
-            return prev;
-          });
+          setRates(data.canonical.rates);
         }
       } catch (err) {
         console.error('Error fetching job details:', err);
@@ -77,7 +96,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
       isSubscribed = false;
       clearInterval(interval);
     };
-  }, [jobId, jobData?.status]);
+  }, [effectiveJobId]);
 
   const handleCellChange = (rowIndex: number, field: string, value: any) => {
     const updated = [...rates];
@@ -86,11 +105,11 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   };
 
   const handleRevalidate = async () => {
-    if (!jobId) return;
+    if (!effectiveJobId) return;
     try {
       setIsRevalidating(true);
-      await api.revalidateJob(jobId, rates);
-      const data = await api.getJob(jobId);
+      await api.revalidateJob(effectiveJobId, rates);
+      const data = await api.getJob(effectiveJobId);
       setJobData(data);
       if (data.canonical && data.canonical.rates) {
         setRates(data.canonical.rates);
@@ -104,21 +123,21 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
   };
 
   const handleApproveAndDownload = async () => {
-    if (!jobId) return;
+    if (!effectiveJobId) return;
     try {
       setIsApproving(true);
-      await api.revalidateJob(jobId, rates);
-      await api.approveJob(jobId, 'PARTIAL');
+      await api.revalidateJob(effectiveJobId, rates);
+      await api.approveJob(effectiveJobId, 'PARTIAL');
 
-      const downloadUrl = api.getDownloadUrl(jobId);
+      const downloadUrl = api.getDownloadUrl(effectiveJobId);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `Freightify_Upload_${jobId}.xlsm`;
+      link.download = `Freightify_Upload_${effectiveJobId}.xlsm`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      const data = await api.getJob(jobId);
+      const data = await api.getJob(effectiveJobId);
       setJobData(data);
       if (data.canonical && data.canonical.rates) {
         setRates(data.canonical.rates);
@@ -137,7 +156,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, effectiveJobId]);
 
   // Counts for filter pills
   const counts = useMemo(() => {
@@ -177,29 +196,80 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
     jobData?.file_name || 
     jobData?.canonical?.file_name || 
     jobData?.output_file_name || 
-    (jobId ? `Rate Card #${jobId}` : 'Rate Card Details');
+    (effectiveJobId ? `Rate Card #${effectiveJobId}` : 'Rate Card Details');
 
   const carrierName = jobData?.canonical?.carrier_code || jobData?.carrier_code || jobData?.summary?.carriers_found?.[0] || 'Standardized Rates';
 
-  if (!jobId) {
+  // ── EMPTY STATE (No jobs in system) ──
+  if (!effectiveJobId && jobs.length === 0) {
     return (
-      <div className="bg-white rounded-3xl p-16 text-center space-y-4 border border-slate-200 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)]">
-        <h3 className="text-xl font-black text-slate-900">No Rate Card Selected for Review</h3>
-        <p className="text-sm text-slate-500 font-medium">Please select an ingestion job from the Dashboard or Rate Ingestion Hub to inspect.</p>
-        <button 
-          onClick={onBackToDashboard} 
+      <div className="bg-white rounded-3xl p-16 text-center space-y-5 border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] max-w-2xl mx-auto my-12 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
+        
+        <div 
           style={{ backgroundColor: '#00AFAF' }}
-          className="px-6 py-3 rounded-2xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20 inline-flex items-center gap-2"
+          className="w-16 h-16 rounded-3xl text-white flex items-center justify-center mx-auto shadow-lg shadow-[#00AFAF]/25"
         >
-          <ArrowLeft className="w-4 h-4" /> Return to Dashboard
+          <UploadCloud className="w-8 h-8" />
+        </div>
+
+        <div>
+          <h3 className="text-xl font-black text-slate-900">No Rate Cards Ingested Yet</h3>
+          <p className="text-xs text-slate-500 font-medium mt-1.5 max-w-md mx-auto leading-relaxed">
+            Upload carrier rate files (.EML, .XLSX, .PDF, .PNG) in the Ingestion Hub to unpivot container matrices and review rates here.
+          </p>
+        </div>
+
+        <button 
+          onClick={onNavigateToIngest || onBackToDashboard} 
+          style={{ backgroundColor: '#00AFAF' }}
+          className="px-6 py-3 rounded-2xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/20 hover:brightness-105 inline-flex items-center gap-2"
+        >
+          <UploadCloud className="w-4 h-4" /> Go to Rate Ingestion Hub
         </button>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-4 animate-fade-in text-slate-900 pb-20">
+    <div className="w-full space-y-4 animate-fade-in text-slate-900 pb-20 relative">
       
+      {/* ── MULTI-FILE SWITCHER RIBBON (When multiple rate files exist) ── */}
+      {jobs.length > 1 && (
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3 overflow-x-auto custom-scrollbar">
+          <div className="flex items-center gap-1.5 pl-2 text-xs font-black text-slate-500 uppercase tracking-wider shrink-0">
+            <Layers className="w-3.5 h-3.5 text-[#00AFAF]" />
+            <span>Switch Rate File ({jobs.length}):</span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {jobs.map((j) => {
+              const isActive = j.job_id === effectiveJobId;
+              const rowCount = j.total_rows || j.summary?.total_rows || (j.canonical?.rates || []).length || 0;
+              return (
+                <button
+                  key={j.job_id}
+                  onClick={() => onSelectJob && onSelectJob(j.job_id)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 border ${
+                    isActive
+                      ? 'bg-[#00AFAF] text-white border-[#00AFAF] shadow-md shadow-[#00AFAF]/20'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                  }`}
+                >
+                  <FileText className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span className="truncate max-w-[180px]">{j.file_name}</span>
+                  <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-600'
+                  }`}>
+                    {rowCount.toLocaleString('en-US')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── TOP STREAMLINED CONTROL HEADER ── */}
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl px-6 py-4 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         
@@ -274,9 +344,34 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
         </div>
       </div>
 
-      {/* ── DATA GRID CARD ── */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col relative">
+      {/* ── DATA GRID CARD WITH FROSTED GLASS BLUR SPINNER OVERLAY ── */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col relative min-h-[400px]">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#00AFAF] via-indigo-600 to-purple-600" />
+
+        {/* ── FROSTED GLASS BLUR LOADING OVERLAY ── */}
+        {(isLoading || isWorkerProcessing) && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/75 backdrop-blur-md transition-all duration-300 p-6 text-center">
+            <div className="relative">
+              <div 
+                style={{ backgroundColor: '#00AFAF' }}
+                className="w-16 h-16 rounded-3xl text-white flex items-center justify-center shadow-xl shadow-[#00AFAF]/25"
+              >
+                <RefreshCw className="w-8 h-8 animate-spin" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white animate-ping" />
+            </div>
+
+            <p className="text-base font-black text-slate-900 mt-4 tracking-tight">
+              Loading Rate Card & Alignment Matrix...
+            </p>
+            <p className="text-xs text-slate-500 font-medium mt-1 font-mono truncate max-w-sm">
+              {displayFileName}
+            </p>
+            <span className="mt-3 px-3 py-1 rounded-full bg-[#00AFAF]/10 text-[#008f8f] font-mono text-[11px] font-black">
+              Standardizing with 13,670 UNLOCODEs
+            </span>
+          </div>
+        )}
 
         {/* Filter Toolbar */}
         <div className="px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70">
@@ -337,7 +432,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({ jobId, onBackToD
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {paginatedRates.length === 0 ? (
+              {paginatedRates.length === 0 && !isLoading ? (
                 <tr>
                   <td colSpan={9} className="text-center py-16 text-slate-400 font-medium">
                     No rate rows found matching current search/filter.

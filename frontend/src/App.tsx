@@ -117,6 +117,9 @@ export function App() {
           {activeTab === 'review' && (
             <RateReviewGrid 
               jobId={selectedJobId} 
+              jobs={jobs}
+              onSelectJob={handleSelectJob}
+              onNavigateToIngest={() => setActiveTab('ingest')}
               onBackToDashboard={() => setActiveTab('dashboard')} 
             />
           )}
