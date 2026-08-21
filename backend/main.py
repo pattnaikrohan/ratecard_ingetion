@@ -28,15 +28,24 @@ app = FastAPI(
     description="Enterprise PoC API for carrier rate card ingestion, master data validation, and Freightify upload sheet generation."
 )
 
+# 1. Custom caching middleware (inner)
+app.add_middleware(CacheControlMiddleware)
+
+# 2. CORS middleware (outermost so all preflight and error responses include CORS headers)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://icy-bush-00b71b600.7.azurestaticapps.net",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "*"
+    ],
+    allow_origin_regex=r"https://.*\.azurestaticapps\.net",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
-
-app.add_middleware(CacheControlMiddleware)
 
 app.include_router(api_router)
 
