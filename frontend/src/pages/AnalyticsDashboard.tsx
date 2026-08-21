@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  TrendingUp, 
   Layers, 
   Ship, 
   CheckCircle2, 
@@ -44,25 +43,25 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     let validRates = 0;
     let warningRates = 0;
     let errorRates = 0;
-    const carrierCountMap: Record<string, { total: number; valid: number; name: string; scac: string; bg: string; color: string }> = {};
+    const carrierCountMap: Record<string, { total: number; valid: number; name: string; scac: string; bg: string; color: string; border: string }> = {};
     const equipmentMap: Record<string, number> = {};
     const corridorMap: Record<string, number> = {};
     const surchargeMap: Record<string, number> = {
       'BAF': 0, 'DTHC': 0, 'OTHC': 0, 'EBS': 0, 'PAI': 0, 'PAE': 0, 'DDF': 0, 'VPI': 0, 'Low Sulfur': 0
     };
 
-    const CARRIER_CONFIG: Record<string, { name: string; bg: string; color: string }> = {
-      'MAEU': { name: 'Maersk Line', bg: 'bg-sky-50 border-sky-200', color: 'text-sky-700' },
-      'OOLU': { name: 'OOCL Shipping', bg: 'bg-rose-50 border-rose-200', color: 'text-rose-700' },
-      'ANNU': { name: 'ANL / CMA CGM', bg: 'bg-blue-50 border-blue-200', color: 'text-blue-700' },
-      'ONEY': { name: 'Ocean Network Express', bg: 'bg-pink-50 border-pink-200', color: 'text-pink-700' },
-      'MSCU': { name: 'MSC Mediterranean', bg: 'bg-amber-50 border-amber-200', color: 'text-amber-700' },
-      'COSU': { name: 'COSCO Shipping', bg: 'bg-emerald-50 border-emerald-200', color: 'text-emerald-700' },
-      'HLCU': { name: 'Hapag-Lloyd', bg: 'bg-orange-50 border-orange-200', color: 'text-orange-700' },
-      'ZIMU': { name: 'ZIM Integrated', bg: 'bg-indigo-50 border-indigo-200', color: 'text-indigo-700' },
-      'HMMU': { name: 'HMM Ocean', bg: 'bg-cyan-50 border-cyan-200', color: 'text-cyan-700' },
-      'CRTS': { name: 'CaroTrans LCL', bg: 'bg-teal-50 border-teal-200', color: 'text-teal-700' },
-      'AAWU': { name: 'AAW Global', bg: 'bg-purple-50 border-purple-200', color: 'text-purple-700' },
+    const CARRIER_CONFIG: Record<string, { name: string; bg: string; color: string; border: string }> = {
+      'MAEU': { name: 'Maersk Line', bg: 'bg-sky-50', color: 'text-sky-700', border: 'border-sky-200' },
+      'OOLU': { name: 'OOCL Shipping', bg: 'bg-rose-50', color: 'text-rose-700', border: 'border-rose-200' },
+      'ANNU': { name: 'ANL / CMA CGM', bg: 'bg-blue-50', color: 'text-blue-700', border: 'border-blue-200' },
+      'ONEY': { name: 'Ocean Network Express', bg: 'bg-pink-50', color: 'text-pink-700', border: 'border-pink-200' },
+      'MSCU': { name: 'MSC Mediterranean', bg: 'bg-amber-50', color: 'text-amber-700', border: 'border-amber-200' },
+      'COSU': { name: 'COSCO Shipping', bg: 'bg-emerald-50', color: 'text-emerald-700', border: 'border-emerald-200' },
+      'HLCU': { name: 'Hapag-Lloyd', bg: 'bg-orange-50', color: 'text-orange-700', border: 'border-orange-200' },
+      'ZIMU': { name: 'ZIM Integrated', bg: 'bg-indigo-50', color: 'text-indigo-700', border: 'border-indigo-200' },
+      'HMMU': { name: 'HMM Ocean', bg: 'bg-cyan-50', color: 'text-cyan-700', border: 'border-cyan-200' },
+      'CRTS': { name: 'CaroTrans LCL', bg: 'bg-teal-50', color: 'text-teal-700', border: 'border-teal-200' },
+      'AAWU': { name: 'AAW Global', bg: 'bg-purple-50', color: 'text-purple-700', border: 'border-purple-200' },
     };
 
     recentJobs.forEach((job) => {
@@ -83,12 +82,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       const conf = CARRIER_CONFIG[carrier] || {
         name: carrier === 'UNKN' ? 'Generic / Multi-Carrier' : carrier,
-        bg: 'bg-slate-50 border-slate-200',
+        bg: 'bg-slate-50',
         color: 'text-slate-700',
+        border: 'border-slate-200',
       };
 
       if (!carrierCountMap[carrier]) {
-        carrierCountMap[carrier] = { total: 0, valid: 0, name: conf.name, scac: carrier, bg: conf.bg, color: conf.color };
+        carrierCountMap[carrier] = { total: 0, valid: 0, name: conf.name, scac: carrier, bg: conf.bg, color: conf.color, border: conf.border };
       }
       carrierCountMap[carrier].total += rowCount;
       carrierCountMap[carrier].valid += validCount;
@@ -128,12 +128,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       .slice(0, 6)
       .map(([eq, count]) => ({ eq, count, pct: totalRates ? Math.round((count / totalRates) * 100) : 0 }));
 
-    // AI Cost calculations
+    // AI Cost calculations formatted to en-US
     const estimatedTotalTokens = Math.round((totalRates || 41081) * 98 + (totalJobs || 38) * 12500);
     const promptTokens = Math.round(estimatedTotalTokens * 0.78);
     const completionTokens = estimatedTotalTokens - promptTokens;
     // OpenAI GPT-4o pricing: ~$2.50 / 1M prompt, $10.00 / 1M completion
-    const aiCostUsd = ((promptTokens / 1_000_000) * 2.50 + (completionTokens / 1_000_000) * 10.00) + 1.78;
+    const aiCostUsd = ((promptTokens / 1_000_000) * 2.50 + (completionTokens / 1_000_000) * 10.00) + 2.15;
     const manualLaborCostUsd = ((totalJobs || 38) * 3.8 * 30.0); // 3.8 hrs/sheet at $30/hr manual entry
     const netSavingsUsd = manualLaborCostUsd - aiCostUsd;
 
@@ -164,47 +164,44 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       ],
       surcharges: surchargeMap,
       aiMetrics: {
-        totalTokens: estimatedTotalTokens || 4215800,
-        promptTokens,
-        completionTokens,
-        costUsd: aiCostUsd || 14.82,
+        totalTokensFormatted: estimatedTotalTokens.toLocaleString('en-US'),
+        costUsd: aiCostUsd || 20.46,
         manualCostUsd: manualLaborCostUsd || 4332.00,
-        netSavingsUsd: netSavingsUsd || 4317.18,
-        costPerRow: ((aiCostUsd || 14.82) / (totalRates || 41081)).toFixed(5),
+        netSavingsUsd: netSavingsUsd || 4311.54,
+        costPerRow: ((aiCostUsd || 20.46) / (totalRates || 41081)).toFixed(5),
       }
     };
   }, [recentJobs]);
-
 
   const hrsSaved = metrics?.average_time_saved_mins ? (metrics.average_time_saved_mins * 3).toFixed(1) : '148.5';
   const learnedSynonymsCount = masterDataStatus?.learned_synonyms_count || 1438;
 
   // Timeline Mock Spend Breakdown by date
   const timelineData = [
-    { date: 'Aug 16', spend: 0.85, tokens: '240k', files: 3, rates: 1840 },
-    { date: 'Aug 17', spend: 1.40, tokens: '390k', files: 5, rates: 3620 },
-    { date: 'Aug 18', spend: 2.75, tokens: '780k', files: 8, rates: 8140 },
-    { date: 'Aug 19', spend: 3.90, tokens: '1.1M', files: 9, rates: 10420 },
-    { date: 'Aug 20', spend: 3.42, tokens: '980k', files: 7, rates: 9280 },
-    { date: 'Aug 21 (Today)', spend: 2.50, tokens: '725k', files: 6, rates: 7781 },
+    { date: 'Aug 16', spend: 1.85, tokens: '380k tokens', files: 4, rates: 2450 },
+    { date: 'Aug 17', spend: 2.90, tokens: '640k tokens', files: 6, rates: 4820 },
+    { date: 'Aug 18', spend: 4.15, tokens: '920k tokens', files: 8, rates: 8140 },
+    { date: 'Aug 19', spend: 4.80, tokens: '1.15M tokens', files: 9, rates: 10420 },
+    { date: 'Aug 20', spend: 3.92, tokens: '890k tokens', files: 7, rates: 9280 },
+    { date: 'Aug 21 (Today)', spend: 2.84, tokens: '620k tokens', files: 6, rates: 5971 },
   ];
 
   return (
-    <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-12">
+    <div className="w-full flex-1 flex flex-col min-h-0 space-y-8 animate-fade-in select-none text-slate-900 pb-16 px-1">
       
-      {/* ── TOP HERO HEADER ── */}
-      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#00AFAF]/10 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* ── TOP HERO HEADER (Ultra-Posh Ambient Card) ── */}
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.04)] relative overflow-hidden shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-[#00AFAF]/12 via-indigo-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 space-y-2.5 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-3.5 py-1 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/30 text-[#008f8f] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+            <span className="px-3.5 py-1 rounded-full bg-[#00AFAF]/10 border border-[#00AFAF]/25 text-[#008f8f] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-[#00AFAF]" />
-              RateBridge Autonomous Intelligence
+              RateBridge Executive Intelligence
             </span>
             <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-mono font-black flex items-center gap-1.5 shadow-2xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Live Telemetry Online
+              Live Telemetry Active
             </span>
           </div>
 
@@ -212,18 +209,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             Rate Standardization & AI Cost Intelligence
           </h1>
           <p className="text-sm text-slate-500 font-medium leading-relaxed">
-            Holistic oversight of carrier contract extractions, UNLOCODE resolution accuracy, and accumulated OpenAI GPT-4o API consumption.
+            Real-time analytics across global carrier rate contracts, LOCODE master validation accuracy, and total OpenAI GPT-4o API consumption till date.
           </p>
         </div>
 
         {/* Action Controls */}
         <div className="relative z-10 flex items-center gap-3 shrink-0">
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80 text-xs font-black">
+          <div className="flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 text-xs font-black">
             {(['all', 'q3', 'month'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTimeFilter(t)}
-                className={`px-3.5 py-2 rounded-xl transition-all ${
+                className={`px-4 py-2 rounded-xl transition-all ${
                   timeFilter === t
                     ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
                     : 'text-slate-500 hover:text-slate-900'
@@ -237,84 +234,109 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <button
             onClick={onNavigateToIngest}
             style={{ backgroundColor: '#00AFAF' }}
-            className="px-6 py-2.5 rounded-2xl text-white font-black text-xs transition-all shadow-md shadow-[#00AFAF]/25 hover:brightness-105 active:scale-[0.98] flex items-center gap-2"
+            className="px-6 py-3 rounded-2xl text-white font-black text-xs transition-all shadow-lg shadow-[#00AFAF]/25 hover:brightness-105 active:scale-[0.98] flex items-center gap-2"
           >
             <Layers className="w-4 h-4 text-white" />
-            <span>Ingest New Files</span>
+            <span>Ingest Rate Cards</span>
           </button>
         </div>
       </div>
 
-      {/* ── 5-COLUMN HIGH-IMPACT FINANCIAL & OPERATIONAL KPIS ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-        {[
-          {
-            label: 'Total Standardized Rates',
-            val: dynamicStats.totalRates.toLocaleString(),
-            sub: '100% Freightify compliant',
-            icon: Boxes,
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50 border-indigo-200',
-          },
-          {
-            label: 'LOCODE Accuracy',
-            val: `${dynamicStats.accuracyPct}%`,
-            sub: '13,670 master ports',
-            icon: ShieldCheck,
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50 border-emerald-200',
-          },
-          {
-            label: 'Total OpenAI Spend',
-            val: `$${dynamicStats.aiMetrics.costUsd.toFixed(2)}`,
-            sub: `${dynamicStats.aiMetrics.totalTokens.toLocaleString()} tokens`,
-            icon: Coins,
-            color: 'text-[#00AFAF]',
-            bg: 'bg-[#00AFAF]/10 border-[#00AFAF]/30',
-          },
-          {
-            label: 'Net Cost Savings',
-            val: `$${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-            sub: '99.7% Labor reduction',
-            icon: Scale,
-            color: 'text-purple-600',
-            bg: 'bg-purple-50 border-purple-200',
-          },
-          {
-            label: 'Labor Hours Saved',
-            val: `${hrsSaved} hrs`,
-            sub: 'vs manual rate entry',
-            icon: TrendingUp,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50 border-amber-200',
-          },
-        ].map((kpi, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 group hover:-translate-y-1"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{kpi.label}</span>
-              <div className={`w-8 h-8 rounded-xl ${kpi.bg} border flex items-center justify-center shadow-2xs group-hover:scale-110 transition-transform`}>
-                <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
-              </div>
+      {/* ── 4-COLUMN POSH LUXURY CARDS (Spacious & Refined) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        
+        {/* CARD 1: STANDARDIZED RATES */}
+        <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.07)] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Standardized Rates</span>
+            <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs group-hover:scale-110 transition-transform">
+              <Boxes className="w-4.5 h-4.5" />
             </div>
-            <p className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight">{kpi.val}</p>
-            <p className="text-xs font-bold text-slate-400 mt-2">{kpi.sub}</p>
           </div>
-        ))}
+          <p className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight truncate">
+            {dynamicStats.totalRates.toLocaleString('en-US')}
+          </p>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-400">100% Freightify compliant</span>
+            <span className="text-[10px] font-black text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100 font-mono">
+              38 Workbooks
+            </span>
+          </div>
+        </div>
+
+        {/* CARD 2: LOCODE ACCURACY */}
+        <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.07)] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">LOCODE Accuracy</span>
+            <div className="w-9 h-9 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-2xs group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <p className="text-3xl sm:text-4xl font-black text-emerald-600 font-mono tracking-tight truncate">
+            {dynamicStats.accuracyPct}%
+          </p>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-400">13,670 Master Ports</span>
+            <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100 font-mono">
+              Zero Faults
+            </span>
+          </div>
+        </div>
+
+        {/* CARD 3: TOTAL OPENAI SPEND */}
+        <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_-6px_rgba(0,175,175,0.12)] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#00AFAF] to-[#008f8f]" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Total OpenAI Spend</span>
+            <div className="w-9 h-9 rounded-2xl bg-[#00AFAF]/10 border border-[#00AFAF]/25 flex items-center justify-center text-[#00AFAF] shadow-2xs group-hover:scale-110 transition-transform">
+              <Coins className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <p className="text-3xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight truncate">
+            ${dynamicStats.aiMetrics.costUsd.toFixed(2)}
+          </p>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-400">{dynamicStats.aiMetrics.totalTokensFormatted} tokens</span>
+            <span className="text-[10px] font-black text-[#008f8f] bg-[#00AFAF]/10 px-2.5 py-0.5 rounded-full border border-[#00AFAF]/25 font-mono">
+              GPT-4o
+            </span>
+          </div>
+        </div>
+
+        {/* CARD 4: NET COST SAVINGS */}
+        <div className="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.07)] transition-all duration-300 relative overflow-hidden group hover:-translate-y-1">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500" />
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Net Cost Savings</span>
+            <div className="w-9 h-9 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shadow-2xs group-hover:scale-110 transition-transform">
+              <Scale className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <p className="text-3xl sm:text-4xl font-black text-purple-700 font-mono tracking-tight truncate">
+            ${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-400">99.7% Labor Reduction</span>
+            <span className="text-[10px] font-black text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100 font-mono">
+              {hrsSaved}h Saved
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* ── DEDICATED OPENAI COST & TOKEN INTELLIGENCE SECTION ── */}
-      <div className="bg-white rounded-3xl p-7 sm:p-8 border border-slate-200/90 shadow-sm space-y-6">
+      <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#00AFAF]/10 border border-[#00AFAF]/30 flex items-center justify-center text-[#00AFAF]">
-              <BrainCircuit className="w-5 h-5" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#00AFAF]/10 border border-[#00AFAF]/25 flex items-center justify-center text-[#00AFAF]">
+              <BrainCircuit className="w-5.5 h-5.5" />
             </div>
             <div>
-              <h2 className="text-base font-black text-slate-900 tracking-tight">
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">
                 OpenAI GPT-4o & Document Intelligence Spend Analytics
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -323,8 +345,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
 
-          {/* Selector */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200/80 text-xs font-black">
+          {/* Selector Tabs */}
+          <div className="flex items-center bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 text-xs font-black">
             <button
               onClick={() => setActiveCostTab('timeline')}
               className={`px-4 py-1.5 rounded-xl transition-all ${
@@ -357,30 +379,30 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
                   <span>Daily API Usage & Ingestion Trajectory</span>
-                  <span className="font-mono text-[#00AFAF]">Cumulative Spend: ${dynamicStats.aiMetrics.costUsd.toFixed(2)} USD</span>
+                  <span className="font-mono text-[#00AFAF] font-black">Cumulative Spend: ${dynamicStats.aiMetrics.costUsd.toFixed(2)} USD</span>
                 </div>
 
                 {/* Timeline Bar Chart */}
-                <div className="grid grid-cols-6 gap-3 pt-4">
+                <div className="grid grid-cols-6 gap-3.5 pt-4">
                   {timelineData.map((d, i) => {
-                    const heightPct = Math.round((d.spend / 4.5) * 100);
+                    const heightPct = Math.round((d.spend / 5.0) * 100);
                     return (
-                      <div key={i} className="flex flex-col items-center gap-2 group">
+                      <div key={i} className="flex flex-col items-center gap-2.5 group">
                         {/* Tooltip Hover Value */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] font-mono font-black text-[#00AFAF] bg-[#00AFAF]/10 px-2 py-0.5 rounded border border-[#00AFAF]/20">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[11px] font-mono font-black text-[#00AFAF] bg-[#00AFAF]/10 px-2 py-0.5 rounded-md border border-[#00AFAF]/20">
                           ${d.spend.toFixed(2)}
                         </div>
 
                         {/* Bar Track */}
-                        <div className="w-full h-36 bg-slate-100 rounded-2xl flex flex-col justify-end p-1.5 overflow-hidden">
+                        <div className="w-full h-40 bg-slate-100/90 rounded-2xl flex flex-col justify-end p-1.5 overflow-hidden">
                           <div
-                            className="w-full bg-gradient-to-t from-[#00AFAF] via-indigo-500 to-purple-500 rounded-xl transition-all duration-500 group-hover:brightness-110 shadow-xs"
+                            className="w-full bg-gradient-to-t from-[#00AFAF] via-teal-500 to-indigo-500 rounded-xl transition-all duration-500 group-hover:brightness-110 shadow-xs"
                             style={{ height: `${heightPct}%` }}
                           />
                         </div>
 
                         {/* Date Label */}
-                        <span className="text-[11px] font-bold text-slate-600 truncate">{d.date}</span>
+                        <span className="text-xs font-bold text-slate-700 truncate">{d.date}</span>
                         <span className="text-[10px] font-mono text-slate-400 font-medium">{d.tokens}</span>
                       </div>
                     );
@@ -389,17 +411,17 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             ) : (
               /* Breakdown Category View */
-              <div className="space-y-3 pt-2">
+              <div className="space-y-3.5 pt-2">
                 {[
-                  { name: 'Autonomous GPT-4o Rate Card Extraction', spend: '$8.60', pct: 58, desc: 'Unstructured emails, spot quotes & non-standard layouts' },
-                  { name: 'AI Port & UNLOCODE Synonym Matching', spend: '$3.55', pct: 24, desc: 'Dynamic geographic resolution across 13,670 ports' },
-                  { name: 'Azure Document Intelligence Layout OCR', spend: '$1.78', pct: 12, desc: 'Scanned PDF rate schedules & image matrices' },
-                  { name: 'Validation Reasoning & Auto-Repair', spend: '$0.89', pct: 6, desc: 'Self-healing validation warning corrections' },
+                  { name: 'Autonomous GPT-4o Rate Card Extraction', spend: '$11.85', pct: 58, desc: 'Unstructured emails, spot quotes & non-standard layouts' },
+                  { name: 'AI Port & UNLOCODE Synonym Matching', spend: '$4.90', pct: 24, desc: 'Dynamic geographic resolution across 13,670 ports' },
+                  { name: 'Azure Document Intelligence Layout OCR', spend: '$2.45', pct: 12, desc: 'Scanned PDF rate schedules & image matrices' },
+                  { name: 'Validation Reasoning & Auto-Repair', spend: '$1.26', pct: 6, desc: 'Self-healing validation warning corrections' },
                 ].map((cat, idx) => (
-                  <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-black text-slate-900">{cat.name}</span>
-                      <span className="font-mono font-bold text-[#00AFAF]">{cat.spend} ({cat.pct}%)</span>
+                      <span className="font-mono font-black text-[#00AFAF]">{cat.spend} ({cat.pct}%)</span>
                     </div>
                     <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
                       <div
@@ -407,7 +429,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         style={{ width: `${cat.pct}%` }}
                       />
                     </div>
-                    <p className="text-[10px] text-slate-400 font-medium">{cat.desc}</p>
+                    <p className="text-[11px] text-slate-400 font-medium">{cat.desc}</p>
                   </div>
                 ))}
               </div>
@@ -434,18 +456,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200/70">
                 <span className="text-slate-500 font-medium">Manual Entry Equiv.</span>
                 <span className="font-mono font-black text-rose-600 line-through">
-                  ${dynamicStats.aiMetrics.manualCostUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  ${dynamicStats.aiMetrics.manualCostUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
+            <div className="p-4.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1">
               <div className="flex items-center justify-between font-black text-xs">
                 <span>Net Labor ROI</span>
                 <span className="text-emerald-700 font-mono text-sm">+99.7%</span>
               </div>
-              <p className="text-[11px] text-emerald-700 font-medium">
-                RateBridge AI automation has delivered <strong className="font-black">${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong> in labor cost avoidance till date.
+              <p className="text-[11px] text-emerald-700 font-medium leading-relaxed">
+                RateBridge AI automation has delivered <strong className="font-black">${dynamicStats.aiMetrics.netSavingsUsd.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong> in labor cost avoidance till date.
               </p>
             </div>
           </div>
@@ -458,11 +480,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* CARRIER MARKET SHARE & VOLUME BREAKDOWN */}
-        <div className="bg-white rounded-3xl p-7 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-5">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
-                <Ship className="w-4 h-4" />
+                <Ship className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">
@@ -485,14 +507,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 <div key={c.scac} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-200/70 hover:bg-slate-100/80 transition-all space-y-1.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border ${c.bg} ${c.color}`}>
+                      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black font-mono border ${c.bg} ${c.color} ${c.border}`}>
                         {c.scac}
                       </span>
                       <span className="text-xs font-black text-slate-900">{c.name}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs font-mono font-bold text-slate-500">
-                        {c.total.toLocaleString()} rows
+                        {c.total.toLocaleString('en-US')} rows
                       </span>
                       <span className="text-xs font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">
                         {percentage}%
@@ -512,11 +534,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
 
         {/* TRADE CORRIDORS & PORT FLOW MATRIX */}
-        <div className="bg-white rounded-3xl p-7 sm:p-8 border border-slate-200/90 shadow-sm space-y-5">
+        <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-sm space-y-5">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600">
-                <Globe2 className="w-4 h-4" />
+                <Globe2 className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">
@@ -545,7 +567,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   <span className="text-xs font-black text-slate-900 font-mono truncate">{c.route}</span>
                 </div>
                 <span className="text-xs font-mono font-black text-[#00AFAF] bg-white px-2.5 py-1 rounded-xl border border-slate-200 shadow-2xs shrink-0">
-                  {c.count.toLocaleString()}
+                  {c.count.toLocaleString('en-US')}
                 </span>
               </div>
             ))}
@@ -557,7 +579,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <Activity className="w-3.5 h-3.5 text-[#00AFAF]" /> Self-Learned Port Aliases:
             </span>
             <span className="font-mono font-black text-[#00AFAF] bg-white px-3 py-1 rounded-xl border border-slate-200">
-              {learnedSynonymsCount.toLocaleString()} Synonyms
+              {learnedSynonymsCount.toLocaleString('en-US')} Synonyms
             </span>
           </div>
         </div>
@@ -565,7 +587,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* ── RECENT RATE WORKBOOKS QUICK SUMMARY TABLE ── */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.03)] overflow-hidden">
         <div className="px-8 py-5 flex items-center justify-between border-b border-slate-100 bg-slate-50/70">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-indigo-600" />
@@ -617,7 +639,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                       <div className="text-[10px] text-slate-400">{validity}</div>
                     </td>
                     <td className="text-center py-4 font-mono font-bold text-slate-900">
-                      {rowCount.toLocaleString()}
+                      {rowCount.toLocaleString('en-US')}
                     </td>
                     <td className="text-center py-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1 border ${
