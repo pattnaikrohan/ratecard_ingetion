@@ -219,6 +219,14 @@ class JobManager:
                     sheet.rates = await asyncio.to_thread(ai_mapper.validate_with_reasoning, sheet.rates, sheet.carrier_code)
 
             proc_time_ms = round((time.time() - start_time) * 1000, 2)
+            c_num = sheet.contract_number or (sheet.rates[0].contract_number if sheet.rates else "")
+            v_s = sheet.validity_start or (sheet.rates[0].validity_start if sheet.rates else "")
+            v_e = sheet.validity_end or (sheet.rates[0].validity_end if sheet.rates else "")
+
+            sheet.contract_number = c_num
+            sheet.validity_start = v_s
+            sheet.validity_end = v_e
+
             sheet.summary = JobSummary(
                 total_rows=len(sheet.rates),
                 valid_rows=valid_cnt,
@@ -226,6 +234,9 @@ class JobManager:
                 error_rows=err_cnt,
                 critical_rows=crit_cnt,
                 carriers_found=[sheet.carrier_code] if sheet.carrier_code else ["UNKN"],
+                contract_number=c_num,
+                validity_start=v_s,
+                validity_end=v_e,
                 processing_time_ms=proc_time_ms
             )
 

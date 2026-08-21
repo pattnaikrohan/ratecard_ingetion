@@ -60,6 +60,9 @@ class JobSummary(BaseModel):
     critical_rows: int = 0
     carriers_found: List[str] = Field(default_factory=list)
     trade_lanes_found: List[str] = Field(default_factory=list)
+    contract_number: str = ""
+    validity_start: str = ""
+    validity_end: str = ""
     processing_time_ms: float = 0.0
 
 class CanonicalRateSheet(BaseModel):

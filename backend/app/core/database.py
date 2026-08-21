@@ -163,6 +163,9 @@ class DatabaseManager:
                 item["warning_rows"] = summary.get("warning_rows", 0)
                 item["error_rows"] = summary.get("error_rows", 0)
                 item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
+                item["contract_number"] = summary.get("contract_number", "")
+                item["validity_start"] = summary.get("validity_start", "")
+                item["validity_end"] = summary.get("validity_end", "")
                 result.append(item)
             return result
 

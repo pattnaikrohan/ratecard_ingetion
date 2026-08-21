@@ -609,8 +609,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   const can = job.canonical || {};
                   const carrier = job.carrier_code || job.summary?.carriers_found?.[0] || can.carrier_code || 'UNKN';
                   const rowCount = job.total_rows || job.summary?.total_rows || (can.rates || []).length || 0;
-                  const contract = can.contract_number || job.contract_number || '—';
-                  const validity = can.validity_start ? `${can.validity_start} → ${can.validity_end || ''}` : '—';
+                  const contract = job.contract_number || job.summary?.contract_number || can.contract_number || '—';
+                  const vStart = job.validity_start || job.summary?.validity_start || can.validity_start;
+                  const vEnd = job.validity_end || job.summary?.validity_end || can.validity_end;
+                  const validity = vStart ? `${vStart} → ${vEnd || 'Open'}` : '—';
 
                   return (
                     <tr key={job.job_id} className="hover:bg-slate-50/70 transition-colors">

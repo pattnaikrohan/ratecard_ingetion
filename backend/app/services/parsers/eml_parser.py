@@ -268,9 +268,29 @@ class EMLParser(BaseParser):
                 print(f"[EML Parser] AI Fallback error: {e}")
 
         final_carrier = carrier_scac or (all_carriers[0] if all_carriers else "UNKN")
+        
+        # Propagate contract and validity to all individual rate rows if missing
+        for r in all_rates:
+            if not r.contract_number and contract_number:
+                r.contract_number = contract_number
+            if not r.validity_start and validity_start:
+                r.validity_start = validity_start
+            if not r.validity_end and validity_end:
+                r.validity_end = validity_end
+
+        # Fallback contract and validity from first rate if present
+        if not contract_number and all_rates and all_rates[0].contract_number:
+            contract_number = all_rates[0].contract_number
+        if not validity_start and all_rates and all_rates[0].validity_start:
+            validity_start = all_rates[0].validity_start
+            validity_end = all_rates[0].validity_end
+
         summary = JobSummary(
             total_rows=len(all_rates),
             carriers_found=all_carriers if all_carriers else [final_carrier],
+            contract_number=contract_number,
+            validity_start=validity_start,
+            validity_end=validity_end,
         )
 
         return CanonicalRateSheet(
@@ -426,12 +446,18 @@ class EMLParser(BaseParser):
         return ""
 
     def _extract_contract_number(self, subject: str, body: str) -> str:
-        combined = f"{subject}\n{body}"
-        m = re.search(r'\b(?:contract|agreement|service\s*contract|sc)\s*(?:no|number|#)?[:\s]+([A-Za-z0-9\-_/]{4,})', combined, re.IGNORECASE)
-        if m:
-            c = m.group(1).strip()
-            if c.lower() not in ("harge", "rate", "ofr", "summary", "standard", "number", "notes", "hedules", "schedules", "details"):
-                return c
+        combined = f"Subject: {subject}\n{body}"
+        patterns = [
+            r'\b(?:contract|agreement|service\s*contract|sc)\s*(?:no|number|#)?[:\s]+([A-Za-z0-9\-_/]{3,30})',
+            r'\b(?:mention\s+reference\s+number|reference\s+number|quote\s+reference|quotation\s+ref|quote\s*no|quotation\s*no|ref\s*no|reference\s*no|quote\s*#)[:\s]+([A-Za-z0-9\-_/\s]{3,30}?)(?:\n|\r|\.|\;|\,|$)',
+            r'Subject:\s*ANL\s*-\s*([A-Za-z0-9\-_/\s]+)'
+        ]
+        for p in patterns:
+            m = re.search(p, combined, re.IGNORECASE)
+            if m:
+                c = m.group(1).strip()
+                if c.lower() not in ("harge", "rate", "ofr", "summary", "standard", "number", "notes", "hedules", "schedules", "details"):
+                    return c
         return ""
 
     def _extract_validity(self, subject: str, body: str) -> Tuple[str, str]:

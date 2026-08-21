@@ -277,8 +277,14 @@ class GenericExcelPlugin(BaseParser):
                     c_1based = c_idx + 1
                     h_norm = _normalize(h)
 
+                    # Check validity start & end FIRST (prevents "valid from" matching origin "from" and "valid to" matching dest "to")
+                    if _match_synonym(h, VALIDITY_START_SYNONYMS) and "validity_start" not in candidate_map:
+                        candidate_map["validity_start"] = c_1based
+                    elif _match_synonym(h, VALIDITY_END_SYNONYMS) and "validity_end" not in candidate_map:
+                        candidate_map["validity_end"] = c_1based
+
                     # Check origin & load port
-                    if _match_synonym(h, ORIGIN_SYNONYMS):
+                    elif _match_synonym(h, ORIGIN_SYNONYMS):
                         if "load port" in h_norm or "pol" in h_norm:
                             candidate_map["origin"] = c_1based
                             origin_found = True
@@ -309,10 +315,6 @@ class GenericExcelPlugin(BaseParser):
                         candidate_map["currency"] = c_1based
                     elif _match_synonym(h, SERVICE_SYNONYMS) and "service" not in candidate_map:
                         candidate_map["service"] = c_1based
-                    elif _match_synonym(h, VALIDITY_START_SYNONYMS) and "validity_start" not in candidate_map:
-                        candidate_map["validity_start"] = c_1based
-                    elif _match_synonym(h, VALIDITY_END_SYNONYMS) and "validity_end" not in candidate_map:
-                        candidate_map["validity_end"] = c_1based
                     elif _match_synonym(h, CONTRACT_SYNONYMS) and "contract" not in candidate_map:
                         candidate_map["contract"] = c_1based
                     elif _match_synonym(h, COMMODITY_SYNONYMS) and "commodity" not in candidate_map:
@@ -477,6 +479,24 @@ class GenericExcelPlugin(BaseParser):
         )
 
         print(f"[GenericExcel] Extracted {len(all_rates)} rate rows from {file_path.name}")
+
+        # Fallback contract and validity from rows if not detected in top rows
+        if not detected_contract and all_rates and all_rates[0].contract_number:
+            detected_contract = all_rates[0].contract_number
+        if not detected_validity_start and all_rates and all_rates[0].validity_start:
+            detected_validity_start = all_rates[0].validity_start
+            detected_validity_end = all_rates[0].validity_end
+
+        # Check sheet title for contract reference like "TO_USA PORTS"
+        if not detected_contract and len(wb.sheetnames) > 0:
+            first_cell = str(wb[wb.sheetnames[0]].cell(1, 1).value or "").strip()
+            title_m = re.match(r'^([A-Za-z0-9\-_/\s]{3,30}?)(?:\s*\(|$|\s*\-)', first_cell)
+            if title_m and title_m.group(1).strip().lower() not in ("summary", "standard", "rates", "sheet1"):
+                detected_contract = title_m.group(1).strip()
+
+        summary.contract_number = detected_contract
+        summary.validity_start = detected_validity_start
+        summary.validity_end = detected_validity_end
 
         return CanonicalRateSheet(
             job_id=job_id,
