@@ -160,18 +160,31 @@ class DatabaseManager:
              threading.Thread(target=self.backup_to_blob, daemon=True).start()
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,))
-            row = cursor.fetchone()
-            if not row:
-                return None
-            
-            res = dict(row)
-            res["summary"] = json.loads(res["summary_json"]) if res["summary_json"] else {}
-            res["canonical"] = json.loads(res["canonical_json"]) if res["canonical_json"] else None
-            res["logs"] = json.loads(res["logs_json"]) if res["logs_json"] else []
-            return res
+        try:
+            with self._get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                
+                res = dict(row)
+                try:
+                    res["summary"] = json.loads(res["summary_json"]) if res.get("summary_json") else {}
+                except Exception:
+                    res["summary"] = {}
+                try:
+                    res["canonical"] = json.loads(res["canonical_json"]) if res.get("canonical_json") else None
+                except Exception:
+                    res["canonical"] = None
+                try:
+                    res["logs"] = json.loads(res["logs_json"]) if res.get("logs_json") else []
+                except Exception:
+                    res["logs"] = []
+                return res
+        except Exception as e:
+            print(f"[DB] Error in get_job({job_id}): {e}")
+            return None
 
     def list_jobs(self, limit: int = 40) -> List[Dict[str, Any]]:
         rows = []
