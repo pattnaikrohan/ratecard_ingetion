@@ -40,7 +40,11 @@ async def upload_batch_rate_cards(files: List[UploadFile] = File(...), export_po
 
 @router.get("/jobs")
 async def list_jobs(limit: int = 20):
-    return db.list_jobs(limit)
+    try:
+        return db.list_jobs(limit)
+    except Exception as e:
+        print(f"[API Error] list_jobs failed: {e}")
+        return []
 
 @router.post("/jobs/clear")
 async def clear_all_jobs_post():
@@ -168,26 +172,36 @@ async def reload_master_data():
 
 @router.get("/metrics")
 async def get_metrics():
-    jobs = db.list_jobs(limit=100)
-    total_jobs = len(jobs)
-    completed_jobs = sum(1 for j in jobs if j["status"] in ["COMPLETED", "APPROVED", "NEEDS_REVIEW"])
-    total_rows = sum(j.get("summary", {}).get("total_rows", 0) for j in jobs)
-    
-    avg_time_ms = 0.0
-    if total_jobs > 0:
-        times = [j.get("summary", {}).get("processing_time_ms", 0) for j in jobs if j.get("summary", {}).get("processing_time_ms", 0) > 0]
-        if times:
-            avg_time_ms = sum(times) / len(times)
-            
-    time_saved_hrs = round(completed_jobs * 0.45, 1)
-    
-    return {
-        "total_jobs": total_jobs,
-        "completed_jobs": completed_jobs,
-        "total_rows_ingested": total_rows,
-        "avg_processing_time_ms": round(avg_time_ms, 2),
-        "average_time_saved_mins": time_saved_hrs
-    }
+    try:
+        jobs = db.list_jobs(limit=100)
+        total_jobs = len(jobs)
+        completed_jobs = sum(1 for j in jobs if j.get("status") in ["COMPLETED", "APPROVED", "NEEDS_REVIEW"])
+        total_rows = sum(j.get("summary", {}).get("total_rows", 0) for j in jobs)
+        
+        avg_time_ms = 0.0
+        if total_jobs > 0:
+            times = [j.get("summary", {}).get("processing_time_ms", 0) for j in jobs if j.get("summary", {}).get("processing_time_ms", 0) > 0]
+            if times:
+                avg_time_ms = sum(times) / len(times)
+                
+        time_saved_hrs = round(completed_jobs * 0.45, 1)
+        
+        return {
+            "total_jobs": total_jobs,
+            "completed_jobs": completed_jobs,
+            "total_rows_ingested": total_rows,
+            "avg_processing_time_ms": round(avg_time_ms, 2),
+            "average_time_saved_mins": time_saved_hrs
+        }
+    except Exception as e:
+        print(f"[API Error] get_metrics failed: {e}")
+        return {
+            "total_jobs": 0,
+            "completed_jobs": 0,
+            "total_rows_ingested": 0,
+            "avg_processing_time_ms": 0.0,
+            "average_time_saved_mins": 0.0
+        }
 
 @router.get("/ai/learned-synonyms")
 async def get_learned_synonyms():

@@ -174,35 +174,38 @@ class DatabaseManager:
             return res
 
     def list_jobs(self, limit: int = 40) -> List[Dict[str, Any]]:
+        rows = []
         with self._get_conn() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
             rows = cursor.fetchall()
             
-            # If 0 rows, check if we need to restore from Azure Blob once
-            if len(rows) == 0:
-                conn.close()
+        # If 0 rows, check if we need to restore from Azure Blob once
+        if len(rows) == 0:
+            try:
                 self.restore_from_blob()
                 with self._get_conn() as conn2:
                     cursor2 = conn2.cursor()
                     cursor2.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
                     rows = cursor2.fetchall()
+            except Exception as e:
+                print(f"[DB] Warning during blob restore in list_jobs: {e}")
 
-            result = []
-            for r in rows:
-                item = dict(r)
-                summary = json.loads(item["summary_json"]) if item["summary_json"] else {}
-                item["summary"] = summary
-                item["total_rows"] = summary.get("total_rows", 0)
-                item["valid_rows"] = summary.get("valid_rows", 0)
-                item["warning_rows"] = summary.get("warning_rows", 0)
-                item["error_rows"] = summary.get("error_rows", 0)
-                item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
-                item["contract_number"] = summary.get("contract_number", "")
-                item["validity_start"] = summary.get("validity_start", "")
-                item["validity_end"] = summary.get("validity_end", "")
-                result.append(item)
-            return result
+        result = []
+        for r in rows:
+            item = dict(r)
+            summary = json.loads(item["summary_json"]) if item["summary_json"] else {}
+            item["summary"] = summary
+            item["total_rows"] = summary.get("total_rows", 0)
+            item["valid_rows"] = summary.get("valid_rows", 0)
+            item["warning_rows"] = summary.get("warning_rows", 0)
+            item["error_rows"] = summary.get("error_rows", 0)
+            item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
+            item["contract_number"] = summary.get("contract_number", "")
+            item["validity_start"] = summary.get("validity_start", "")
+            item["validity_end"] = summary.get("validity_end", "")
+            result.append(item)
+        return result
 
     def clear_all_jobs(self):
         with self._get_conn() as conn:
