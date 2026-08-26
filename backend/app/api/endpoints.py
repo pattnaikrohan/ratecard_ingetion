@@ -41,9 +41,11 @@ async def upload_batch_rate_cards(files: List[UploadFile] = File(...), export_po
 @router.get("/jobs")
 async def list_jobs(limit: int = 20):
     try:
-        return db.list_jobs(limit)
+        result = db.list_jobs(limit)
+        return result
     except Exception as e:
-        print(f"[API Error] list_jobs failed: {e}")
+        import traceback
+        print(f"[API Error] list_jobs failed: {e}\n{traceback.format_exc()}")
         return []
 
 @router.post("/jobs/clear")

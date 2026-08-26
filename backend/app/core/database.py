@@ -235,27 +235,48 @@ class DatabaseManager:
             return None
 
     def list_jobs(self, limit: int = 40) -> List[Dict[str, Any]]:
-        rows = []
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
-            rows = cursor.fetchall()
+        for attempt in range(_MAX_RETRIES):
+            try:
+                rows = []
+                with self._get_conn() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
+                    rows = cursor.fetchall()
 
-        result = []
-        for r in rows:
-            item = dict(r)
-            summary = json.loads(item["summary_json"]) if item["summary_json"] else {}
-            item["summary"] = summary
-            item["total_rows"] = summary.get("total_rows", 0)
-            item["valid_rows"] = summary.get("valid_rows", 0)
-            item["warning_rows"] = summary.get("warning_rows", 0)
-            item["error_rows"] = summary.get("error_rows", 0)
-            item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
-            item["contract_number"] = summary.get("contract_number", "")
-            item["validity_start"] = summary.get("validity_start", "")
-            item["validity_end"] = summary.get("validity_end", "")
-            result.append(item)
-        return result
+                result = []
+                for r in rows:
+                    try:
+                        item = dict(r)
+                        summary = {}
+                        if item.get("summary_json"):
+                            try:
+                                summary = json.loads(item["summary_json"])
+                            except (json.JSONDecodeError, TypeError):
+                                summary = {}
+                        item["summary"] = summary
+                        item["total_rows"] = summary.get("total_rows", 0)
+                        item["valid_rows"] = summary.get("valid_rows", 0)
+                        item["warning_rows"] = summary.get("warning_rows", 0)
+                        item["error_rows"] = summary.get("error_rows", 0)
+                        item["carrier_code"] = summary.get("carriers_found", ["UNKN"])[0] if summary.get("carriers_found") else "UNKN"
+                        item["contract_number"] = summary.get("contract_number", "")
+                        item["validity_start"] = summary.get("validity_start", "")
+                        item["validity_end"] = summary.get("validity_end", "")
+                        result.append(item)
+                    except Exception as row_err:
+                        print(f"[DB] Skipping corrupt row in list_jobs: {row_err}")
+                        continue
+                return result
+            except sqlite3.OperationalError as e:
+                if attempt < _MAX_RETRIES - 1:
+                    time.sleep(_RETRY_DELAY * (attempt + 1))
+                    continue
+                print(f"[DB] list_jobs failed after {_MAX_RETRIES} retries: {e}")
+                return []
+            except Exception as e:
+                print(f"[DB] list_jobs unexpected error: {e}")
+                return []
+        return []
 
     def clear_all_jobs(self):
         with self._lock:
