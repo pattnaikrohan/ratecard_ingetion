@@ -456,7 +456,8 @@ class EMLParser(BaseParser):
             m = re.search(p, combined, re.IGNORECASE)
             if m:
                 c = m.group(1).strip()
-                if c.lower() not in ("harge", "rate", "ofr", "summary", "standard", "number", "notes", "hedules", "schedules", "details"):
+                from app.utils_contracts import is_valid_contract_number
+                if is_valid_contract_number(c):
                     return c
         return ""
 

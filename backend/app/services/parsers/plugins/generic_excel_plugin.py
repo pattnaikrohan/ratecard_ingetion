@@ -12,6 +12,7 @@ from typing import List, Optional, Tuple, Dict, Any
 from app.services.parsers.base_parser import BaseParser
 from app.models.canonical import CanonicalRateSheet, RateRow, ChargeItem, JobSummary
 from app.services.ai_column_mapper import AIColumnMapper
+from app.utils_contracts import is_valid_contract_number
 
 # ── Sheet Blacklist ─────────────────────────────────────────────────────────
 IGNORED_SHEET_NAMES = {
@@ -491,8 +492,10 @@ class GenericExcelPlugin(BaseParser):
         if not detected_contract and len(wb.sheetnames) > 0:
             first_cell = str(wb[wb.sheetnames[0]].cell(1, 1).value or "").strip()
             title_m = re.match(r'^([A-Za-z0-9\-_/\s]{3,30}?)(?:\s*\(|$|\s*\-)', first_cell)
-            if title_m and title_m.group(1).strip().lower() not in ("summary", "standard", "rates", "sheet1"):
-                detected_contract = title_m.group(1).strip()
+            if title_m:
+                candidate = title_m.group(1).strip()
+                if is_valid_contract_number(candidate):
+                    detected_contract = candidate
 
         summary.contract_number = detected_contract
         summary.validity_start = detected_validity_start

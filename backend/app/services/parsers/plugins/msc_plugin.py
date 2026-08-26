@@ -313,7 +313,7 @@ class MSCPlugin(BaseParser):
                                 ofr_currency=currency,
                                 validity_start=validity_start,
                                 validity_end=validity_end,
-                                contract_number="MSC-FAK-2026",
+                                contract_number="",
                                 remarks=f"MSC Special FAK Rate ({unit})",
                             ))
                             row_counter += 1
@@ -325,7 +325,7 @@ class MSCPlugin(BaseParser):
             job_id=job_id,
             file_name=filename,
             carrier_code="MSCU",
-            contract_number="MSC-FAK-2026",
+            contract_number="",
             validity_start=validity_start,
             validity_end=validity_end,
             rates=rates,

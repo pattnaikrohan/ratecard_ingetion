@@ -375,7 +375,7 @@ class AzureDocumentIntelligenceParser(BaseParser):
                             ofr_currency=currency,
                             validity_start=validity_start,
                             validity_end=validity_end,
-                            contract_number="AZURE_DOCINTEL_REF",
+                            contract_number="",
                             remarks=f"Local Charge: {charge_name}" if charge_name else "",
                             commodity=charge_name if charge_name else ""
                         ))
@@ -388,7 +388,7 @@ class AzureDocumentIntelligenceParser(BaseParser):
             file_name=filename,
             carrier_code=carrier or "UNKN",
             carrier_name=f"Azure Doc Intel Extracted ({carrier})",
-            contract_number="AZURE_DOCINTEL_REF",
+            contract_number="",
             validity_start=validity_start,
             validity_end=validity_end,
             rates=rates,
