@@ -83,7 +83,7 @@ class DatabaseManager:
         if blob_client and self.db_path.exists() and self.db_path.stat().st_size > 0:
             try:
                 with open(self.db_path, "rb") as data:
-                    blob_client.upload_blob(data, overwrite=True, timeout=10)
+                    blob_client.upload_blob(data, overwrite=True, timeout=60)
                 print("[Storage] Backed up rate_agent.db to Azure Blob Storage successfully.")
             except Exception as e:
                 print(f"[Storage] Warning: Failed to backup DB to Azure Blob: {e}")
@@ -96,7 +96,7 @@ class DatabaseManager:
             return
 
         try:
-            if not blob_client.exists(timeout=10):
+            if not blob_client.exists(timeout=30):
                 return
 
             local_job_count = 0
@@ -112,7 +112,7 @@ class DatabaseManager:
             # If local has 0 records, download the cloud version
             if local_job_count == 0:
                 print("[Storage] Local DB empty — downloading persisted rate_agent.db from Azure Blob...")
-                blob_data = blob_client.download_blob(timeout=15).readall()
+                blob_data = blob_client.download_blob(timeout=60).readall()
                 if len(blob_data) > 0:
                     with open(self.db_path, "wb") as f:
                         f.write(blob_data)
