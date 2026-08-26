@@ -132,6 +132,11 @@ export function App() {
         });
       } catch (err) {
         console.error(`Error uploading file ${fileArray[i].name}:`, err);
+        setBatchDockState((prev) => {
+          const updated = [...prev.jobIds];
+          updated[i] = `failed_${Date.now()}`;
+          return { ...prev, jobIds: updated };
+        });
       }
     }
   };

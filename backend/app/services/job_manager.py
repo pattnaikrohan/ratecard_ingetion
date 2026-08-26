@@ -2,6 +2,7 @@ import re
 import uuid
 import time
 import asyncio
+import concurrent.futures
 from typing import Optional, List, Dict
 from pathlib import Path
 import pandas as pd
@@ -22,6 +23,7 @@ from app.services.ai_column_mapper import AIColumnMapper
 
 class JobManager:
     _instance = None
+    _executor = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix="rate_worker")
 
     def __init__(self):
         self.db = DatabaseManager.get_instance()
@@ -33,7 +35,6 @@ class JobManager:
         self.azure_parser = AzureDocumentIntelligenceParser()
         self.validator = RateValidationEngine()
         self.exporter = FreightifyExporter()
-        self._export_tasks = {}  # job_id -> asyncio.Task for debouncing concurrent exports
 
     @classmethod
     def get_instance(cls) -> "JobManager":
@@ -47,15 +48,12 @@ class JobManager:
         
         self.db.create_job(job_id, filename, len(file_bytes), export_policy)
         
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(self._process_pipeline(job_id, file_path, filename, export_policy, notes=notes))
-        except RuntimeError:
-            asyncio.run(self._process_pipeline(job_id, file_path, filename, export_policy, notes=notes))
+        # Offload pipeline completely to background thread pool so FastAPI/Uvicorn event loop is NEVER blocked
+        self._executor.submit(self._run_pipeline_sync, job_id, file_path, filename, export_policy, notes)
 
         return job_id
 
-    async def _process_pipeline(self, job_id: str, file_path: Path, original_filename: str, export_policy: str, notes: Optional[str] = None):
+    def _run_pipeline_sync(self, job_id: str, file_path: Path, original_filename: str, export_policy: str, notes: Optional[str] = None):
         start_time = time.time()
         try:
             # 1. PARSING PHASE
@@ -68,49 +66,47 @@ class JobManager:
             generic_excel_plugin = GenericExcelPlugin()
             azure_parser = AzureDocumentIntelligenceParser()
 
-            sheet: CanonicalRateSheet = None
+            sheet: Optional[CanonicalRateSheet] = None
             fn = original_filename.lower()
 
             # ── Route to appropriate parser ──
             if fn.endswith(".eml") or fn.endswith(".msg"):
                 self.db.update_job_status(job_id, "PARSING", progress=20, log_msg="Parsing email: extracting all attachments...")
-                sheet = await asyncio.to_thread(eml_parser.parse, file_path, job_id)
+                sheet = eml_parser.parse(file_path, job_id)
 
             elif azure_parser.can_parse(file_path, original_filename):
                 self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Invoking Microsoft Azure Document Intelligence layout OCR model...")
-                sheet = await asyncio.to_thread(azure_parser.parse, file_path, job_id)
+                sheet = azure_parser.parse(file_path, job_id)
 
             elif fn.endswith(".xlsx") or fn.endswith(".xls") or fn.endswith(".xlsm"):
                 if fn.endswith(".xls"):
                     self.db.update_job_status(job_id, "PARSING", progress=22, log_msg="Converting legacy .xls format to .xlsx...")
                     try:
-                        def convert_xls():
-                            dfs = pd.read_excel(file_path, sheet_name=None, engine='xlrd')
-                            new_path = file_path.with_suffix(".xlsx")
-                            with pd.ExcelWriter(new_path, engine='openpyxl') as writer:
-                                for sheet_name, df in dfs.items():
-                                    df.to_excel(writer, sheet_name=sheet_name, index=False)
-                            return new_path
-                        file_path = await asyncio.to_thread(convert_xls)
+                        dfs = pd.read_excel(file_path, sheet_name=None, engine='xlrd')
+                        new_path = file_path.with_suffix(".xlsx")
+                        with pd.ExcelWriter(new_path, engine='openpyxl') as writer:
+                            for sheet_name, df in dfs.items():
+                                df.to_excel(writer, sheet_name=sheet_name, index=False)
+                        file_path = new_path
                         original_filename = original_filename + "x"
                     except Exception as e:
                         self.db.update_job_status(job_id, "PARSING", progress=22, log_msg=f"Warning: Failed to convert .xls: {e}")
 
                 if maersk_plugin.can_parse(file_path, original_filename):
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Detected Maersk rate card format, using BAS+Surcharges parser...")
-                    sheet = await asyncio.to_thread(maersk_plugin.parse, file_path, job_id)
+                    sheet = maersk_plugin.parse(file_path, job_id)
                 elif one_plugin.can_parse(file_path, original_filename):
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Detected ONE rate card format...")
-                    sheet = await asyncio.to_thread(one_plugin.parse, file_path, job_id)
+                    sheet = one_plugin.parse(file_path, job_id)
                 else:
                     self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Using intelligent generic Excel parser with auto-header detection...")
-                    sheet = await asyncio.to_thread(generic_excel_plugin.parse, file_path, job_id)
+                    sheet = generic_excel_plugin.parse(file_path, job_id)
 
             else:
                 # Unknown format — try generic Excel as last resort
                 self.db.update_job_status(job_id, "PARSING", progress=25, log_msg="Unknown file format, attempting generic parse...")
                 try:
-                    sheet = await asyncio.to_thread(self.generic_excel_plugin.parse, file_path, job_id)
+                    sheet = self.generic_excel_plugin.parse(file_path, job_id)
                 except Exception:
                     sheet = CanonicalRateSheet(
                         job_id=job_id,
@@ -129,7 +125,7 @@ class JobManager:
                     raw_text = raw_bytes.decode("utf-8", errors="ignore")
 
                     ai_mapper = AIColumnMapper.get_instance()
-                    ai_sheet = await asyncio.to_thread(ai_mapper.extract_rates_from_raw_text, raw_text, original_filename, job_id, notes=notes)
+                    ai_sheet = ai_mapper.extract_rates_from_raw_text(raw_text, original_filename, job_id, notes=notes)
                     if ai_sheet and len(ai_sheet.rates) > 0:
                         sheet = ai_sheet
                         self.db.update_job_status(job_id, "PARSING", progress=35, log_msg=f"Autonomous AI Extractor successfully extracted {len(sheet.rates)} rates!")
@@ -144,16 +140,13 @@ class JobManager:
             # Enrich from supplementary notes if provided
             if notes and notes.strip():
                 self.db.update_job_status(job_id, "NORMALIZING", progress=45, log_msg="Enriching rate card with supplementary email / contract notes...")
-                # Contract extraction
                 c_match = re.search(r'\b(?:contract|agreement|service\s*contract|sc)\s*(?:no|number|#)?[:\s]+([A-Za-z0-9\-_/]{4,})', notes, re.IGNORECASE)
                 if c_match and not sheet.contract_number:
                     sheet.contract_number = c_match.group(1).strip()
-                # Validity extraction
                 v_match = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', notes, re.IGNORECASE)
                 if v_match and not sheet.validity_start:
                     sheet.validity_start = v_match.group(1).strip()
                     sheet.validity_end = v_match.group(2).strip()
-                # Propagate to rows
                 for r in sheet.rates:
                     if not r.contract_number and sheet.contract_number:
                         r.contract_number = sheet.contract_number
@@ -163,7 +156,6 @@ class JobManager:
                         r.validity_end = sheet.validity_end
 
             # 2. DESTINATION GROUP EXPANSION
-            # Expand "AUS MAIN PORTS", "AUBP" etc. into individual port rows BEFORE validation
             pre_expansion_count = len(sheet.rates)
             sheet.rates = self.validator.expand_destination_groups(sheet.rates)
             if len(sheet.rates) != pre_expansion_count:
@@ -172,7 +164,7 @@ class JobManager:
                     log_msg=f"Expanded {pre_expansion_count} rows to {len(sheet.rates)} rows (destination group expansion)"
                 )
 
-            # 3. FILTER JUNK ROWS (headers, notes, comments parsed as data)
+            # 3. FILTER JUNK ROWS
             pre_filter_count = len(sheet.rates)
             sheet.rates = [r for r in sheet.rates if not self.validator.is_junk_row(r)]
             junk_removed = pre_filter_count - len(sheet.rates)
@@ -200,23 +192,23 @@ class JobManager:
                 elif validated_row.validation_status == "CRITICAL": crit_cnt += 1
 
             if warn_cnt > 0 or err_cnt > 0 or crit_cnt > 0:
-                # 5a. AI PORT RESOLUTION — attempt to resolve unmatched ports via GPT-4o
+                # 5a. AI PORT RESOLUTION
                 self.db.update_job_status(job_id, "VALIDATING", progress=65, log_msg=f"AI resolving {warn_cnt} unmatched port names via GPT-4o...")
                 ai_mapper = AIColumnMapper.get_instance()
-                sheet.rates = await asyncio.to_thread(ai_mapper.resolve_ports_with_ai, sheet.rates, sheet.carrier_code)
+                sheet.rates = ai_mapper.resolve_ports_with_ai(sheet.rates, sheet.carrier_code)
 
-                # Recount after AI resolution (many WARNINGs should now be VALID)
+                # Recount after AI resolution
                 valid_cnt = sum(1 for r in sheet.rates if r.validation_status == "VALID")
                 warn_cnt = sum(1 for r in sheet.rates if r.validation_status == "WARNING")
                 err_cnt = sum(1 for r in sheet.rates if r.validation_status == "ERROR")
                 crit_cnt = sum(1 for r in sheet.rates if r.validation_status == "CRITICAL")
 
-                self.db.update_job_status(job_id, "VALIDATING", progress=72, log_msg=f"Post-AI: {valid_cnt} Valid, {warn_cnt} Warnings, {err_cnt} Errors (AI resolved {len(sheet.rates) - warn_cnt - err_cnt - crit_cnt - valid_cnt + valid_cnt} ports)")
+                self.db.update_job_status(job_id, "VALIDATING", progress=72, log_msg=f"Post-AI: {valid_cnt} Valid, {warn_cnt} Warnings, {err_cnt} Errors")
 
-                # 5b. AI REASONING — explain any remaining issues
+                # 5b. AI REASONING
                 if warn_cnt > 0 or err_cnt > 0 or crit_cnt > 0:
                     self.db.update_job_status(job_id, "VALIDATING", progress=75, log_msg="Running AI-powered validation reasoning (GPT-4o)...")
-                    sheet.rates = await asyncio.to_thread(ai_mapper.validate_with_reasoning, sheet.rates, sheet.carrier_code)
+                    sheet.rates = ai_mapper.validate_with_reasoning(sheet.rates, sheet.carrier_code)
 
             proc_time_ms = round((time.time() - start_time) * 1000, 2)
             c_num = sheet.contract_number or (sheet.rates[0].contract_number if sheet.rates else "")
@@ -240,23 +232,21 @@ class JobManager:
                 processing_time_ms=proc_time_ms
             )
 
-            # 4. SELF-LEARNING: Persist any new port/carrier synonyms learned during this job
+            # 4. SELF-LEARNING
             md = MasterDataEngine.get_instance()
             md.save_if_dirty()
 
             # Determine next job status
-            # WARNING-only rows are now considered "good enough" — only ERROR/CRITICAL block approval
             if len(sheet.rates) == 0:
                 next_status = "FAILED"
                 self.db.update_job_status(
                     job_id,
                     next_status,
                     progress=100,
-                    log_msg=f"No rate rows could be extracted from {original_filename}. The file format may not be supported or the document contains no recognizable rate tables.",
+                    log_msg=f"No rate rows could be extracted from {original_filename}.",
                     canonical_sheet=sheet
                 )
             else:
-                # APPROVED if no errors/critical, NEEDS_REVIEW if there are errors
                 next_status = "NEEDS_REVIEW" if (err_cnt > 0 or crit_cnt > 0) else "APPROVED"
                 
                 self.db.update_job_status(
@@ -267,10 +257,9 @@ class JobManager:
                     canonical_sheet=sheet
                 )
 
-                # Pre-generate export for instant download (both APPROVED and NEEDS_REVIEW)
-                await self.pre_generate_export(job_id, export_policy)
+                # Pre-generate export for instant download
+                self._generate_export_sync(job_id, export_policy)
 
-                # If auto-approved, finalize to COMPLETED
                 if next_status == "APPROVED":
                     self.db.update_job_status(job_id, "COMPLETED", progress=100,
                         log_msg="Auto-approved — Freightify workbook ready for download.")
@@ -281,33 +270,7 @@ class JobManager:
             traceback.print_exc()
             self.db.update_job_status(job_id, "FAILED", progress=0, log_msg=f"Pipeline Error: {str(e)}")
 
-    async def generate_export(self, job_id: str, export_policy: str = "PARTIAL") -> str:
-        job = self.db.get_job(job_id)
-        if not job or not job.get("canonical"):
-            raise ValueError("Job not found or canonical data missing")
-
-        self.db.update_job_status(job_id, "GENERATING", progress=90, log_msg="Generating Freightify Upload Workbook (.xlsm)...")
-        
-        canonical_data = job["canonical"]
-        sheet = CanonicalRateSheet(**canonical_data)
-        output_filename = f"Freightify_Upload_{job_id}.xlsm"
-
-        await asyncio.to_thread(self.exporter.export, sheet, output_filename, export_policy)
-
-        # Upload to Azure Blob for fast download
-        StorageService.upload_output_to_blob(output_filename)
-
-        self.db.update_job_status(
-            job_id, 
-            "COMPLETED", 
-            progress=100, 
-            log_msg=f"Successfully generated Freightify Upload Workbook: {output_filename}",
-            output_file=output_filename
-        )
-        return output_filename
-
-    async def pre_generate_export(self, job_id: str, export_policy: str = "PARTIAL") -> str:
-        """Generate export file without changing job status. Enables instant download."""
+    def _generate_export_sync(self, job_id: str, export_policy: str = "PARTIAL") -> str:
         try:
             job = self.db.get_job(job_id)
             if not job or not job.get("canonical"):
@@ -317,38 +280,22 @@ class JobManager:
             sheet = CanonicalRateSheet(**canonical_data)
             output_filename = f"Freightify_Upload_{job_id}.xlsm"
 
-            await asyncio.to_thread(self.exporter.export, sheet, output_filename, export_policy)
-
-            # Upload to Azure Blob for fast download
+            self.exporter.export(sheet, output_filename, export_policy)
             StorageService.upload_output_to_blob(output_filename)
 
-            # Save output filename without changing job status
-            current_status = job["status"]
+            current_status = job.get("status", "COMPLETED")
             self.db.update_job_status(
                 job_id,
                 current_status,
-                log_msg=f"Pre-generated export: {output_filename}",
+                log_msg=f"Generated Freightify Upload Workbook: {output_filename}",
                 output_file=output_filename
             )
-            print(f"[Pipeline] Pre-generated export for {job_id}: {output_filename}")
             return output_filename
         except Exception as e:
-            print(f"[Pipeline] Failed to pre-generate export for {job_id}: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"[Export Error] {e}")
             return ""
 
-    def schedule_pre_export(self, job_id: str, export_policy: str = "PARTIAL"):
-        """Schedule a pre-export task, cancelling any pending one for the same job."""
-        try:
-            if job_id in self._export_tasks:
-                existing = self._export_tasks[job_id]
-                if not existing.done():
-                    existing.cancel()
-                    print(f"[Pipeline] Cancelled stale export task for {job_id}")
+    async def generate_export(self, job_id: str, export_policy: str = "PARTIAL") -> str:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(self._executor, self._generate_export_sync, job_id, export_policy)
 
-            loop = asyncio.get_running_loop()
-            task = loop.create_task(self.pre_generate_export(job_id, export_policy))
-            self._export_tasks[job_id] = task
-        except RuntimeError:
-            pass
