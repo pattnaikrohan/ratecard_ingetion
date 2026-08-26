@@ -43,7 +43,20 @@ export function App() {
       loadPeriodicData();
     }, 4000);
 
-    return () => clearInterval(interval);
+    // Instant re-sync when computer wakes from sleep or network reconnects
+    const handleDeviceWake = () => {
+      if (!document.hidden && navigator.onLine) {
+        loadPeriodicData();
+      }
+    };
+    window.addEventListener('online', handleDeviceWake);
+    document.addEventListener('visibilitychange', handleDeviceWake);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('online', handleDeviceWake);
+      document.removeEventListener('visibilitychange', handleDeviceWake);
+    };
   }, []);
 
   const loadInitialData = async () => {

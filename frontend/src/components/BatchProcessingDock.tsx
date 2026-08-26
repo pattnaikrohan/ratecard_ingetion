@@ -16,7 +16,7 @@ import {
   Globe2,
   FileText
 } from 'lucide-react';
-import { api } from '../services/api';
+import { api, requestWakeLock, releaseWakeLock } from '../services/api';
 
 interface BatchProcessingDockProps {
   isOpen: boolean;
@@ -160,7 +160,13 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
   // Continuous single-request polling for active job statuses (lightweight listJobs)
   useEffect(() => {
-    if (!isOpen || files.length === 0) return;
+    if (!isOpen || files.length === 0) {
+      releaseWakeLock();
+      return;
+    }
+
+    // Keep screen awake while batch ingestion is actively extracting/normalizing rates
+    requestWakeLock();
 
     let isPolling = true;
     const fetchStatus = async () => {
@@ -188,7 +194,7 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
           return next;
         });
 
-        // Check if all jobs have reached terminal states to stop polling
+        // Check if all jobs have reached terminal states to stop polling & release wake lock
         const allDone = validIds.length === files.length && validIds.every((id) => {
           const st = jobsMap.get(id)?.status;
           return ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(st);
@@ -196,19 +202,32 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
 
         if (allDone) {
           isPolling = false;
+          releaseWakeLock();
           if (pollTimer) clearInterval(pollTimer);
         }
       } catch {
-        /* silent catch */
+        /* silent catch - handled by resilient interceptor */
       }
     };
 
     fetchStatus();
     const pollTimer = setInterval(fetchStatus, 1500);
 
+    // Instant rehydration when device wakes up or tab returns to focus
+    const handleWake = () => {
+      if (!document.hidden && navigator.onLine) {
+        fetchStatus();
+      }
+    };
+    window.addEventListener('online', handleWake);
+    document.addEventListener('visibilitychange', handleWake);
+
     return () => {
       isPolling = false;
+      releaseWakeLock();
       clearInterval(pollTimer);
+      window.removeEventListener('online', handleWake);
+      document.removeEventListener('visibilitychange', handleWake);
     };
   }, [isOpen, files.length, jobIds]);
 
