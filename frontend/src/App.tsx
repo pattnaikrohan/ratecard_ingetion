@@ -66,9 +66,9 @@ export function App() {
         api.getMasterData(),
         api.getMetrics(),
       ]);
-      setJobs(jobsData || []);
-      setMasterDataStatus(mdData || null);
-      setMetrics(metricsData || null);
+      if (Array.isArray(jobsData)) setJobs(jobsData);
+      if (mdData) setMasterDataStatus(mdData);
+      if (metricsData) setMetrics(metricsData);
     } catch (err) {
       console.error('Error fetching initial data:', err);
     }
@@ -80,8 +80,14 @@ export function App() {
         api.listJobs(40),
         api.getMetrics(),
       ]);
-      setJobs(jobsData || []);
-      setMetrics(metricsData || null);
+      if (Array.isArray(jobsData)) {
+        setJobs((prevJobs) => {
+          const prevKey = prevJobs.map((j) => `${j.job_id}:${j.status}:${j.progress}:${j.output_file_name}`).join('|');
+          const nextKey = jobsData.map((j) => `${j.job_id}:${j.status}:${j.progress}:${j.output_file_name}`).join('|');
+          return prevKey === nextKey ? prevJobs : jobsData;
+        });
+      }
+      if (metricsData) setMetrics(metricsData);
     } catch (err) {
       console.error('Error fetching periodic data:', err);
     }

@@ -47,7 +47,7 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
     if (jobs.length > 0 && (!jobId || !isJobInList) && onSelectJob) {
       onSelectJob(jobs[0].job_id);
     }
-  }, [jobId, isJobInList, jobs, onSelectJob]);
+  }, [jobId, isJobInList]);
 
   // Fetch job details whenever effectiveJobId changes
   useEffect(() => {
@@ -230,12 +230,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
   return (
     <div className="w-full space-y-4 animate-fade-in text-slate-900 pb-20 relative">
       
-      {/* ── MULTI-FILE SWITCHER RIBBON (When multiple rate files exist) ── */}
-      {jobs.length > 1 && (
+      {/* ── MULTI-FILE SWITCHER RIBBON ── */}
+      {jobs.length > 0 && (
         <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3 overflow-x-auto custom-scrollbar">
           <div className="flex items-center gap-1.5 pl-2 text-xs font-black text-slate-500 uppercase tracking-wider shrink-0">
             <Layers className="w-3.5 h-3.5 text-[#00AFAF]" />
-            <span>Switch Rate File ({jobs.length}):</span>
+            <span>Rate Card Files ({jobs.length}):</span>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
