@@ -222,17 +222,6 @@ class DatabaseManager:
             cursor = conn.cursor()
             cursor.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
             rows = cursor.fetchall()
-            
-        # If 0 rows, check if we need to restore from Azure Blob once
-        if len(rows) == 0:
-            try:
-                self.restore_from_blob()
-                with self._get_conn() as conn2:
-                    cursor2 = conn2.cursor()
-                    cursor2.execute("SELECT job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, created_at, updated_at, output_file_name FROM jobs ORDER BY created_at DESC LIMIT ?", (limit,))
-                    rows = cursor2.fetchall()
-            except Exception as e:
-                print(f"[DB] Warning during blob restore in list_jobs: {e}")
 
         result = []
         for r in rows:
