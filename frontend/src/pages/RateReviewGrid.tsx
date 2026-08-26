@@ -28,8 +28,9 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
   onNavigateToIngest, 
   onBackToDashboard 
 }) => {
-  // Determine effective active jobId (auto-select first job if none selected)
-  const effectiveJobId = jobId || (jobs.length > 0 ? jobs[0].job_id : null);
+  // Determine effective active jobId (validate against available jobs to prevent 404 on stale IDs)
+  const isJobInList = jobs.some((j) => j.job_id === jobId);
+  const effectiveJobId = isJobInList ? jobId : (jobs.length > 0 ? jobs[0].job_id : jobId);
 
   const [jobData, setJobData] = useState<any>(null);
   const [rates, setRates] = useState<any[]>([]);
@@ -41,12 +42,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
 
   const fetchingRef = React.useRef(false);
 
-  // Auto-select first job in parent if jobId was not set but jobs exist
+  // Auto-sync parent to valid active job if current jobId is stale or unselected
   useEffect(() => {
-    if (!jobId && jobs.length > 0 && onSelectJob) {
+    if (jobs.length > 0 && (!jobId || !isJobInList) && onSelectJob) {
       onSelectJob(jobs[0].job_id);
     }
-  }, [jobId, jobs, onSelectJob]);
+  }, [jobId, isJobInList, jobs, onSelectJob]);
 
   // Fetch job details whenever effectiveJobId changes
   useEffect(() => {

@@ -85,10 +85,17 @@ async def get_job_logs(job_id: str):
 @router.post("/jobs/{job_id}/revalidate")
 async def revalidate_job(job_id: str, updated_rates: List[RateRow]):
     job = db.get_job(job_id)
-    if not job or not job.get("canonical"):
-        raise HTTPException(status_code=404, detail="Job not found")
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     
-    canonical_data = job["canonical"]
+    canonical_data = job.get("canonical")
+    if not canonical_data:
+        canonical_data = {
+            "job_id": job_id,
+            "file_name": job.get("file_name", "rates.xlsx"),
+            "carrier_code": "UNKN",
+            "rates": []
+        }
     sheet = CanonicalRateSheet(**canonical_data)
     sheet.rates = updated_rates
 
