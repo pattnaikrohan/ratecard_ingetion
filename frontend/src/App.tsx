@@ -34,12 +34,19 @@ export function App() {
   });
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 3000);
+    // Initial fetch for all data
+    loadInitialData();
+
+    // Periodic lightweight polling for jobs and metrics
+    const interval = setInterval(() => {
+      if (document.hidden) return; // Don't poll when tab is backgrounded
+      loadPeriodicData();
+    }, 4000);
+
     return () => clearInterval(interval);
   }, []);
 
-  const loadData = async () => {
+  const loadInitialData = async () => {
     try {
       const [jobsData, mdData, metricsData] = await Promise.all([
         api.listJobs(40),
@@ -50,8 +57,25 @@ export function App() {
       setMasterDataStatus(mdData || null);
       setMetrics(metricsData || null);
     } catch (err) {
-      console.error('Error fetching data:', err);
+      console.error('Error fetching initial data:', err);
     }
+  };
+
+  const loadPeriodicData = async () => {
+    try {
+      const [jobsData, metricsData] = await Promise.all([
+        api.listJobs(40),
+        api.getMetrics(),
+      ]);
+      setJobs(jobsData || []);
+      setMetrics(metricsData || null);
+    } catch (err) {
+      console.error('Error fetching periodic data:', err);
+    }
+  };
+
+  const loadData = async () => {
+    await loadInitialData();
   };
 
   const handleSelectJob = (jobId: string) => {

@@ -158,34 +158,58 @@ export const BatchProcessingDock: React.FC<BatchProcessingDockProps> = ({
     }
   }, [isOpen, files]);
 
-  // Continuous parallel polling for active job statuses
+  // Continuous single-request polling for active job statuses (lightweight listJobs)
   useEffect(() => {
     if (!isOpen || files.length === 0) return;
 
-    const poll = setInterval(async () => {
+    let isPolling = true;
+    const fetchStatus = async () => {
       const validIds = jobIds.filter((id) => id && !id.startsWith('failed_'));
       if (validIds.length === 0) return;
+
       try {
-        const promises = validIds.map(async (id) => {
-          try {
-            const data = await api.getJob(id);
-            return [id, data];
-          } catch {
-            return [id, { status: 'FAILED', progress: 100, log_msg: 'Server error fetching job.' }];
-          }
-        });
-        const results = await Promise.all(promises);
+        const jobsList = await api.listJobs(50);
+        if (!isPolling) return;
+
+        const jobsMap = new Map<string, any>();
+        if (Array.isArray(jobsList)) {
+          jobsList.forEach((j: any) => {
+            if (j && j.job_id) jobsMap.set(j.job_id, j);
+          });
+        }
+
         setJobStates((prev) => {
           const next = { ...prev };
-          results.forEach(([id, data]) => {
-            if (id) next[id as string] = data;
+          validIds.forEach((id) => {
+            if (jobsMap.has(id)) {
+              next[id] = jobsMap.get(id);
+            }
           });
           return next;
         });
-      } catch { /* silent */ }
-    }, 600);
 
-    return () => { clearInterval(poll); };
+        // Check if all jobs have reached terminal states to stop polling
+        const allDone = validIds.length === files.length && validIds.every((id) => {
+          const st = jobsMap.get(id)?.status;
+          return ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(st);
+        });
+
+        if (allDone) {
+          isPolling = false;
+          if (pollTimer) clearInterval(pollTimer);
+        }
+      } catch {
+        /* silent catch */
+      }
+    };
+
+    fetchStatus();
+    const pollTimer = setInterval(fetchStatus, 1500);
+
+    return () => {
+      isPolling = false;
+      clearInterval(pollTimer);
+    };
   }, [isOpen, files.length, jobIds]);
 
   // Accurate Multi-File Batch Progress Calculation:

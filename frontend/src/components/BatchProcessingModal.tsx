@@ -17,41 +17,59 @@ export const BatchProcessingModal: React.FC<BatchProcessingModalProps> = ({ isOp
   useEffect(() => {
     if (!isOpen || files.length === 0) return;
 
-    // Start polling job states
-    const interval = setInterval(async () => {
+    let isPolling = true;
+    const fetchStatus = async () => {
       if (jobIds.length === 0) return;
 
       try {
+        const jobsList = await api.listJobs(50);
+        if (!isPolling) return;
+
+        const jobsMap = new Map<string, any>();
+        if (Array.isArray(jobsList)) {
+          jobsList.forEach((j: any) => {
+            if (j && j.job_id) jobsMap.set(j.job_id, j);
+          });
+        }
+
         const updated: Record<string, any> = {};
         let totalProg = 0;
 
         for (const id of jobIds) {
-          try {
-            const data = await api.getJob(id);
+          if (!id) continue;
+          if (jobsMap.has(id)) {
+            const data = jobsMap.get(id);
             updated[id] = data;
             totalProg += data.progress || 0;
-          } catch (err) {
-            updated[id] = { status: 'FAILED', progress: 100, log_msg: 'Job not found or server error.' };
-            totalProg += 100;
+          } else {
+            updated[id] = { status: 'PARSING', progress: 20 };
+            totalProg += 20;
           }
         }
 
         setJobStates(updated);
-        setOverallProgress(Math.round(totalProg / jobIds.length));
+        setOverallProgress(Math.round(totalProg / (jobIds.length || 1)));
 
-        const allFinished = Object.values(updated).every((j) =>
-          ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(j.status)
+        const allFinished = jobIds.length === files.length && jobIds.every((id) =>
+          ['COMPLETED', 'NEEDS_REVIEW', 'APPROVED', 'FAILED'].includes(updated[id]?.status)
         );
 
         if (allFinished) {
-          clearInterval(interval);
+          isPolling = false;
+          if (interval) clearInterval(interval);
         }
       } catch (err) {
         console.error('Error polling batch status:', err);
       }
-    }, 600);
+    };
 
-    return () => clearInterval(interval);
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 1500);
+
+    return () => {
+      isPolling = false;
+      clearInterval(interval);
+    };
   }, [isOpen, files, jobIds]);
 
   if (!isOpen) return null;
