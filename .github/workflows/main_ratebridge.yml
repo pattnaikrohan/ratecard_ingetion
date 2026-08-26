@@ -38,8 +38,10 @@ jobs:
         with:
           name: python-app
           path: |
-            .
-            !antenv/
+            backend/
+            Rate_File_Template_Completion_Freightify/Freightify Upload Template Master Data1.xls
+            Rate_File_Template_Completion_Freightify/Freightify Uplad Sheet Completed.xlsm
+            requirements.txt
 
       # 🚫 Opting Out of Oryx Build
       # If you prefer to disable the Oryx build process during deployment, follow these steps:
