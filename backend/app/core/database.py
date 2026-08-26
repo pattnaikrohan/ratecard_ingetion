@@ -58,6 +58,24 @@ class DatabaseManager:
             """)
             conn.commit()
 
+    _backup_lock = threading.Lock()
+    _backup_timer: Optional[threading.Timer] = None
+
+    def trigger_debounced_backup(self, delay: float = 3.0):
+        """Debounces Azure Blob backup so multiple concurrent job status updates only perform a single upload."""
+        with self._backup_lock:
+            if self._backup_timer is not None and self._backup_timer.is_alive():
+                self._backup_timer.cancel()
+            self._backup_timer = threading.Timer(delay, self._safe_backup_worker)
+            self._backup_timer.daemon = True
+            self._backup_timer.start()
+
+    def _safe_backup_worker(self):
+        try:
+            self.backup_to_blob()
+        except Exception as e:
+            print(f"[Storage] Debounced backup notice: {e}")
+
     def backup_to_blob(self):
         """Upload current SQLite DB to Azure Blob Storage with robust retry and timeout."""
         from app.services.storage import StorageService
@@ -65,7 +83,7 @@ class DatabaseManager:
         if blob_client and self.db_path.exists() and self.db_path.stat().st_size > 0:
             try:
                 with open(self.db_path, "rb") as data:
-                    blob_client.upload_blob(data, overwrite=True, timeout=15)
+                    blob_client.upload_blob(data, overwrite=True, timeout=10)
                 print("[Storage] Backed up rate_agent.db to Azure Blob Storage successfully.")
             except Exception as e:
                 print(f"[Storage] Warning: Failed to backup DB to Azure Blob: {e}")
@@ -126,8 +144,8 @@ class DatabaseManager:
                     print(f"[DB] create_job FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
                     raise
 
-        # Backup state to Azure
-        threading.Thread(target=self.backup_to_blob, daemon=True).start()
+        # Trigger debounced state backup to Azure Blob Storage
+        self.trigger_debounced_backup(delay=4.0)
             
         return JobStatusResponse(
             job_id=job_id,
@@ -185,9 +203,9 @@ class DatabaseManager:
                     print(f"[DB] update_job_status FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
                     raise
 
-        # Backup on completion or important status transitions
-        if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW", "VALIDATING"] or progress == 100:
-             threading.Thread(target=self.backup_to_blob, daemon=True).start()
+        # Debounced backup on final terminal status transitions
+        if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW"] or progress == 100:
+            self.trigger_debounced_backup(delay=2.0)
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
         try:
@@ -240,12 +258,13 @@ class DatabaseManager:
         return result
 
     def clear_all_jobs(self):
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM jobs;")
-            conn.commit()
-        # Immediately backup cleared state to Azure Blob
-        self.backup_to_blob()
+        with self._lock:
+            with self._get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM jobs;")
+                conn.commit()
+        # Immediately trigger debounced backup of cleared state
+        self.trigger_debounced_backup(delay=0.5)
 
 def datetime_now_iso():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
