@@ -2,13 +2,19 @@ import sqlite3
 import json
 import time
 import os
+import threading
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from app.core.config import DB_PATH
 from app.models.canonical import JobStatusResponse, CanonicalRateSheet, JobSummary
 
+# Max retries for transient SQLite errors (disk I/O, database locked)
+_MAX_RETRIES = 3
+_RETRY_DELAY = 0.5  # seconds
+
 class DatabaseManager:
     _instance = None
+    _lock = threading.Lock()  # Serialize write operations
 
     def __init__(self, db_path: str = str(DB_PATH)):
         self.db_path = Path(db_path)
@@ -23,8 +29,12 @@ class DatabaseManager:
         return cls._instance
 
     def _get_conn(self):
-        conn = sqlite3.connect(str(self.db_path), timeout=30.0)
+        conn = sqlite3.connect(str(self.db_path), timeout=60.0)
         conn.row_factory = sqlite3.Row
+        # Enable WAL mode for concurrent read/write support
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA busy_timeout=30000;")  # 30s busy wait
+        conn.execute("PRAGMA synchronous=NORMAL;")   # Faster writes, still safe with WAL
         return conn
 
     def _init_db(self):
@@ -97,16 +107,26 @@ class DatabaseManager:
         summary = JobSummary()
         logs = [f"[{now}] Job initialized for file: {file_name}"]
         
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO jobs (job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, logs_json, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (job_id, file_name, file_size, "NEW", 0, export_policy, json.dumps(summary.model_dump()), json.dumps(logs), now, now))
-            conn.commit()
+        for attempt in range(_MAX_RETRIES):
+            try:
+                with self._lock:
+                    with self._get_conn() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("""
+                            INSERT INTO jobs (job_id, file_name, file_size_bytes, status, progress, export_policy, summary_json, logs_json, created_at, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (job_id, file_name, file_size, "NEW", 0, export_policy, json.dumps(summary.model_dump()), json.dumps(logs), now, now))
+                        conn.commit()
+                break  # Success
+            except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+                if attempt < _MAX_RETRIES - 1:
+                    print(f"[DB] create_job retry {attempt+1}/{_MAX_RETRIES} for {job_id}: {e}")
+                    time.sleep(_RETRY_DELAY * (attempt + 1))
+                else:
+                    print(f"[DB] create_job FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
+                    raise
 
         # Backup state to Azure
-        import threading
         threading.Thread(target=self.backup_to_blob, daemon=True).start()
             
         return JobStatusResponse(
@@ -124,39 +144,49 @@ class DatabaseManager:
 
     def update_job_status(self, job_id: str, status: str, progress: int = None, log_msg: str = None, canonical_sheet: CanonicalRateSheet = None, output_file: str = None):
         now = datetime_now_iso()
-        with self._get_conn() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT logs_json, progress FROM jobs WHERE job_id = ?", (job_id,))
-            row = cursor.fetchone()
-            if not row:
-                return
-            
-            logs = json.loads(row["logs_json"]) if row["logs_json"] else []
-            if log_msg:
-                logs.append(f"[{now}] {log_msg}")
-            
-            p = progress if progress is not None else row["progress"]
-            
-            sql = "UPDATE jobs SET status = ?, progress = ?, logs_json = ?, updated_at = ?"
-            params = [status, p, json.dumps(logs), now]
-            
-            if canonical_sheet:
-                sql += ", canonical_json = ?, summary_json = ?"
-                params.extend([json.dumps(canonical_sheet.model_dump()), json.dumps(canonical_sheet.summary.model_dump())])
-            
-            if output_file:
-                sql += ", output_file_name = ?"
-                params.append(output_file)
-                
-            sql += " WHERE job_id = ?"
-            params.append(job_id)
-            
-            cursor.execute(sql, params)
-            conn.commit()
+        for attempt in range(_MAX_RETRIES):
+            try:
+                with self._lock:
+                    with self._get_conn() as conn:
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT logs_json, progress FROM jobs WHERE job_id = ?", (job_id,))
+                        row = cursor.fetchone()
+                        if not row:
+                            return
+                        
+                        logs = json.loads(row["logs_json"]) if row["logs_json"] else []
+                        if log_msg:
+                            logs.append(f"[{now}] {log_msg}")
+                        
+                        p = progress if progress is not None else row["progress"]
+                        
+                        sql = "UPDATE jobs SET status = ?, progress = ?, logs_json = ?, updated_at = ?"
+                        params = [status, p, json.dumps(logs), now]
+                        
+                        if canonical_sheet:
+                            sql += ", canonical_json = ?, summary_json = ?"
+                            params.extend([json.dumps(canonical_sheet.model_dump()), json.dumps(canonical_sheet.summary.model_dump())])
+                        
+                        if output_file:
+                            sql += ", output_file_name = ?"
+                            params.append(output_file)
+                            
+                        sql += " WHERE job_id = ?"
+                        params.append(job_id)
+                        
+                        cursor.execute(sql, params)
+                        conn.commit()
+                break  # Success
+            except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+                if attempt < _MAX_RETRIES - 1:
+                    print(f"[DB] update_job_status retry {attempt+1}/{_MAX_RETRIES} for {job_id}: {e}")
+                    time.sleep(_RETRY_DELAY * (attempt + 1))
+                else:
+                    print(f"[DB] update_job_status FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
+                    raise
 
         # Backup on completion or important status transitions
         if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW", "VALIDATING"] or progress == 100:
-             import threading
              threading.Thread(target=self.backup_to_blob, daemon=True).start()
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
