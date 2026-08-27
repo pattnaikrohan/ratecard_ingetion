@@ -1,4 +1,5 @@
 import uvicorn
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -22,10 +23,39 @@ class CacheControlMiddleware(BaseHTTPMiddleware):
                 response.headers["Cache-Control"] = "public, max-age=1"
         return response
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # ── STARTUP ──────────────────────────────────────────────
+    # Eagerly initialize the DatabaseManager singleton.
+    # This triggers blob restore BEFORE any request is served,
+    # ensuring the dashboard has data immediately after container restart.
+    from app.core.database import DatabaseManager
+    db = DatabaseManager.get_instance()
+    job_count = db.get_job_count()
+    print(f"[Startup] ✅ DatabaseManager initialized. Jobs in DB: {job_count}")
+    if job_count == 0:
+        print("[Startup] ⚠️ DB has 0 jobs — if this is unexpected, check Azure Blob restore logs above.")
+    else:
+        print(f"[Startup] 📦 {job_count} jobs restored and ready to serve.")
+
+    yield  # App is now running and serving requests
+
+    # ── SHUTDOWN ─────────────────────────────────────────────
+    # Force a final synchronous backup before the container shuts down
+    print("[Shutdown] Performing final synchronous DB backup to Azure Blob...")
+    try:
+        db.backup_to_blob()
+        print("[Shutdown] ✅ Final backup completed successfully.")
+    except Exception as e:
+        print(f"[Shutdown] ⚠️ Final backup failed: {e}")
+
+
 app = FastAPI(
     title="Carrier Rate Card Extraction & Freightify Ingestion Agent API",
     version="3.0.0",
-    description="Enterprise PoC API for carrier rate card ingestion, master data validation, and Freightify upload sheet generation."
+    description="Enterprise PoC API for carrier rate card ingestion, master data validation, and Freightify upload sheet generation.",
+    lifespan=lifespan,
 )
 
 # 1. Custom caching middleware (inner)
@@ -60,3 +90,4 @@ async def root():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+

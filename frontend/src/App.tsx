@@ -59,18 +59,36 @@ export function App() {
     };
   }, []);
 
-  const loadInitialData = async () => {
+  const loadInitialData = async (retryCount: number = 0) => {
     try {
       const [jobsData, mdData, metricsData] = await Promise.all([
         api.listJobs(40),
         api.getMasterData(),
         api.getMetrics(),
       ]);
-      if (Array.isArray(jobsData)) setJobs(jobsData);
+      if (Array.isArray(jobsData)) {
+        // Retry resilience: if backend returned 0 jobs but we previously had data,
+        // the Azure backend may still be restoring from blob. Retry after a brief delay.
+        const lastKnownCount = parseInt(sessionStorage.getItem('rb_last_job_count') || '0', 10);
+        if (jobsData.length === 0 && lastKnownCount > 0 && retryCount < 2) {
+          console.warn(`[RateBridge] Got 0 jobs but expected ~${lastKnownCount}. Retrying in 2s (attempt ${retryCount + 1}/2)...`);
+          setTimeout(() => loadInitialData(retryCount + 1), 2000);
+          return;
+        }
+        setJobs(jobsData);
+        // Persist last known job count for retry detection across hard refreshes
+        if (jobsData.length > 0) {
+          sessionStorage.setItem('rb_last_job_count', String(jobsData.length));
+        }
+      }
       if (mdData) setMasterDataStatus(mdData);
       if (metricsData) setMetrics(metricsData);
     } catch (err) {
       console.error('Error fetching initial data:', err);
+      // On network error during initial load, retry once after 3s
+      if (retryCount < 2) {
+        setTimeout(() => loadInitialData(retryCount + 1), 3000);
+      }
     }
   };
 

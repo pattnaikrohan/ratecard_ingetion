@@ -230,3 +230,27 @@ async def get_learned_synonyms():
     from app.services.ai_column_mapper import AIColumnMapper
     mapper = AIColumnMapper.get_instance()
     return mapper.get_learned_stats()
+
+@router.get("/health")
+async def health_check():
+    """Health check endpoint that reports DB persistence status.
+    
+    Useful for Azure App Service health probes and debugging blob restore issues.
+    """
+    try:
+        job_count = db.get_job_count()
+        db_exists = db.db_path.exists()
+        db_size = db.db_path.stat().st_size if db_exists else 0
+        return {
+            "status": "healthy",
+            "db_exists": db_exists,
+            "db_size_bytes": db_size,
+            "job_count": job_count,
+            "db_path": str(db.db_path),
+        }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "error": str(e),
+            "job_count": 0,
+        }

@@ -12,6 +12,10 @@ from app.models.canonical import JobStatusResponse, CanonicalRateSheet, JobSumma
 _MAX_RETRIES = 3
 _RETRY_DELAY = 0.5  # seconds
 
+# Max retries for Azure Blob restore operations
+_BLOB_RESTORE_RETRIES = 3
+_BLOB_RESTORE_DELAY = 2.0  # seconds (exponential backoff base)
+
 class DatabaseManager:
     _instance = None
     _lock = threading.Lock()  # Serialize write operations
@@ -19,8 +23,10 @@ class DatabaseManager:
     def __init__(self, db_path: str = str(DB_PATH)):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+        # CRITICAL ORDER: Restore cloud backup FIRST, then init schema (idempotent CREATE IF NOT EXISTS)
         self.restore_from_blob()
+        self._init_db()
+        self._start_periodic_backup()
 
     @classmethod
     def get_instance(cls) -> "DatabaseManager":
@@ -60,6 +66,25 @@ class DatabaseManager:
 
     _backup_lock = threading.Lock()
     _backup_timer: Optional[threading.Timer] = None
+    _periodic_timer: Optional[threading.Timer] = None
+
+    def _start_periodic_backup(self):
+        """Start a periodic backup every 60 seconds as a safety net against container recycling."""
+        def _periodic_worker():
+            try:
+                self.backup_to_blob()
+            except Exception as e:
+                print(f"[Storage] Periodic backup notice: {e}")
+            finally:
+                # Reschedule — non-daemon so it has a chance to finish
+                self._periodic_timer = threading.Timer(60.0, _periodic_worker)
+                self._periodic_timer.daemon = True
+                self._periodic_timer.start()
+
+        self._periodic_timer = threading.Timer(60.0, _periodic_worker)
+        self._periodic_timer.daemon = True
+        self._periodic_timer.start()
+        print("[Storage] Periodic blob backup timer started (every 60s).")
 
     def trigger_debounced_backup(self, delay: float = 3.0):
         """Debounces Azure Blob backup so multiple concurrent job status updates only perform a single upload."""
@@ -69,6 +94,13 @@ class DatabaseManager:
             self._backup_timer = threading.Timer(delay, self._safe_backup_worker)
             self._backup_timer.daemon = True
             self._backup_timer.start()
+
+    def backup_synchronous(self):
+        """Immediate synchronous backup — blocks until upload completes. Used for terminal states."""
+        try:
+            self.backup_to_blob()
+        except Exception as e:
+            print(f"[Storage] Synchronous backup failed: {e}")
 
     def _safe_backup_worker(self):
         try:
@@ -89,36 +121,72 @@ class DatabaseManager:
                 print(f"[Storage] Warning: Failed to backup DB to Azure Blob: {e}")
 
     def restore_from_blob(self):
-        """Restore SQLite DB from Azure Blob Storage if blob contains more recent/populated records."""
+        """Restore SQLite DB from Azure Blob Storage with robust retry logic.
+        
+        This is CRITICAL for Azure App Service where the container filesystem is ephemeral.
+        Every container restart wipes the local DB, so we MUST reliably restore from blob.
+        """
         from app.services.storage import StorageService
         blob_client = StorageService._get_blob_client("rate_agent.db")
         if not blob_client:
+            print("[Storage] No Azure Blob client configured — skipping DB restore.")
             return
 
-        try:
-            if not blob_client.exists(timeout=30):
-                return
+        # Check if local DB already has data (avoid overwriting active data)
+        local_job_count = 0
+        if self.db_path.exists():
+            try:
+                conn = sqlite3.connect(str(self.db_path), timeout=10.0)
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM jobs")
+                local_job_count = cursor.fetchone()[0]
+                conn.close()
+            except Exception:
+                local_job_count = 0
 
-            local_job_count = 0
-            if self.db_path.exists():
-                try:
-                    with self._get_conn() as conn:
-                        cursor = conn.cursor()
-                        cursor.execute("SELECT COUNT(*) FROM jobs")
-                        local_job_count = cursor.fetchone()[0]
-                except Exception:
-                    local_job_count = 0
+        if local_job_count > 0:
+            print(f"[Storage] Local DB already has {local_job_count} jobs — skipping blob restore.")
+            return
 
-            # If local has 0 records, download the cloud version
-            if local_job_count == 0:
-                print("[Storage] Local DB empty — downloading persisted rate_agent.db from Azure Blob...")
-                blob_data = blob_client.download_blob(timeout=60).readall()
+        # Retry loop with exponential backoff for blob download
+        for attempt in range(_BLOB_RESTORE_RETRIES):
+            try:
+                if not blob_client.exists(timeout=30):
+                    print("[Storage] No rate_agent.db blob found in Azure — starting fresh.")
+                    return
+
+                print(f"[Storage] Local DB empty — downloading rate_agent.db from Azure Blob (attempt {attempt + 1}/{_BLOB_RESTORE_RETRIES})...")
+                blob_data = blob_client.download_blob(timeout=120).readall()
                 if len(blob_data) > 0:
                     with open(self.db_path, "wb") as f:
                         f.write(blob_data)
-                    print(f"[Storage] Successfully restored SQLite DB ({len(blob_data)} bytes) from Azure Blob Storage.")
-        except Exception as e:
-            print(f"[Storage] Warning: Failed to restore DB from Azure Blob: {e}")
+                    
+                    # Verify the restored DB is valid and has data
+                    try:
+                        verify_conn = sqlite3.connect(str(self.db_path), timeout=10.0)
+                        verify_cursor = verify_conn.cursor()
+                        verify_cursor.execute("SELECT COUNT(*) FROM jobs")
+                        restored_count = verify_cursor.fetchone()[0]
+                        verify_conn.close()
+                        print(f"[Storage] ✅ Successfully restored SQLite DB ({len(blob_data)} bytes, {restored_count} jobs) from Azure Blob Storage.")
+                        return  # Success!
+                    except Exception as verify_err:
+                        print(f"[Storage] ⚠️ Restored DB file appears corrupt: {verify_err}")
+                        # Delete corrupt file and retry
+                        self.db_path.unlink(missing_ok=True)
+                else:
+                    print("[Storage] Blob download returned 0 bytes — starting fresh.")
+                    return
+
+            except Exception as e:
+                delay = _BLOB_RESTORE_DELAY * (2 ** attempt)
+                print(f"[Storage] ⚠️ Blob restore attempt {attempt + 1}/{_BLOB_RESTORE_RETRIES} failed: {e}")
+                if attempt < _BLOB_RESTORE_RETRIES - 1:
+                    print(f"[Storage] Retrying in {delay:.1f}s...")
+                    time.sleep(delay)
+                else:
+                    print(f"[Storage] ❌ All {_BLOB_RESTORE_RETRIES} blob restore attempts failed. Starting with empty DB.")
 
     def create_job(self, job_id: str, file_name: str, file_size: int, export_policy: str = "PARTIAL") -> JobStatusResponse:
         now = datetime_now_iso()
@@ -145,7 +213,7 @@ class DatabaseManager:
                     raise
 
         # Trigger debounced state backup to Azure Blob Storage
-        self.trigger_debounced_backup(delay=4.0)
+        self.trigger_debounced_backup(delay=3.0)
             
         return JobStatusResponse(
             job_id=job_id,
@@ -203,9 +271,12 @@ class DatabaseManager:
                     print(f"[DB] update_job_status FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
                     raise
 
-        # Debounced backup on final terminal status transitions
+        # SYNCHRONOUS backup on terminal status transitions — MUST complete before container could recycle
         if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW"] or progress == 100:
-            self.trigger_debounced_backup(delay=2.0)
+            self.backup_synchronous()
+        else:
+            # Debounced backup for intermediate states (PARSING, VALIDATING, etc.)
+            self.trigger_debounced_backup(delay=3.0)
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
         try:
@@ -284,8 +355,18 @@ class DatabaseManager:
                 cursor = conn.cursor()
                 cursor.execute("DELETE FROM jobs;")
                 conn.commit()
-        # Immediately trigger debounced backup of cleared state
-        self.trigger_debounced_backup(delay=0.5)
+        # Synchronous backup of cleared state — must persist before response
+        self.backup_synchronous()
+
+    def get_job_count(self) -> int:
+        """Return the total number of jobs in the database."""
+        try:
+            with self._get_conn() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM jobs")
+                return cursor.fetchone()[0]
+        except Exception:
+            return 0
 
 def datetime_now_iso():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
