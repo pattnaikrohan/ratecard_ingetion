@@ -175,6 +175,26 @@ def _is_junk_rate_row(origin: str, dest: str, ofr: float) -> bool:
         return True
     if re.match(r'^(?:20|40|45)(?:gp|hc|st|dry|ft)?$', o_low) or re.match(r'^(?:20|40|45)(?:gp|hc|st|dry|ft)?$', d_low):
         return True
+
+    # Surcharge / supplementary table rows that leak through when the same ORIGIN/DESTINATION columns are reused
+    surcharge_keywords = [
+        "surcharge", "add-on", "addon", "psa group", "imo dg", "dg class",
+        "haz surcharge", "bunker", "peak season", "congestion", "emergency",
+        "war risk", "piracy", "low sulphur", "fuel surcharge", "baf",
+        "terms and conditions", "terms & conditions", "note:", "notes:",
+        "applicable for", "addon applicable", "an addon",
+    ]
+    if any(k in o_low for k in surcharge_keywords) or any(k in d_low for k in surcharge_keywords):
+        return True
+
+    # Surcharge table header rows (e.g. "COUNTRY" in origin + "SURCHARGE" in dest)
+    if o_low in ("country", "region", "area", "trade", "trade lane") and d_low in ("surcharge", "charge", "rate", "amount"):
+        return True
+
+    # DG Class rows (e.g. dest = "CLASS 2.1/2.2/2.3", "CLASS 3", etc.)
+    if re.match(r'^class\s+[\d\./]+', d_low) or re.match(r'^class\s+[\d\./]+', o_low):
+        return True
+
     return False
 
 
@@ -228,11 +248,22 @@ class GenericExcelPlugin(BaseParser):
             max_row = min(ws.max_row or 1, 5000)
 
             # Metadata scan from top rows
+            sheet_carrier = ""
             for r in range(1, min(max_row + 1, 15)):
                 row_text = " ".join(str(ws.cell(r, c).value or "") for c in range(1, max_col + 1))
+
+                # Carrier detection from sheet content (e.g. "OCEAN NETWORK EXPRESS", "MAERSK LINE")
+                if not sheet_carrier and not carrier_from_filename:
+                    sheet_carrier = self._detect_carrier_from_content(row_text)
+                    if sheet_carrier:
+                        detected_carrier = sheet_carrier
+                        print(f"[GenericExcel] Detected carrier from content: {sheet_carrier}")
+
                 if not detected_validity_start and re.search(r'validity|effective|valid from', row_text, re.IGNORECASE):
-                    text_clean = re.sub(r'\s+', ' ', row_text).strip()
-                    m = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', text_clean, re.IGNORECASE)
+                    # Strip ordinal suffixes (1st, 2nd, 3rd, 4th, 01st, 31st, etc.) before parsing
+                    text_clean = re.sub(r'(\d+)(?:st|nd|rd|th)\b', r'\1', row_text)
+                    text_clean = re.sub(r'\s+', ' ', text_clean).strip()
+                    m = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2}|\d{1,2}\s+[a-zA-Z]{3,9}\s+\d{4})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2}|\d{1,2}\s+[a-zA-Z]{3,9}\s+\d{4})', text_clean, re.IGNORECASE)
                     if m:
                         s_raw = m.group(1).strip()
                         e_raw = m.group(2).strip()
@@ -271,6 +302,7 @@ class GenericExcelPlugin(BaseParser):
                 dest_found = False
                 container_found = False
                 lcl_found = False
+                paired_layout_detected = False
 
                 for c_idx, h in enumerate(row_headers):
                     if not h:
@@ -333,12 +365,35 @@ class GenericExcelPlugin(BaseParser):
                         lcl_found = True
 
                 if (origin_found or dest_found) and not container_found and r + 1 <= max_row:
-                    next_row_headers = [str(ws.cell(r + 1, c).value or "").strip() for c in range(1, max_col + 1)]
-                    for c_idx, h in enumerate(next_row_headers):
-                        ct = _match_container_type(h)
-                        if ct:
-                            candidate_containers.append((c_idx + 1, ct))
-                            container_found = True
+                    # Check for paired "EQ TYPE" + "OCEAN FREIGHT" layout (e.g. ONE rate sheets)
+                    eq_type_idxs = [c_idx + 1 for c_idx, h in enumerate(row_headers) if _normalize(h) in ('eq type', 'equipment type', 'eq', 'cntr type', 'container type')]
+                    rate_col_idxs = [c_idx + 1 for c_idx, h in enumerate(row_headers) if _normalize(h) in ('ocean freight', 'freight', 'ocean rate')]
+                    
+                    if eq_type_idxs and rate_col_idxs:
+                        # Paired layout: read equipment type from first data row
+                        for eq_col in eq_type_idxs:
+                            # Find the nearest OCEAN FREIGHT column after this EQ TYPE
+                            matching_rate_col = None
+                            for rc in rate_col_idxs:
+                                if rc > eq_col:
+                                    matching_rate_col = rc
+                                    break
+                            if matching_rate_col:
+                                eq_val = str(ws.cell(r + 1, eq_col).value or "").strip()
+                                ct = _match_container_type(eq_val)
+                                if ct:
+                                    candidate_containers.append((matching_rate_col, ct))
+                                    container_found = True
+                                    paired_layout_detected = True
+                    
+                    # Fallback: check next row for standard container type headers
+                    if not container_found:
+                        next_row_headers = [str(ws.cell(r + 1, c).value or "").strip() for c in range(1, max_col + 1)]
+                        for c_idx, h in enumerate(next_row_headers):
+                            ct = _match_container_type(h)
+                            if ct:
+                                candidate_containers.append((c_idx + 1, ct))
+                                container_found = True
 
                 if (origin_found or dest_found) and (container_found or lcl_found):
                     header_row_idx = r
@@ -347,7 +402,9 @@ class GenericExcelPlugin(BaseParser):
                     container_cols = candidate_containers
                     is_lcl_format = lcl_found and not container_found
                     lcl_rate_col = candidate_lcl_col
-                    if container_found and any(_match_container_type(str(ws.cell(r + 1, c).value or "")) for c in range(1, max_col + 1)):
+                    # Only bump header_row_idx if the NEXT row is a sub-header (container type headers)
+                    # but NOT if we already resolved containers from paired EQ TYPE layout
+                    if container_found and not paired_layout_detected and any(_match_container_type(str(ws.cell(r + 1, c).value or "")) for c in range(1, max_col + 1)):
                         header_row_idx = r + 1
                     break
 
@@ -612,9 +669,55 @@ class GenericExcelPlugin(BaseParser):
         if "oocl" in fn_l: return "OOLU"
         if "maeu" in fn_l or "maersk" in fn_l or "o3e" in fn_l or "o3w" in fn_l: return "MAEU"
         if "msc" in fn_l: return "MSCU"
-        if "one" in fn_l: return "ONEY"
+        # Use word boundary to avoid matching 'done', 'phone', 'zone', etc.
+        if re.search(r'\bone\b', fn_l) or "oney" in fn_l: return "ONEY"
+        if "ocean network" in fn_l: return "ONEY"
         if "cosco" in fn_l: return "COSU"
         if "hapag" in fn_l or "hlcu" in fn_l: return "HLCU"
+        if "evergreen" in fn_l or "eglv" in fn_l: return "EGLV"
+        if "yang ming" in fn_l or "ymlu" in fn_l: return "YMLU"
+        if "wan hai" in fn_l or "whlc" in fn_l: return "WHLC"
+        if "zim" in fn_l: return "ZIMU"
+        if "hmm" in fn_l or "hyundai" in fn_l: return "HMMU"
+        if "pil" in fn_l: return "PILU"
+        if "cma" in fn_l: return "CMDU"
+        return ""
+
+    def _detect_carrier_from_content(self, row_text: str) -> str:
+        """Detect carrier SCAC by scanning sheet content for carrier name patterns."""
+        text = row_text.upper().strip()
+        if not text:
+            return ""
+        # Order matters — check longer/more specific patterns first
+        carrier_patterns = [
+            ("OCEAN NETWORK EXPRESS", "ONEY"),
+            ("MAERSK LINE", "MAEU"),
+            ("MAERSK", "MAEU"),
+            ("MEDITERRANEAN SHIPPING", "MSCU"),
+            ("CMA CGM", "CMDU"),
+            ("CMA-CGM", "CMDU"),
+            ("HAPAG-LLOYD", "HLCU"),
+            ("HAPAG LLOYD", "HLCU"),
+            ("EVERGREEN", "EGLV"),
+            ("YANG MING", "YMLU"),
+            ("WAN HAI", "WHLC"),
+            ("HAMBURG SUD", "SUDU"),
+            ("ZIM INTEGRATED", "ZIMU"),
+            ("HYUNDAI MERCHANT", "HMMU"),
+            ("ORIENT OVERSEAS", "OOLU"),
+            ("COSCO SHIPPING", "COSU"),
+            ("PACIFIC INTERNATIONAL", "PILU"),
+            ("ANL CONTAINER", "ANNU"),
+            ("VANGUARD LOGISTICS", "VGLU"),
+            ("SHIPCO TRANSPORT", "VGLU"),
+            ("CAROTRANS", "CTLU"),
+            ("SM LINE", "SMLM"),
+            ("TS LINES", "TSLE"),
+            ("SWIRE SHIPPING", "CHML"),
+        ]
+        for pattern, scac in carrier_patterns:
+            if pattern in text:
+                return scac
         return ""
 
     def _detect_validity_from_filename(self, fn: str) -> Optional[Tuple[str, str]]:

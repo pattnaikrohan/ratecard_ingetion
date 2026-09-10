@@ -184,16 +184,32 @@ class MasterDataEngine:
         self.port_synonyms.update({
             # ──── CHINA ────
             "SHANGHAI": "CNSHA", "CNSHA": "CNSHA", "SHA": "CNSHA",
+            # Shanghai carrier EDI / legacy variants (from Kate's port mapping)
+            "CNSGH": "CNSHA", "CNSHG": "CNSHA", "CHSHA": "CNSHA",
             "NINGBO": "CNNGB", "CNNGB": "CNNGB", "NGB": "CNNGB", "NINGBO-ZHOUSHAN": "CNNGB",
+            # Ningbo carrier EDI variants
+            "CNNBO": "CNNGB", "CNNBG": "CNNGB",
             "HONG KONG": "HKHKG", "HKHKG": "HKHKG", "HKG": "HKHKG", "HK": "HKHKG", "HONGKONG": "HKHKG",
-            "SHENZHEN": "CNSZX", "CNSZX": "CNSZX", "YANTIAN": "CNYAN", "CNYAN": "CNYAN",
+            "SHENZHEN": "CNSZX", "CNSZX": "CNSZX",
+            # Shenzhen carrier EDI variants
+            "CNSZH": "CNSZX", "CNSZP": "CNSZX",
+            "YANTIAN": "CNYAN", "CNYAN": "CNYAN",
+            # Yantian carrier EDI variants
+            "CNYTN": "CNYAN", "CNYAT": "CNYAN",
             "SHEKOU": "CNSHK", "CNSHK": "CNSHK", "SHEKOU, CHINA": "CNSHK",
             "QINGDAO": "CNTAO", "CNTAO": "CNTAO", "TAO": "CNTAO",
+            # Qingdao carrier EDI variants
+            "CNQIN": "CNTAO", "CNQDG": "CNTAO",
             "XIAMEN": "CNXMN", "CNXMN": "CNXMN", "XMN": "CNXMN", "AMOY": "CNXMN",
+            # Xiamen carrier EDI variants
+            "CNXMG": "CNXMN", "CNHAG": "CNXMN", "CNXAM": "CNXMN",
             "TIANJIN": "CNTXG", "CNTXG": "CNTXG", "XINGANG": "CNTXG", "TXG": "CNTXG",
             "TIANJIN XINGANG": "CNTXG", "XINGANG, CHINA": "CNTXG",
+            # Xingang/Tianjin carrier EDI variants
+            "CNXGG": "CNTXG", "CNTNG": "CNTXG", "CNTNJ": "CNTXG",
             "NANSHA": "CNNSA", "CNNSA": "CNNSA",
-            "DALIAN": "CNDLC", "CNDLC": "CNDLC",
+            "DALIAN": "CNDAG", "CNDAG": "CNDAG", "CNDLC": "CNDAG",
+            "DALIAN VIA PUSAN": "CNDAG",
             "FUZHOU": "CNFOC", "CNFOC": "CNFOC",
             "GUANGZHOU": "CNCAN", "CNCAN": "CNCAN", "CANTON": "CNCAN",
             "ZHONGSHAN": "CNZSN", "CNZSN": "CNZSN",
@@ -259,13 +275,21 @@ class MasterDataEngine:
             "PORT KELANG": "MYPKG", "PORT KELANG, MALAYSIA": "MYPKG",
             "PORT KLANG, MALAYSIA": "MYPKG", "PELABUHAN KLANG": "MYPKG",
             "PELABUHAN KLANG, MALAYSIA": "MYPKG", "KLANG": "MYPKG",
+            # Port Kelang carrier EDI variants
+            "MYNKL": "MYPKG",
             "TANJUNG PELEPAS": "MYTPP", "MYTPP": "MYTPP", "PTP": "MYTPP",
+            # Note: MYPTP is also Tanjung Pelepas (carrier EDI variant)
+            "MYPTP": "MYTPP",
             "PASIR GUDANG": "MYPGU", "MYPGU": "MYPGU",
             "PENANG": "MYPEN", "MYPEN": "MYPEN",
             "KUANTAN": "MYKUA", "MYKUA": "MYKUA",
             "JAKARTA": "IDJKT", "IDJKT": "IDJKT", "JKT": "IDJKT",
             "JAKARTA, INDONESIA": "IDJKT",
+            # Jakarta / Tanjung Priok carrier EDI variant
+            "IDTPK": "IDJKT",
             "SURABAYA": "IDSUB", "IDSUB": "IDSUB", "SUB": "IDSUB",
+            # Surabaya / Tanjung Perak carrier EDI variant
+            "IDTPE": "IDSUB",
             "SEMARANG": "IDSRG", "IDSRG": "IDSRG",
             "BELAWAN": "IDBLW", "IDBLW": "IDBLW", "MEDAN": "IDBLW",
             "BEKASI": "IDBKS",
@@ -281,9 +305,11 @@ class MasterDataEngine:
             "LAEM CHABANG": "THLCH", "THLCH": "THLCH", "LCB": "THLCH", "LEAM CHABANG": "THLCH",
             "BANGKOK": "THBKK", "THBKK": "THBKK", "BKK": "THBKK",
             "LAT KRABANG": "THLKR",
-            "SONGKHLA": "THSGZ",
+            "SONGKHLA": "THSGZ", "SONGKLA": "THSGZ",
             "HO CHI MINH": "VNSGN", "VNSGN": "VNSGN", "HOCHIMINH": "VNSGN", "HCMC": "VNSGN",
             "HO CHI MINH, VIETNAM": "VNSGN", "HO CHI MINH CITY": "VNSGN",
+            # Ho Chi Minh / Cai Mep carrier EDI variant
+            "VNCMP": "VNSGN", "CAI MEP": "VNSGN",
             "VUNG TAU": "VNVUT", "VNVUT": "VNVUT",
             "HAIPHONG": "VNHPH", "VNHPH": "VNHPH", "HAI PHONG": "VNHPH",
             "DANANG": "VNDAD", "VNDAD": "VNDAD", "DA NANG": "VNDAD",
@@ -292,10 +318,14 @@ class MasterDataEngine:
             "CAT LAI": "VNCLI",
             "CAN THO": "VNCTH",
             "MANILA": "PHMNL", "PHMNL": "PHMNL", "MNL": "PHMNL",
+            # Manila carrier EDI / terminal variants
+            "PHMNB": "PHMNL", "PHMNS": "PHMNL",
             "CEBU": "PHCEB", "PHCEB": "PHCEB",
             "DAVAO": "PHDVO",
             "SUBIC BAY": "PHSFS",
             "SIHANOUKVILLE": "KHKOS", "KHKOS": "KHKOS",
+            # Common misspellings from rate sheets
+            "SIHANOUVILLE": "KHKOS", "SIHANOUKVILLE, CAMBODIA": "KHKOS",
             "PHNOM PENH": "KHPNH", "KHPNH": "KHPNH",
             "YANGON": "MMRGN", "MMRGN": "MMRGN",
 
@@ -353,6 +383,8 @@ class MasterDataEngine:
             # ──── EUROPE ────
             "RIJEKA": "HRRJK", "HRRJK": "HRRJK", "RIJEKA, CROATIA": "HRRJK",
             "ANTWERP": "BEANR", "BEANR": "BEANR", "ANR": "BEANR",
+            # Antwerp-Bruges carrier EDI variant
+            "BEBRG": "BEANR", "ANTWERP-BRUGES": "BEANR",
             "ROTTERDAM": "NLRTM", "NLRTM": "NLRTM", "RTM": "NLRTM",
             "HAMBURG": "DEHAM", "DEHAM": "DEHAM", "HAM": "DEHAM",
             "BREMERHAVEN": "DEBRV", "DEBRV": "DEBRV",
@@ -374,12 +406,16 @@ class MasterDataEngine:
             "LOS ANGELES": "USLAX", "USLAX": "USLAX", "LAX": "USLAX",
             "LONG BEACH": "USLGB", "USLGB": "USLGB",
             "NEW YORK": "USNYC", "USNYC": "USNYC", "NYC": "USNYC",
+            # New York / New Jersey carrier EDI variant
+            "USNWK": "USNYC",
             "SAVANNAH": "USSAV", "USSAV": "USSAV",
             "CHARLESTON": "USCHS", "USCHS": "USCHS",
             "HOUSTON": "USHOU", "USHOU": "USHOU",
             "SEATTLE": "USSEA", "USSEA": "USSEA",
             "OAKLAND": "USOAK", "USOAK": "USOAK",
             "NORFOLK": "USORF", "USORF": "USORF",
+            # Norfolk / Portsmouth carrier EDI variants
+            "USORV": "USORF", "USPVG": "USORF",
             "MIAMI": "USMIA", "USMIA": "USMIA",
             "BALTIMORE": "USBAL", "USBAL": "USBAL",
             "ATLANTA": "USATL",
@@ -400,6 +436,9 @@ class MasterDataEngine:
             "PARANAGUA": "BRPNG",
             "SAN ANTONIO": "CLSAI",
             "VALPARAISO": "CLVAP",
+            # Colón / Manzanillo Panama carrier EDI variants
+            "COLON": "PAONX", "PAONX": "PAONX", "PAMIT": "PAONX",
+            "MANZANILLO INT": "PAONX",
 
             # ──── AFRICA ────
             "DURBAN": "ZADUR", "ZADUR": "ZADUR",
@@ -523,10 +562,17 @@ class MasterDataEngine:
             "AUEC": ["AUSYD", "AUMEL", "AUBNE"],  # East Coast
             "AUS EAST COAST": ["AUSYD", "AUMEL", "AUBNE"],
             "AUSTRALIA EAST COAST": ["AUSYD", "AUMEL", "AUBNE"],
+            "EAST COAST": ["AUSYD", "AUMEL", "AUBNE"],  # Common alias from ONE rate sheets
+            "EAST COAST AUSTRALIA": ["AUSYD", "AUMEL", "AUBNE"],
+            "EC AUSTRALIA": ["AUSYD", "AUMEL", "AUBNE"],
+            "EC": ["AUSYD", "AUMEL", "AUBNE"],
             "AUWC": ["AUFRE", "AUADL"],  # West Coast
             "AUS WEST COAST": ["AUFRE", "AUADL"],
             "AUSTRALIA WEST COAST": ["AUFRE", "AUADL"],
+            "WEST COAST": ["AUFRE", "AUADL"],  # Common alias from rate sheets
+            "WEST COAST AUSTRALIA": ["AUFRE", "AUADL"],
             "WC AUSTRALIA": ["AUFRE", "AUADL"],
+            "WC": ["AUFRE", "AUADL"],
             "*WC AUSTRALIA": ["AUFRE", "AUADL"],
             "ALL AUS PORTS": ["AUSYD", "AUMEL", "AUBNE", "AUFRE", "AUADL"],
 
@@ -549,7 +595,7 @@ class MasterDataEngine:
             "INDIAN SUBCONTINENT": ["INNSA", "INMUN", "INMAA", "INCCU", "LKCMB", "PKKAR", "BDCGP"],
             "MEG": ["AEJEA", "SAJED", "SADMM", "OMSOH"],
             "MIDDLE EAST GULF": ["AEJEA", "SAJED", "SADMM", "OMSOH"],
-            "CHINA": ["CNSHA", "CNNGB", "CNTAO", "CNXMN", "CNTXG", "CNSZX", "CNSHK", "CNNSA", "CNDLC"],
+            "CHINA": ["CNSHA", "CNNGB", "CNTAO", "CNXMN", "CNTXG", "CNSZX", "CNSHK", "CNNSA", "CNDAG"],
             "CHINA PORTS": ["CNSHA", "CNNGB", "CNTAO", "CNXMN", "CNTXG", "CNSZX", "CNSHK", "CNNSA"],
             "JAPAN": ["JPTYO", "JPYOK", "JPOSA", "JPNGO", "JPUKB"],
             "JAPAN PORTS": ["JPTYO", "JPYOK", "JPOSA", "JPNGO", "JPUKB"],
