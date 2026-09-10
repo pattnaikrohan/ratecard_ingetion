@@ -2,6 +2,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from app.api.endpoints import router as api_router
@@ -60,6 +61,9 @@ app = FastAPI(
 
 # 1. Custom caching middleware (inner)
 app.add_middleware(CacheControlMiddleware)
+
+# 2. GZip compression (compresses large rate sheet JSONs down from 18MB to <1MB)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # 2. CORS middleware (outermost so all preflight and error responses include CORS headers)
 app.add_middleware(

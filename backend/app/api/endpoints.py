@@ -1,7 +1,7 @@
 import os
 import asyncio
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from typing import Optional, List, Dict, Any
 from app.services.job_manager import JobManager
 from app.core.database import DatabaseManager
@@ -61,10 +61,10 @@ async def clear_all_jobs_delete():
 @router.get("/jobs/{job_id}")
 async def get_job(job_id: str):
     try:
-        job = db.get_job(job_id)
-        if not job:
+        raw_json = db.get_job_raw_json(job_id)
+        if not raw_json:
             raise HTTPException(status_code=404, detail="Job not found")
-        return job
+        return Response(content=raw_json, media_type="application/json")
     except HTTPException:
         raise
     except Exception as e:
