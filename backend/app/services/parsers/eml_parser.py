@@ -18,7 +18,7 @@ from app.services.parsers.base_parser import BaseParser
 from app.models.canonical import CanonicalRateSheet, RateRow, ChargeItem, JobSummary
 from app.services.parsers.plugins.maersk_plugin import MaerskPlugin
 from app.services.parsers.plugins.one_plugin import ONEPlugin
-from app.services.parsers.plugins.generic_excel_plugin import GenericExcelPlugin
+from app.services.parsers.plugins.generic_excel_plugin import GenericExcelPlugin, _clean_date
 from app.services.parsers.plugins.msc_plugin import MSCPlugin
 from app.services.parsers.azure_doc_intel import AzureDocumentIntelligenceParser
 
@@ -171,10 +171,24 @@ class EMLParser(BaseParser):
         for fn, ap in attachments_to_process:
             print(f"[EML Parser] Extracted attachment: {fn} ({os.path.getsize(ap)} bytes)")
 
+        # Extract date from email headers
+        email_date = ""
+        if not is_msg_file:
+            try:
+                date_hdr = msg.get("Date")
+                if date_hdr:
+                    from email.utils import parsedate_to_datetime
+                    email_dt = parsedate_to_datetime(str(date_hdr))
+                    email_date = email_dt.strftime("%Y-%m-%d")
+            except Exception:
+                pass
+        if not email_date:
+            email_date = datetime.date.today().strftime("%Y-%m-%d")
+
         # Detect carrier from metadata
         carrier_scac = self._detect_carrier(subject, sender, file_path.name)
         contract_number = self._extract_contract_number(subject, body_text or html_body)
-        validity_start, validity_end = self._extract_validity(subject, body_text or html_body)
+        validity_start, validity_end = self._extract_validity(subject, body_text or html_body, email_date=email_date)
 
         all_rates: List[RateRow] = []
         all_carriers: List[str] = []
@@ -461,13 +475,26 @@ class EMLParser(BaseParser):
                     return c
         return ""
 
-    def _extract_validity(self, subject: str, body: str) -> Tuple[str, str]:
+    def _extract_validity(self, subject: str, body: str, email_date: str = "") -> Tuple[str, str]:
         combined = f"{subject}\n{body}"
+        # 1. Date range (e.g. 01-Jan-2026 to 31-Mar-2026, 2026/01/01 - 2026/03/31, 1 Aug to 31 Aug 2026)
         m = re.search(r'(?:validity|effective)?[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})\s*(?:to|\-|\~)\s*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', combined, re.IGNORECASE)
         if m:
-            s_raw = m.group(1).strip()
-            e_raw = m.group(2).strip()
+            s_raw = _clean_date(m.group(1).strip())
+            e_raw = _clean_date(m.group(2).strip())
             return s_raw, e_raw
+
+        # 2. Single end date (e.g. Valid till 31 August 2026, Valid until 31-Aug-2026, Validity till 31 Aug, Expires 30 Sep)
+        m_till = re.search(r'(?:valid\s+(?:till|until|through|to|thru)|validity\s+(?:till|until|through|to|thru)|validity[:\s]+till|expires|expiry)\s*[:\s]*(\d{1,2}\s+[a-zA-Z]{3,9}(?:\s+\d{4})?|\d{1,2}[\-/][a-zA-Z]{3,9}[\-/]\d{2,4}|\d{4}[\-/]\d{1,2}[\-/]\d{1,2})', combined, re.IGNORECASE)
+        if m_till:
+            raw_val = m_till.group(1).strip()
+            if not re.search(r'\b20\d{2}\b', raw_val):
+                yr = email_date[:4] if len(email_date) >= 4 else str(datetime.date.today().year)
+                raw_val = f"{raw_val} {yr}"
+            e_raw = _clean_date(raw_val)
+            s_raw = email_date or datetime.date.today().strftime("%Y-%m-%d")
+            return s_raw, e_raw
+
         return "", ""
 
     def _try_download_link(self, body_text: str, job_id: str, carrier_scac: str, original_filename: str) -> List[RateRow]:

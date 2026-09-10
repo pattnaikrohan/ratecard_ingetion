@@ -50,15 +50,24 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
   }, [jobId, isJobInList]);
 
   // Fetch job details whenever effectiveJobId changes
+  const jobStatusRef = React.useRef<string>('');
+  const loadedJobIdRef = React.useRef<string>('');
+  const ratesCountRef = React.useRef<number>(0);
+  ratesCountRef.current = rates.length;
+
   useEffect(() => {
     if (!effectiveJobId) {
       setIsLoading(false);
       setJobData(null);
       setRates([]);
+      loadedJobIdRef.current = '';
       return;
     }
 
-    setIsLoading(true);
+    // Only show full loading overlay if we are switching to a new job we haven't loaded yet
+    if (loadedJobIdRef.current !== effectiveJobId) {
+      setIsLoading(true);
+    }
     let isSubscribed = true;
 
     const fetchJob = async () => {
@@ -69,6 +78,8 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
         if (!isSubscribed) return;
 
         setJobData(data);
+        loadedJobIdRef.current = effectiveJobId;
+        jobStatusRef.current = data.status || '';
         setIsLoading(false);
 
         if (data.canonical && data.canonical.rates) {
@@ -78,7 +89,16 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
         console.error('Error fetching job details:', err);
         if (isSubscribed) {
           setIsLoading(false);
-          setJobData({ status: 'FAILED', logs: ['Job not found or server error.'] });
+          jobStatusRef.current = 'ERROR';
+          // If we had no rates loaded and this job returned 404, fallback to first valid job
+          if (ratesCountRef.current === 0) {
+            if (jobs.length > 0 && onSelectJob && jobs[0].job_id !== effectiveJobId) {
+              console.warn(`Job ${effectiveJobId} not found, switching to active job ${jobs[0].job_id}`);
+              onSelectJob(jobs[0].job_id);
+            } else {
+              setJobData({ status: 'FAILED', logs: ['Job not found or server error.'] });
+            }
+          }
         }
       } finally {
         fetchingRef.current = false;
@@ -88,10 +108,12 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
     fetchJob();
 
     const interval = setInterval(() => {
-      if (jobData && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(jobData.status)) {
+      // Use ref instead of stale closure — only poll during active processing states
+      const status = jobStatusRef.current;
+      if (status && ['QUEUED', 'PARSING', 'NORMALIZING', 'VALIDATING'].includes(status)) {
         fetchJob();
       }
-    }, 2500);
+    }, 3000);
 
     return () => {
       isSubscribed = false;
@@ -552,18 +574,42 @@ export const RateReviewGrid: React.FC<RateReviewGridProps> = ({
                         {r.currency || r.ofr_currency || 'USD'}
                       </td>
 
-                      {/* Validity */}
+                      {/* Validity Window (Editable with clear status) */}
                       <td className="text-center py-2.5 font-mono text-[10px] text-slate-600">
-                        {r.validity_start ? (
-                          <div>
-                            <div>{r.validity_start}</div>
-                            <div className="text-slate-400">→ {r.validity_end || 'Open'}</div>
+                        <div className="inline-flex flex-col items-center gap-1">
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={r.validity_start || ''}
+                              placeholder="Start Date"
+                              onChange={(e) => handleCellChange(actualIdx, 'validity_start', e.target.value)}
+                              className={`w-20 px-1.5 py-0.5 text-[10px] text-center font-mono rounded border transition-colors ${
+                                !r.validity_start 
+                                  ? 'bg-amber-50/80 border-amber-300 text-amber-900 placeholder:text-amber-400' 
+                                  : 'bg-white border-slate-200 text-slate-800'
+                              } focus:outline-none focus:ring-1 focus:ring-[#00AFAF]`}
+                              title="Validity Start (e.g. 2026-08-06)"
+                            />
+                            <span className="text-slate-400 font-bold">→</span>
+                            <input
+                              type="text"
+                              value={r.validity_end || ''}
+                              placeholder="End Date"
+                              onChange={(e) => handleCellChange(actualIdx, 'validity_end', e.target.value)}
+                              className={`w-20 px-1.5 py-0.5 text-[10px] text-center font-mono rounded border transition-colors ${
+                                !r.validity_end 
+                                  ? 'bg-amber-50/80 border-amber-300 text-amber-900 placeholder:text-amber-400' 
+                                  : 'bg-white border-slate-200 text-slate-800'
+                              } focus:outline-none focus:ring-1 focus:ring-[#00AFAF]`}
+                              title="Validity End (e.g. 2026-08-31)"
+                            />
                           </div>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 font-bold">
-                            Missing
-                          </span>
-                        )}
+                          {!r.validity_start && !r.validity_end && (
+                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200 text-[9px] font-black">
+                              Missing
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Attached Surcharges */}

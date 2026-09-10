@@ -100,6 +100,10 @@ export function App() {
       ]);
       if (Array.isArray(jobsData)) {
         setJobs((prevJobs) => {
+          // If server temporarily returned 0 jobs due to a brief lock or transient glitch, do NOT wipe existing jobs
+          if (jobsData.length === 0 && prevJobs.length > 0) {
+            return prevJobs;
+          }
           const prevKey = prevJobs.map((j) => `${j.job_id}:${j.status}:${j.progress}:${j.output_file_name}`).join('|');
           const nextKey = jobsData.map((j) => `${j.job_id}:${j.status}:${j.progress}:${j.output_file_name}`).join('|');
           return prevKey === nextKey ? prevJobs : jobsData;
