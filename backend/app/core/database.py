@@ -271,8 +271,8 @@ class DatabaseManager:
                     print(f"[DB] update_job_status FAILED after {_MAX_RETRIES} retries for {job_id}: {e}")
                     raise
 
-        # SYNCHRONOUS backup on terminal status transitions — MUST complete before container could recycle
-        if status in ["COMPLETED", "FAILED", "APPROVED", "NEEDS_REVIEW"] or progress == 100:
+        # SYNCHRONOUS backup only on true terminal states (COMPLETED / FAILED)
+        if status in ["COMPLETED", "FAILED"] or progress == 100:
             self.backup_synchronous()
         else:
             # Debounced backup for intermediate states (PARSING, VALIDATING, etc.)
