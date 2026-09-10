@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.PROD
 
 const client = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 120000,
+  timeout: 0, // No client-side timeout — requests will wait indefinitely for the server
 });
 
 // Resilient response interceptor that suppresses sleep/suspend noise
